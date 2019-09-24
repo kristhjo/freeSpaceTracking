@@ -179,7 +179,7 @@ void HedyLamarrGui::stopStabilization(std::stringstream &ss){
 
 void HedyLamarrGui::moveNorth(){
     if(!this->isHedyLamarrStabilizing->load(std::memory_order_acquire)){
-        this->NSoffset = this->ui->SB_stepSize->value();
+        this->NSoffset += this->ui->SB_stepSize->value();
         QString command = "$SOR,0000000056,94,2,41=51:164,164=48:" + QString::number(NSoffset, 'f', 6) + ",$EOM,$EOR";
         this->hedylamarr_socket.write(command.toUtf8());
         this->displayResponse(QTextCodec::codecForMib(106)->toUnicode(this->hedylamarr_socket.readAll()));
@@ -191,7 +191,7 @@ void HedyLamarrGui::moveNorth(){
 
 void HedyLamarrGui::moveSouth(){
     if(!this->isHedyLamarrStabilizing->load(std::memory_order_acquire)){
-        this->NSoffset = -this->ui->SB_stepSize->value();
+        this->NSoffset -= this->ui->SB_stepSize->value();
         QString command = "$SOR,0000000056,94,2,41=51:164,164=48:"+ QString::number(NSoffset, 'f', 6) + ",$EOM,$EOR";
         this->hedylamarr_socket.write(command.toUtf8());
         //char response[200];
@@ -207,7 +207,7 @@ void HedyLamarrGui::moveSouth(){
 
 void HedyLamarrGui::moveWest(){
     if(!this->isHedyLamarrStabilizing->load(std::memory_order_acquire)){
-        this->EWoffset = this->ui->SB_stepSize->value();
+        this->EWoffset += this->ui->SB_stepSize->value();
         QString command = "$SOR,0000000056,94,2,41=51:163,163=48:"+  QString::number(EWoffset, 'f', 6)  + ",$EOM,$EOR";
         this->hedylamarr_socket.write(command.toUtf8());
         this->displayResponse(QTextCodec::codecForMib(106)->toUnicode(this->hedylamarr_socket.readAll()));
@@ -219,7 +219,7 @@ void HedyLamarrGui::moveWest(){
 
 void HedyLamarrGui::moveEast(){
     if(!this->isHedyLamarrStabilizing->load(std::memory_order_acquire)){
-        this->EWoffset = -this->ui->SB_stepSize->value();
+        this->EWoffset -= this->ui->SB_stepSize->value();
         QString command = "$SOR,0000000056,94,2,41=51:163,163=48:"+  QString::number(EWoffset, 'f', 6) + ",$EOM,$EOR";
         this->hedylamarr_socket.write(command.toUtf8());
         this->displayResponse(QTextCodec::codecForMib(106)->toUnicode(this->hedylamarr_socket.readAll()));
