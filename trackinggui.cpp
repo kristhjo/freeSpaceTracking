@@ -175,6 +175,7 @@ void TrackingGui::StartSeeingMeasurement(){
 void TrackingGui::StopSeeingMeasurement(){
     if(!this->isMeasuringSeeing.load(std::memory_order_acquire)){
         this->ui->TE_LogCam->append("No seeing measurement is running  \n");
+        this->disableWidgets(false);
         return;
     }
     this->pm_seeing->stopMeasurement();
@@ -280,6 +281,7 @@ void TrackingGui::StartStabilization(){
     this->pm_Camera->centroidContainer = this->centroidContainer; //Establishes shared connection between the centroidContainer of cameragui and hexpodgui.
     this->pm_hexapod->centroidContainer = this->centroidContainer;
 
+    this->pm_hexapod->updateRate = this->pm_Camera->m_CamInfo.ExposureActual;
     std::stringstream ss;
     this->pm_hexapod->startStabilization(ss);
     this->pm_hexapod->show();

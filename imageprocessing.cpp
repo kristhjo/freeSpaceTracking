@@ -36,6 +36,13 @@ cv::Point getSpotSeparation(const cv::Mat &img, int windowRadius = 5){
     cv::Point c1, c2;
     c1 = findCentroid(croppedImg1);
     c2 = findCentroid(croppedImg2);
+    double min, max1, max2;
+    cv::Point minLoc, maxLoc;
+    cv::minMaxLoc(img, &min, &max1, &minLoc, &maxLoc);
+    cv::minMaxLoc(img, &min, &max2, &minLoc, &maxLoc);
+    if (max1 <10 || max2 <10){
+        return cv::Point(10000,10000);
+    }
     cv::Point dist;
     dist.x = c2.x + img.cols/2 - c1.x;
     dist.y = c2.y - c1.y;

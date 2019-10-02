@@ -52,6 +52,8 @@ private:
     datacontainers::seeingValues m_seeingValues; ///< Container for fried and seeing values implemented with QCPGraphData Qvectors for ease of plotting and max, min, mean functions.
 
     double getFriedParameter(); ///< Calculates the Fried parameter of m_DIMMsample.
+    double getFriedParameter_x(); ///< Calculates the Fried parameter of m_DIMMsample.
+    double getFriedParameter_y(); ///< Calculates the Fried parameter of m_DIMMsample.
 
     double getSeeingFromFried(double FriedParameter, double wavelength); ///< Converts a Fried parameter to a seeing value.
 
@@ -68,7 +70,7 @@ private:
     QTextStream writeParametersToFile;
     QFile resultsFile;
     QTextStream writeResults;
-
+    std::fstream testStream;
     void DIMM(); ///< Handles the real-time processing of images in m_imageContainer. DIMM() calculates the spotseparation of each image in m_imagecontainer and subsequently the fried parameter and seeing value when the sample size is reached. It also handles the storage of data according to the setup parameters, and continuously updates the gui display. DIMM() is run in a separate thread and terminates when stopMeasurement() is called.
     void plotFriedParameter(); ///< Updates the fried parameter plot in the gui.
     void plotSeeing(); ///< Updates the seeing plot in the gui.

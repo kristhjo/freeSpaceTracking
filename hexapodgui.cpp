@@ -31,14 +31,11 @@ HexapodGui::HexapodGui(QWidget *parent) :
 }
 
 HexapodGui::~HexapodGui(){
-    if(this->isHexapodStabilizing->load(std::memory_order_acquire)){ //don't want to disconnect hexapod during stabilization in case of accidental delete of gui.
-       this->displayMessage("Can't close window during stabilization");
-    }
-    else {
+    if(!this->isHexapodStabilizing->load(std::memory_order_acquire)){ //don't want to disconnect hexapod during stabilization in case of accidental delete of gui.
         this->isHexapodConnected->store(false, std::memory_order_release);
         PI_CloseConnection(this->ID);
-        delete ui;
     }
+    delete ui;
 }
 
 void HexapodGui::connectToHexapod(std::stringstream &ss){
@@ -80,8 +77,9 @@ void HexapodGui::startStabilization(std::stringstream &ss){
     this->initPlot();
     //create directory q
     QDir basedir;
-    QDateTime startTime(QDateTime::fromTime_t(time(nullptr)));
-    this->folderName = startTime.toString();
+    time_t startTime = time(nullptr);
+    QDateTime t(QDateTime::fromTime_t(startTime));
+    this->folderName = t.toString();
     if(!basedir.mkdir(folderName)){
         emit newMessage("Couldn't create folder for plots", true);
     }
@@ -124,54 +122,61 @@ void HexapodGui::stopStabilization(std::stringstream &ss){
 
 void HexapodGui::Stabilize(){
     this->stabilizationInProcess.store(true, std::memory_order_release);
-    this->updateRate = 1;
-    //double maxPixMovPerUpdate = (this->updateRate/20)*1*57.296/1000/this->hexapodParams.pixToHex;  //s*mrad/s, multiply by rad to deg conversion
-    double maxPixMovPerUpdate = 5;
+    PI_qVEL(this->ID, "X Y Z U V W", this->velocity);
+    this->updateRate = 2;
+    std::cout << this->velocity << std::endl;
+    //double maxMovPerUpdate = this->updateRate*this->velocity[5]*57.296/1000;  //s*mrad/s, multiply by rad to deg conversion
+    //std::cout << maxMovPerUpdate << std::endl;
+    double maxMovePerUpdate = 0.2;
     while(this->stabilize.load(std::memory_order_acquire)){
 
         std::this_thread::sleep_for(std::chrono::seconds(static_cast<int>(this->updateRate))); //WAITS FOR NEW CENTROID MEASUREMENTS.
         this->centroidContainer->updateMeanCentroid();
         this->centroidContainer->emptyHistroy();
 
+
         double dHorizontal = this->centroidContainer->meanCentroidX - this->centroidContainer->homeX; //horizontal pixel deviation from home position
         double dVertical = this->centroidContainer->meanCentroidY - this->centroidContainer->homeY; //vertical pixel deviation from home position
-
+        this->xCentroids.push_back(dHorizontal);
+        this->yCentroids.push_back(dVertical);
+        if (abs(dHorizontal) < 2){
+            dHorizontal = 0;
+        }
+        if (abs(dVertical) < 2){
+            dVertical = 0;
+        }
 
         double newPos[6] = { -this->currentPos[0], -this->currentPos[1], -this->currentPos[2], -this->currentPos[3], 0, 0}; //subtract any movement along other axes than V,W, that may have occured from previous rotations.
         //Horizontal and vertical deviation assumed to align with V,W rotations.
-        if (abs(dHorizontal) < maxPixMovPerUpdate){
+       // if (abs(dHorizontal) < maxMovPerUpdate){
             newPos[5] -= dHorizontal*this->hexapodParams.pixToHex;
-        }
-        else if (dHorizontal > maxPixMovPerUpdate){//If deviation is larger than the distance the hexapod can move in between centroid updates, move maxMovPerUpdate instead.
-            newPos[5] += maxPixMovPerUpdate*this->hexapodParams.pixToHex;
-        }
-        else if (dHorizontal < -maxPixMovPerUpdate){
-            newPos[5] -= maxPixMovPerUpdate*this->hexapodParams.pixToHex;
-        }
+      //  }
+        //else if (dHorizontal > maxMovPerUpdate){//If deviation is larger than the distance the hexapod can move in between centroid updates, move maxMovPerUpdate instead.
+        //    newPos[5] += maxMovPerUpdate;
+        //}
+        //else if (dHorizontal < -maxMovPerUpdate){
+        //    newPos[5] -= maxMovPerUpdate;
+       // }
 
-        if (abs(dVertical) < maxPixMovPerUpdate){
+        //if (abs(dVertical) < maxMovPerUpdate){
             newPos[4] += dVertical*this->hexapodParams.pixToHex;
-        }
-        else if (dVertical > maxPixMovPerUpdate){//If deviation is larger than the distance the hexapod can move in between centroid updates, move maxMovPerUpdate instead.
-            newPos[4] += maxPixMovPerUpdate*this->hexapodParams.pixToHex;
-        }
-        else if (dVertical < -maxPixMovPerUpdate){
-            newPos[4] -= maxPixMovPerUpdate*this->hexapodParams.pixToHex;
+      //  }
+       // else if (dVertical > maxMovPerUpdate){//If deviation is larger than the distance the hexapod can move in between centroid updates, move maxMovPerUpdate instead.
+       //     newPos[4] += maxMovPerUpdate;
+       // }
+      //  else if (dVertical < -maxMovPerUpdate){
+       //     newPos[4] -= maxMovPerUpdate;
+      //  }
+        if ( (abs(newPos[4])  > maxMovePerUpdate) || (abs(newPos[5]) > maxMovePerUpdate) ){
+            continue;
         }
         this->MoveToPosition( newPos, true ); //True marks that hexapod moves relative to current position in the Work Coordinate System.
         //this->isStabMoving.load(std::memory_order_acquire);
 
 
-        QCPGraphData HTilt(time(nullptr), this->currentPos[4]*1000);
-        QCPGraphData VTilt(time(nullptr), this->currentPos[5]*1000);
-        QCPGraphData XDev(time(nullptr), dHorizontal);
-        QCPGraphData YDev(time(nullptr), dVertical);
-
-        this->plotDataHTilt.push_back(HTilt);
-        this->plotDataVTilt.push_back(VTilt);
-        this->plotDataXDeviation.push_back(XDev);
-        this->plotDataYDeviation.push_back(YDev);
-
+        this->horizontalTilts.push_back(this->currentPos[4]*1000);
+        this->verticalTilts.push_back(this->currentPos[5]*1000);
+        this->timestamps.push_back(time(nullptr));
         emit updateStabilizationPlot();
     }
     this->stabilizationInProcess.store(false, std::memory_order_release);
@@ -329,7 +334,7 @@ void HexapodGui::setUserDefinedCoSys(){
     emit coSysChanged();
     emit positionChanged();
     double dMaxTravelPositive[6];
-    double dir[6] = {1, 0, 0, 1, 0, 0};
+    double dir[6] = {0, 0, 0, 0, 1, 1};
     PI_qTRA ( ID, "X Y Z U V W", dir, dMaxTravelPositive );
     printf("Max range (%s): %f,%f,%f,%f,%f,%f ", "X Y Z U V W", dMaxTravelPositive[0], dMaxTravelPositive[1], dMaxTravelPositive[2], dMaxTravelPositive[3], dMaxTravelPositive[4], dMaxTravelPositive[5]);
 }
@@ -471,31 +476,36 @@ void HexapodGui::displayPosition(QString message){
 void HexapodGui::initPlot(){
     //set the time format of the x-axis.
     QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime);
+    this->ui->StabilizationPlot->clearGraphs(); // clear old graphs
+    this->plotData.clear();
+    this->plotData2.clear();
+    this->plotData3.clear();
+    this->plotData4.clear();
     dateTicker->setDateTimeFormat("hh:mm:ss");
-    //clear plot if necessary
-    this->ui->StabilizationPlot->clearGraphs();
-    //
-    this->ui->StabilizationPlot->addGraph();
+    this->ui->StabilizationPlot->addGraph(this->ui->StabilizationPlot->xAxis, this->ui->StabilizationPlot->yAxis);
     this->ui->StabilizationPlot->graph(0)->setPen(QPen(QColor(40, 110, 255)));
     this->ui->StabilizationPlot->graph(0)->setName(QString("W"));
     this->ui->StabilizationPlot->xAxis->setLabel("");
     this->ui->StabilizationPlot->xAxis->setTicker(dateTicker);
     this->ui->StabilizationPlot->yAxis->setLabel("[urad]");
+    this->ui->StabilizationPlot->yAxis2->setVisible(true);
+    this->ui->StabilizationPlot->yAxis2->setLabel("pixels");
     this->ui->StabilizationPlot->plotLayout()->insertRow(0);
     this->ui->StabilizationPlot->plotLayout()->addElement(0, 0, new QCPTextElement(this->ui->StabilizationPlot, "Stabilization History"));
-    this->ui->StabilizationPlot->addGraph();
+    this->ui->StabilizationPlot->addGraph(this->ui->StabilizationPlot->xAxis, this->ui->StabilizationPlot->yAxis);
     this->ui->StabilizationPlot->graph(1)->setName(QString("V"));
     this->ui->StabilizationPlot->graph(1)->setPen(QPen(Qt::red));
     this->ui->StabilizationPlot->legend->setVisible(true);
+    this->ui->StabilizationPlot->legend->setBrush(QColor(255, 255, 255, 150));
     this->ui->StabilizationPlot->replot();
 
-    this->ui->StabilizationPlot->addGraph();
+    this->ui->StabilizationPlot->addGraph(this->ui->StabilizationPlot->xAxis2, this->ui->StabilizationPlot->yAxis2);
     this->ui->StabilizationPlot->graph(2)->setName(QString("Y"));
     this->ui->StabilizationPlot->graph(2)->setPen(QPen(Qt::red));
     this->ui->StabilizationPlot->graph(2)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCross, 5));
     this->ui->StabilizationPlot->legend->setVisible(true);
 
-    this->ui->StabilizationPlot->addGraph();
+    this->ui->StabilizationPlot->addGraph(this->ui->StabilizationPlot->xAxis2, this->ui->StabilizationPlot->yAxis2);
     this->ui->StabilizationPlot->graph(3)->setName(QString("X"));
     this->ui->StabilizationPlot->graph(3)->setPen(QPen(QColor(40, 110, 255)));
     this->ui->StabilizationPlot->graph(3)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCross, 5));
@@ -505,24 +515,31 @@ void HexapodGui::initPlot(){
 }
 
 void HexapodGui::updatePlot(){
-
-    if(this->plotDataHTilt.size() > this->maxXRangePlot){
-        this->plotDataHTilt.pop_front();
-        this->plotDataVTilt.pop_front();
-        this->plotDataXDeviation.pop_front();
-        this->plotDataYDeviation.pop_front();
+    QCPGraphData dataPoint(this->timestamps.last(), this->horizontalTilts.last());
+    this->plotData.push_back(dataPoint);
+    if(abs(horizontalTilts.last())>this->maxRange_tilt){
+        this->maxRange_tilt = abs(horizontalTilts.last());
     }
-
-    this->ui->StabilizationPlot->yAxis->setRange(-this->maxYRangePlot, this->maxYRangePlot);
+    if(abs(xCentroids.last())>this->maxRange_px){
+        this->maxRange_px = abs(xCentroids.last());
+    }
+    dataPoint.value  = this->verticalTilts.last();
+    this->plotData2.push_back(dataPoint);
+    dataPoint.value  = this->xCentroids.last();
+    this->plotData3.push_back(dataPoint);
+    dataPoint.value  = this->yCentroids.last();
+    this->plotData4.push_back(dataPoint);
+    this->ui->StabilizationPlot->yAxis->setRange(-this->maxRange_tilt*1.2, this->maxRange_tilt*1.2);
+    this->ui->StabilizationPlot->yAxis2->setRange(-this->maxRange_px*1.2, this->maxRange_px*1.2);
     this->ui->StabilizationPlot->rescaleAxes();
-    this->ui->StabilizationPlot->graph(0)->data()->set(plotDataHTilt);
-    this->ui->StabilizationPlot->graph(1)->data()->set(plotDataVTilt);
-    this->ui->StabilizationPlot->graph(2)->data()->set(plotDataYDeviation);
-    this->ui->StabilizationPlot->graph(3)->data()->set(plotDataXDeviation);
+    this->ui->StabilizationPlot->graph(0)->data()->set(plotData);
+    this->ui->StabilizationPlot->graph(1)->data()->set(plotData2);
+    this->ui->StabilizationPlot->graph(2)->data()->set(plotData4);
+    this->ui->StabilizationPlot->graph(3)->data()->set(plotData3);
 
     this->ui->StabilizationPlot->replot();
-    this->ui->StabilizationPlot->savePdf(this->folderName + "/HexapodStabilizationPlot.pdf" );
+    this->ui->StabilizationPlot->savePdf(this->folderName + "/StabilizationPlot.pdf" );
 
-    this->stabilizationDataStream << this->plotDataHTilt.last().key << "\t" << this->plotDataXDeviation.last().value << "\t" << this->plotDataYDeviation.last().value << "\t" << this->plotDataHTilt.last().value << "\t" << this->plotDataVTilt.last().value << "\n";
+    this->stabilizationDataStream << this->timestamps.last() << "\t" << this->xCentroids.last() << "\t" << this->yCentroids.last() << "\t" << this->horizontalTilts.last() << "\t" << this->verticalTilts.last() << "\n";
     this->stabilizationDataStream.flush();
 }

@@ -75,12 +75,18 @@ private:
     char positionFormat = 'f'; ///< QString format of coordinates in the gui display.
     //Plot functions and variables
     void initPlot();
-    QVector<QCPGraphData> plotDataHTilt;
-    QVector<QCPGraphData> plotDataVTilt;
-    QVector<QCPGraphData> plotDataXDeviation;
-    QVector<QCPGraphData> plotDataYDeviation;
-    double maxYRangePlot = 10.0; //
-    int maxXRangePlot = 300; //5 min
+    QVector<double> horizontalTilts;
+    QVector<double> verticalTilts;
+    QVector<QCPGraphData> plotData;
+    QVector<QCPGraphData> plotData2;
+    QVector<double> xCentroids;
+    QVector<double> yCentroids;
+    QVector<QCPGraphData> plotData3;
+    QVector<QCPGraphData> plotData4;
+
+    QVector<time_t> timestamps;
+    double maxRange_tilt = 0.0;
+    double maxRange_px = 0.0;
 
     QString folderName;
     std::fstream stabilizationDataStream;

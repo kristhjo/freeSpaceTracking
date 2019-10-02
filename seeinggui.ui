@@ -20,7 +20,7 @@
       <x>30</x>
       <y>270</y>
       <width>441</width>
-      <height>141</height>
+      <height>191</height>
      </rect>
     </property>
     <property name="frameShape">
@@ -85,7 +85,7 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>60</y>
+       <y>50</y>
        <width>54</width>
        <height>17</height>
       </rect>
@@ -187,6 +187,112 @@
       </rect>
      </property>
     </widget>
+    <widget class="QLineEdit" name="LE_FriedMean_x">
+     <property name="geometry">
+      <rect>
+       <x>250</x>
+       <y>110</y>
+       <width>71</width>
+       <height>25</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="LE_FriedMean_y">
+     <property name="geometry">
+      <rect>
+       <x>250</x>
+       <y>140</y>
+       <width>71</width>
+       <height>25</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="LE_FriedNow_x">
+     <property name="geometry">
+      <rect>
+       <x>70</x>
+       <y>110</y>
+       <width>61</width>
+       <height>25</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="LE_FriedNow_y">
+     <property name="geometry">
+      <rect>
+       <x>70</x>
+       <y>140</y>
+       <width>61</width>
+       <height>25</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="Label_Fried_2">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>110</y>
+       <width>54</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Fried x</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="Label_Fried_3">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>140</y>
+       <width>54</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Fried y</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="LE_FriedMin_x">
+     <property name="geometry">
+      <rect>
+       <x>140</x>
+       <y>110</y>
+       <width>41</width>
+       <height>25</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="LE_FriedMin_y">
+     <property name="geometry">
+      <rect>
+       <x>140</x>
+       <y>140</y>
+       <width>41</width>
+       <height>25</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="LE_FriedMax_x">
+     <property name="geometry">
+      <rect>
+       <x>190</x>
+       <y>110</y>
+       <width>41</width>
+       <height>25</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="LE_FriedMax_y">
+     <property name="geometry">
+      <rect>
+       <x>190</x>
+       <y>140</y>
+       <width>41</width>
+       <height>25</height>
+      </rect>
+     </property>
+    </widget>
    </widget>
    <widget class="QCustomPlot" name="SeeingPlot" native="true">
     <property name="geometry">
@@ -212,9 +318,9 @@
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>420</y>
+      <y>460</y>
       <width>441</width>
-      <height>151</height>
+      <height>111</height>
      </rect>
     </property>
    </widget>

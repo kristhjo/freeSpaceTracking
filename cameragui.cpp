@@ -139,9 +139,16 @@ void CameraGui::Connect(std::stringstream &ss)
     ss << "5.1.6 Detected devices: " << pm_deviceList->size() << '\n';
     std::string temp_sDeviceID;
     for (DeviceList::iterator dev = pm_deviceList->begin(); dev != pm_deviceList->end(); dev++){ //loops through the detected Baumer devices in the network. Connects to the one with ID identical to BaumerID in the CamInfo struct.
+        try {
+
         dev->second->Open();
         temp_sDeviceID = dev->first;
-        if (this->m_CamInfo.BaumerID == "Baumer Bisamberg"){
+
+        } catch (...) {
+            continue;
+        }
+
+	if (this->m_CamInfo.BaumerID == "Baumer Bisamberg"){
             if (temp_sDeviceID == this->m_CamInfo.BaumerBisamberg){
                 std::cout << "connecting to Baumer Bisamberg" << std::endl;
                 m_sDeviceID = dev->first;

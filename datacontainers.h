@@ -68,7 +68,15 @@ double vV = 6e-3;       //rad/s
 double vU = 6e-3;       //rad/s
 
 //conversion factor: pixel distance to hexapod motion
-double pixToHex = 0.0001937; //rough calculation, pixel to degrees rotation
+double f1 = 2.032; // meade telescope
+double f2 = 0.05; // achromat collimator lens
+double f3 = 0.05; // achromat focusing lens
+double magnification = f1/f2; //magnification of collimation setup
+double pixSize = 5.5e-6;
+double pixFoVrad = pixSize/(f3*magnification);
+double pixFoVdeg = pixFoVrad*360/(6.28);//0.00015516
+double pixToHex = pixFoVdeg;
+//double pixToHex = 0.0001937*0.5;//*7.5/5; //rough calculation, pixel to degrees rotation
 };
 
 /********************************************//**
@@ -198,8 +206,8 @@ struct seeingParameters
     double exposureTime;
     //meters
     double apertureDiameter = 0.026; //meade setup
-    double focalLength = 2.032; //meade setup
-    double wavelength = 450e-9; //Blue LEDs
+    double focalLength = 0.05;// final focusing lens
+    double wavelength = 532e-9; //Green LEDs
     double pxWidth = 5.5e-6; //Baumer cam
     double pxHeight = 5.5e-6; //Baumer cam
     int pxAiryZeros [20];//location of airy minimas in the image plane in pixels.
@@ -208,7 +216,7 @@ struct seeingParameters
     double apertureSeparation = 0.16; //meade setup
     double K_l = 0.364*( 1-0.532 * std::pow((apertureSeparation/apertureDiameter), -1/3) - 0.024 * std::pow((apertureSeparation/apertureDiameter),-7./3.));
     double K_t = 0.364*( 1-0.798 * std::pow((apertureSeparation/apertureDiameter), -1/3) - 0.018 * std::pow((apertureSeparation/apertureDiameter),-7./3.));
-
+    double magnification = 2.032/0.05;
 };
 
 
@@ -269,7 +277,7 @@ struct DIMMsample
         double sum = 0.0;
         double avg = average_y();
         for ( unsigned int j =0; j < spotSeparation.size(); j++)        {
-            sum = std::pow((spotSeparation[j].y - avg),2);
+            sum += std::pow((spotSeparation[j].y - avg),2);
         }
         return sum/(spotSeparation.size() - 1); //divide by n-1 since this is an estimator of the real variance.
     }
@@ -282,9 +290,15 @@ struct DIMMsample
 struct seeingValues
 {
     QVector<double> seeing;
+    QVector<double> seeing_x;
+    QVector<double> seeing_y;
     QVector<double> fried;
+    QVector<double> fried_x;
+    QVector<double> fried_y;
     QVector<time_t> timestamps;
     QVector<QCPGraphData> friedData;
+    QVector<QCPGraphData> friedData_x;
+    QVector<QCPGraphData> friedData_y;
     QVector<QCPGraphData> seeingData;
     QVector<double> plotTimes;
     double minFried(){
@@ -302,6 +316,25 @@ struct seeingValues
     double meanFried(){
         return std::accumulate(fried.begin(), fried.end(), .0) / fried.size();;
     }
+    double meanFried_x(){
+        return std::accumulate(fried_x.begin(), fried_x.end(), .0) / fried_x.size();;
+    }
+    double meanFried_y(){
+        return std::accumulate(fried_y.begin(), fried_y.end(), .0) / fried_y.size();;
+    }
+    double maxFried_x(){
+        return *std::max_element(fried_x.constBegin(), fried_x.constEnd());
+    }
+    double maxFried_y(){
+        return *std::max_element(fried_y.constBegin(), fried_y.constEnd());
+    }
+    double minFried_x(){
+        return *std::min_element(fried_x.constBegin(), fried_x.constEnd());
+    }
+    double minFried_y(){
+        return *std::min_element(fried_y.constBegin(), fried_y.constEnd());
+    }
+
     double meanSeeing(){
         return std::accumulate(seeing.begin(), seeing.end(), .0) / seeing.size();;
     }

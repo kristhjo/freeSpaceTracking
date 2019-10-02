@@ -14,7 +14,7 @@ SeeingGui::SeeingGui(QWidget *parent):
     this->ui->LE_SampleSize->setText("50");
     this->ui->SB_WindowingRadius->setMinimum(1);
     this->ui->SB_WindowingRadius->setMaximum(20);
-    this->ui->SB_WindowingRadius->setValue(5);
+    this->ui->SB_WindowingRadius->setValue(10);
 
     QObject::connect(this->ui->LE_SampleSize,&QLineEdit::textChanged,this,&SeeingGui::setSecPerDataPoint,Qt::UniqueConnection);
     QObject::connect(this, SIGNAL(newSeeingValues()), this, SLOT(replotSeeing()));
@@ -37,7 +37,7 @@ void SeeingGui::startMeasurement(){
     this->createParameterFile();
     this->initPlots();
     this->isMeasuringSeeing->store(true, std::memory_order_release);
-
+     this->testStream.open("testData.dat",std::fstream::out|std::fstream::app);
     if (this->measurementType == "DIMM"){
         this->DIMM_thread = std::make_unique<std::thread>(&SeeingGui::DIMM,this); //Initiates a real-time image processing loop while images are captured.
     }
@@ -82,10 +82,17 @@ void SeeingGui::DIMM(){
             std::this_thread::sleep_for(std::chrono::seconds(3));
         }
         if (counter == this->sampleSize){//When counter reaches the sample size, calculate and plot the seeing/fried values
-            this->m_seeingValues.fried.push_back(this->getFriedParameter());
-            this->m_seeingValues.seeing.push_back(getSeeingFromFried(this->m_seeingValues.fried.last(), this->m_seeingParams.wavelength));
+
+            this->m_seeingValues.fried_x.push_back(this->getFriedParameter_x());
+            this->m_seeingValues.fried_y.push_back(this->getFriedParameter_y());
+            this->m_seeingValues.fried.push_back(( this->m_seeingValues.fried_x.last() + this->m_seeingValues.fried_y.last() )/2.0);
+            this->m_seeingValues.seeing_x.push_back(getSeeingFromFried(this->m_seeingValues.fried_x.last(), this->m_seeingParams.wavelength));
+            this->m_seeingValues.seeing_y.push_back(getSeeingFromFried(this->m_seeingValues.fried_y.last(), this->m_seeingParams.wavelength));
+            this->m_seeingValues.seeing.push_back( (this->m_seeingValues.seeing_x.last() + this->m_seeingValues.seeing_y.last() )/2.0);//    getSeeingFromFried(this->m_seeingValues.fried.last(), this->m_seeingParams.wavelength));
             emit newSeeingValues(); // updates the plots and display in gui
             counter = 1; //reset counter and empty m_DIMMsample
+            //this->testStream << time(nullptr) << "\t" << this->m_seeingValues.fried_x.last() << "\t" << this->m_seeingValues.fried_y.last() << "\n";
+            //this->testStream.flush();
             this->m_DIMMsample = {};
         }
 
@@ -107,8 +114,17 @@ void SeeingGui::DIMM(){
                 }
             }
             //Calculate the spotseparation of the image, then remove it from m_imageContainer.
-             this->m_DIMMsample.spotSeparation.push_back(imageprocessing::getSpotSeparation(img, this->m_seeingParams.pxWindowRadius));
-             this->m_imageContainer->removeFirstImg();
+            cv::Point spotDist = imageprocessing::getSpotSeparation(img, this->m_seeingParams.pxWindowRadius);
+            if (spotDist.x == 10000){
+                std::cout << "skipped image due to no valid centroid" << std::endl;
+                this->m_imageContainer->removeFirstImg();
+                continue;
+            }
+            else{
+                this->m_DIMMsample.spotSeparation.push_back(spotDist);
+            }
+            this->m_imageContainer->removeFirstImg();
+
         }
         else {
             std::this_thread::sleep_for(std::chrono::seconds(3));
@@ -145,9 +161,9 @@ void SeeingGui::writeResultsToFile(){
         this->writeResults.setFieldAlignment(QTextStream::AlignLeft);
         this->writeResults << "Seeing Measurement Results: " << ctime(&this->startOfMeasurement) << "\n";
         this->writeResults.setFieldWidth(20);
-        this->writeResults << "Timestamp" << "Fried" << "Seeing" << qSetFieldWidth(0) << endl << qSetFieldWidth(20);
+        this->writeResults << "Timestamp" << "Fried" << "Seeing" << "Fried x" << "Fried y" << qSetFieldWidth(0) << endl << qSetFieldWidth(20);
         for (int i = 0; i < this->m_seeingValues.fried.size(); i++){
-            this->writeResults << this->m_seeingValues.timestamps.at(i) << this->m_seeingValues.fried.at(i) << this->m_seeingValues.seeing.at(i) << qSetFieldWidth(0) << endl << qSetFieldWidth(20);
+            this->writeResults << this->m_seeingValues.timestamps.at(i) << this->m_seeingValues.fried.at(i) << this->m_seeingValues.seeing.at(i) <<  this->m_seeingValues.fried_x.at(i)<<  this->m_seeingValues.fried_y.at(i) <<qSetFieldWidth(0) << endl << qSetFieldWidth(20);
         }
         this->resultsFile.close();
     }
@@ -157,11 +173,22 @@ void SeeingGui::writeResultsToFile(){
 }
 
 double SeeingGui::getFriedParameter(){
-    double angularVariance_x = this->m_DIMMsample.variance_x()*pow(this->m_seeingParams.pxWidth,2)/pow(this->m_seeingParams.focalLength,2);
-    double angularVariance_y = this->m_DIMMsample.variance_y()*pow(this->m_seeingParams.pxHeight,2)/pow(this->m_seeingParams.focalLength,2);
+    std::cout << this->m_DIMMsample.spotSeparation.size()<< std::endl;
+    double angularVariance_x = this->m_DIMMsample.variance_x()*pow(this->m_seeingParams.pxWidth,2)/(pow(this->m_seeingParams.focalLength,2)*pow(this->m_seeingParams.magnification,2));
+    double angularVariance_y = this->m_DIMMsample.variance_y()*pow(this->m_seeingParams.pxHeight,2)/(pow(this->m_seeingParams.focalLength,2)*pow(this->m_seeingParams.magnification,2));
     double fried_x = pow(this->m_seeingParams.K_l*std::pow( angularVariance_x, -1)*pow(this->m_seeingParams.wavelength,2)*pow(this->m_seeingParams.apertureDiameter,-1./3.),3./5.);
     double fried_y = pow(this->m_seeingParams.K_t*std::pow( angularVariance_y, -1)*pow(this->m_seeingParams.wavelength,2)*pow(this->m_seeingParams.apertureDiameter,-1./3.),3./5.);
     return (fried_x + fried_y)/2.0;
+}
+double SeeingGui::getFriedParameter_x(){
+    double angularVariance_x = this->m_DIMMsample.variance_x()*pow(this->m_seeingParams.pxWidth,2)/(pow(this->m_seeingParams.focalLength,2)*pow(this->m_seeingParams.magnification,2));
+    double fried_x = pow(this->m_seeingParams.K_l*std::pow( angularVariance_x, -1)*pow(this->m_seeingParams.wavelength,2)*pow(this->m_seeingParams.apertureDiameter,-1./3.),3./5.);
+    return fried_x;
+}
+double SeeingGui::getFriedParameter_y(){
+    double angularVariance_y = this->m_DIMMsample.variance_y()*pow(this->m_seeingParams.pxHeight,2)/(pow(this->m_seeingParams.focalLength,2)*pow(this->m_seeingParams.magnification,2));
+    double fried_y = pow(this->m_seeingParams.K_t*std::pow( angularVariance_y, -1)*pow(this->m_seeingParams.wavelength,2)*pow(this->m_seeingParams.apertureDiameter,-1./3.),3./5.);
+    return fried_y;
 }
 
 double SeeingGui::getSeeingFromFried(double FriedParameter, double wavelength){
@@ -169,7 +196,7 @@ double SeeingGui::getSeeingFromFried(double FriedParameter, double wavelength){
 }
 
 void SeeingGui::setMeasurementSettings(){
-    this->m_seeingParams.pxWindowRadius = this->m_seeingParams.pxAiryZeros[this->ui->SB_WindowingRadius->value()];
+    this->m_seeingParams.pxWindowRadius = this->ui->SB_WindowingRadius->value(); //this->m_seeingParams.pxAiryZeros[this->ui->SB_WindowingRadius->value()];
     this->storeImages = this->ui->CheckB_Yes->isChecked();
     this->measurementType = this->ui->ComboB_MeasurementType->currentText();
     if(this->ui->LE_DirectoryPath->text().back() != "/"){   //corrects for a missing "/" at the end of the directory path in the user input
@@ -202,14 +229,19 @@ void SeeingGui::setSecPerDataPoint(){
 void SeeingGui::replotSeeing(){
 
     //First convert fried and seeing values to QCPGraphData format.
-    QCPGraphData dataPoint(this->m_seeingValues.timestamps.last(), this->m_seeingValues.fried.last());
+    QCPGraphData dataPoint(this->m_seeingValues.timestamps.last(), this->m_seeingValues.fried.last()*1e2);
     this->m_seeingValues.friedData.push_back(dataPoint);
-    dataPoint.value = getSeeingFromFried(this->m_seeingValues.fried.last(), this->m_seeingParams.wavelength);
+    dataPoint.value = this->m_seeingValues.fried_x.last()*1e2;
+    this->m_seeingValues.friedData_x.push_back(dataPoint);
+    dataPoint.value = this->m_seeingValues.fried_y.last()*1e2;
+    this->m_seeingValues.friedData_y.push_back(dataPoint);
+    dataPoint.value = getSeeingFromFried(this->m_seeingValues.fried.last(), this->m_seeingParams.wavelength)*1e6;
     this->m_seeingValues.seeingData.push_back(dataPoint);
 
     this->ui->FriedPlot->yAxis->setRange(0, this->m_seeingValues.maxFried()*1.5);
     this->ui->FriedPlot->rescaleAxes();
-    this->ui->FriedPlot->graph(0)->data()->set(this->m_seeingValues.friedData);
+    this->ui->FriedPlot->graph(0)->data()->set(this->m_seeingValues.friedData_y);
+    this->ui->FriedPlot->graph(1)->data()->set(this->m_seeingValues.friedData_x);
 
     this->ui->FriedPlot->replot();
     this->ui->FriedPlot->savePdf(this->directoryPath + "FriedPlot.pdf" );
@@ -223,15 +255,28 @@ void SeeingGui::replotSeeing(){
 }
 
 void SeeingGui::updateSeeingPanel(){
-    this->ui->LE_FriedMax->setText(QString::number(this->m_seeingValues.maxFried(), this->displayFormat, this->displayPrecision));
-    this->ui->LE_FriedMin->setText(QString::number(this->m_seeingValues.minFried(), this->displayFormat, this->displayPrecision));
-    this->ui->LE_FriedNow->setText(QString::number(this->m_seeingValues.fried.last(), this->displayFormat, this->displayPrecision));
-    this->ui->LE_FriedMean->setText(QString::number(this->m_seeingValues.meanFried(), this->displayFormat, this->displayPrecision));
+    //fried parameter in cm, seeing in micro rad
+    this->ui->LE_FriedMax->setText(QString::number(this->m_seeingValues.maxFried()*1e2, this->displayFormat, this->displayPrecision));
+    this->ui->LE_FriedMin->setText(QString::number(this->m_seeingValues.minFried()*1e2, this->displayFormat, this->displayPrecision));
+    this->ui->LE_FriedNow->setText(QString::number(this->m_seeingValues.fried.last()*1e2, this->displayFormat, this->displayPrecision));
+    this->ui->LE_FriedMean->setText(QString::number(this->m_seeingValues.meanFried()*1e2, this->displayFormat, this->displayPrecision));
 
-    this->ui->LE_SeeingMax->setText(QString::number(this->m_seeingValues.maxSeeing(), this->displayFormat, this->displayPrecision));
-    this->ui->LE_SeeingMin->setText(QString::number(this->m_seeingValues.minSeeing(), this->displayFormat, this->displayPrecision));
-    this->ui->LE_SeeingNow->setText(QString::number(this->m_seeingValues.seeing.last(), this->displayFormat, this->displayPrecision));
-    this->ui->LE_SeeingMean->setText(QString::number(this->m_seeingValues.meanSeeing(), this->displayFormat, this->displayPrecision));
+
+    this->ui->LE_FriedMean_x->setText(QString::number(this->m_seeingValues.meanFried_x()*1e2, this->displayFormat, this->displayPrecision));
+    this->ui->LE_FriedNow_x->setText(QString::number(this->m_seeingValues.fried_x.last()*1e2, this->displayFormat, this->displayPrecision));
+    this->ui->LE_FriedMax_x->setText(QString::number(this->m_seeingValues.maxFried_x()*1e2, this->displayFormat, this->displayPrecision));
+    this->ui->LE_FriedMin_x->setText(QString::number(this->m_seeingValues.minFried_x()*1e2, this->displayFormat, this->displayPrecision));
+
+
+    this->ui->LE_FriedNow_y->setText(QString::number(this->m_seeingValues.fried_y.last()*1e2, this->displayFormat, this->displayPrecision));
+    this->ui->LE_FriedMean_y->setText(QString::number(this->m_seeingValues.meanFried_y()*1e2, this->displayFormat, this->displayPrecision));
+    this->ui->LE_FriedMax_y->setText(QString::number(this->m_seeingValues.maxFried_y()*1e2, this->displayFormat, this->displayPrecision));
+    this->ui->LE_FriedMin_y->setText(QString::number(this->m_seeingValues.minFried_y()*1e2, this->displayFormat, this->displayPrecision));
+
+    this->ui->LE_SeeingMax->setText(QString::number(this->m_seeingValues.maxSeeing()*1e6, this->displayFormat, this->displayPrecision));
+    this->ui->LE_SeeingMin->setText(QString::number(this->m_seeingValues.minSeeing()*1e6, this->displayFormat, this->displayPrecision));
+    this->ui->LE_SeeingNow->setText(QString::number(this->m_seeingValues.seeing.last()*1e6, this->displayFormat, this->displayPrecision));
+    this->ui->LE_SeeingMean->setText(QString::number(this->m_seeingValues.meanSeeing()*1e6, this->displayFormat, this->displayPrecision));
 }
 void SeeingGui::initPlots(){
     //set the time format of the x-axis.
@@ -239,8 +284,11 @@ void SeeingGui::initPlots(){
 
     dateTicker->setDateTimeFormat("hh:mm:ss");
     this->ui->FriedPlot->addGraph();
-    this->ui->FriedPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
+    this->ui->FriedPlot->graph(0)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
     this->ui->FriedPlot->graph(0)->setPen(QPen(QColor(40, 110, 255)));
+    this->ui->FriedPlot->addGraph();
+    this->ui->FriedPlot->graph(1)->setPen(QPen(QColor(80, 110, 215)));
+    this->ui->FriedPlot->graph(1)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
     this->ui->FriedPlot->xAxis->setLabel("");
     this->ui->FriedPlot->xAxis->setTicker(dateTicker);
     this->ui->FriedPlot->yAxis->setLabel("[cm]");
