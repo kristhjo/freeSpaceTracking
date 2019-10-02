@@ -81,6 +81,7 @@ private:
 
     std::shared_ptr<datacontainers::ImageContainer> m_imageContainer = nullptr; ///< Contains images shared between cameragui and seeinggui
     std::shared_ptr<datacontainers::CentroidStabilization> centroidContainer = nullptr; ///< Contains centroids shared between cameragui and hexapodgui
+    std::shared_ptr<datacontainers::CentroidStabilization> centroidContainerHedy = nullptr; ///< Contains centroids shared between cameragui and hedylamarrgui
 };
 
 #endif // TRACKINGGUI_H

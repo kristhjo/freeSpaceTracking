@@ -20,6 +20,7 @@ TrackingGui::TrackingGui(QWidget *parent) :
 
     this->m_imageContainer = std::make_shared<datacontainers::ImageContainer>();
     this->centroidContainer = std::make_shared<datacontainers::CentroidStabilization>();
+    this->centroidContainerHedy = std::make_shared<datacontainers::CentroidStabilization>();
 
     this->ui->HS_ExposureCam->setMinimum(15);
     this->ui->HS_ExposureCam->setMaximum(1000000);
@@ -241,8 +242,8 @@ void TrackingGui::StartHedyLamarrStabilization(){
         this->ui->TE_LogCam->append("Hedy Lamarr is already stabilizing \n");
         return;
     }
-    this->pm_Camera->centroidContainer = this->centroidContainer; //Establishes shared connection between the centroidContainer of cameragui and hexpodgui.
-    this->pm_hedylamarr->centroidContainer = this->centroidContainer;
+     this->pm_Camera->centroidContainerHedy = this->centroidContainerHedy; //Establishes shared connection between the centroidContainer of cameragui and hedylamarrgui.
+    this->pm_hedylamarr->centroidContainer = this->centroidContainerHedy;
 
     std::stringstream ss;
     this->pm_hedylamarr->startStabilization(ss);
@@ -492,6 +493,7 @@ void TrackingGui::ConnectToCamera(){
     this->pm_Camera->isCameraConnected = &this->isCameraConnected;
     this->pm_Camera->isMeasuringSeeing = &this->isMeasuringSeeing;
     this->pm_Camera->isHexapodStabilizing = &this->isHexapodStabilizing;
+    this->pm_Camera->isHedyLamarrStabilizing = &this->isHedyLamarrStabilizing;
 
     this->pm_Camera->Connect(ss);
     this->ui->TE_LogCam->append(QString::fromStdString(ss.str()));

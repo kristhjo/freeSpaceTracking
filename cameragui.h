@@ -54,6 +54,7 @@ public:
     ///
     std::shared_ptr<datacontainers::ImageContainer> m_imageContainer = nullptr; ///< Image container shared between cameragui and seeinggui.
     std::shared_ptr<datacontainers::CentroidStabilization> centroidContainer = nullptr; ///< Centroid container shared between cameragui and hexapodgui.
+    std::shared_ptr<datacontainers::CentroidStabilization> centroidContainerHedy = nullptr; ///< Centroid container shared between cameragui and hedylamarrgui.
 private:
     std::atomic<bool> isPictureInProcess; ///< flags if the acquisition loop Run() is still processing a picture.
     std::unique_ptr<std::thread> m_CamThread; ///< Internal thread created within the Start() function. m_CamThread runs the continuous image acquisition through Run().
