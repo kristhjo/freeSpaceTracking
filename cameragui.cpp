@@ -303,6 +303,11 @@ void CameraGui::Run()
                         this->centroidContainer->addCentroid(centroid);
                         //this->centroidContainer->newCentroid.store(true, std::memory_order_release);
                     }
+		    if (this->isHedyLamarrStabilizing->load(std::memory_order_acquire)){ //if hexapodstabilization is activated, share the centroids with hexapodgui.
+                        this->centroidContainerHedy->currentCentroid = centroid;
+                        this->centroidContainerHedy->addCentroid(centroid);
+                        //this->centroidContainer->newCentroid.store(true, std::memory_order_release);
+                    }
                     cv::circle(cvimg,centroid,5,cv::Scalar(128,0,0),-1); //creates circle on img following the centroid.
                     cv::hconcat(cvimg, croppedImg, croppedImg);
                     cv::Point pText(20,20);
