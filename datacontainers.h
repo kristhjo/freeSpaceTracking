@@ -285,11 +285,45 @@ struct DIMMsample
 
 struct gaussianFitParams{
     double intensitymax;
-    double sigma_x;
-    double sigma_y;
+    double var_x;
+    double var_y;
     double center_x;
     double center_y;
     double sigma_cov;
+    double numSaturatedPixels;
+};
+
+struct gaussSample{
+    std::vector<gaussianFitParams> fitParams;
+    inline double FWHM_x(){
+        double var = 0.0;
+        for (unsigned int i = 0; i < fitParams.size(); i++){
+            var+= fitParams.at(i)[1];
+        }
+        return pow(var, 0.5)*2.355;
+    }
+    inline double FWHM_y(){
+        double var = 0.0;
+        for (unsigned int i = 0; i < fitParams.size(); i++){
+            var+= fitParams.at(i)[2];
+        }
+        return pow(var, 0.5)*2.355;
+    }
+
+    inline double average_x(){
+        double sum = 0.0;
+        for (unsigned int i = 0; i < fitParams.size(); i++){
+            sum+= fitParams.at(i)[1];
+        }
+        return (sum/fitParams.size());
+    }
+    inline double average_y(){
+        double sum = 0.0;
+        for (unsigned int i = 0; i < fitParams.size(); i++){
+            sum+= fitParams.at(i)[2];
+        }
+        return (sum/fitParams.size());
+    }
 }
 
 /********************************************//**

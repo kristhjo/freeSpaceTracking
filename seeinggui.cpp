@@ -160,8 +160,19 @@ void SeeingGui::Gaussian(){
             std::this_thread::sleep_for(std::chrono::seconds(3));
         }
         if (counter == this->sampleSize){//When counter reaches the sample size, calculate and plot the seeing/fried values
+            double tempSeeing_x = 0.0;
+            double tempSeeing_y = 0.0;
+            tempSeeing_x = this.m_GaussSample.fitParams.
+            this->m_seeingValues.fried_x.push_back(this->getFriedParameter_x());
+            this->m_seeingValues.fried_y.push_back(this->getFriedParameter_y());
+            this->m_seeingValues.fried.push_back(( this->m_seeingValues.fried_x.last() + this->m_seeingValues.fried_y.last() )/2.0);
+            this->m_seeingValues.seeing_x.push_back(getSeeingFromFried(this->m_seeingValues.fried_x.last(), this->m_seeingParams.wavelength));
+            this->m_seeingValues.seeing_y.push_back(getSeeingFromFried(this->m_seeingValues.fried_y.last(), this->m_seeingParams.wavelength));
+            this->m_seeingValues.seeing.push_back( (this->m_seeingValues.seeing_x.last() + this->m_seeingValues.seeing_y.last() )/2.0);//    getSeeingFromFried(this->m_seeingValues.fried.last(), this->m_seeingParams.wavelength));
+            emit newSeeingValues(); // updates the plots and display in gui
+            counter = 1; //reset counter and empty m_DIMMsample
 
-          this->m_GaussSample = {};
+            this->m_GaussSample = {};
         }
 
         if (counter == 1){//At the beginning of a sample, store the timestamp. If storeImages = true, create a folder where images can be stored.
@@ -183,13 +194,18 @@ void SeeingGui::Gaussian(){
             }
             //Calculate the spotseparation of the image, then remove it from m_imageContainer.
             params = imageprocessing::getGaussianFitParams(img, this->m_seeingParams.pxWindowRadius);
-            if (params.intensitymax < threshold){
+            if (params.intensitymax < 10){
                 std::cout << "skipped image due to low intensity" << std::endl;
                 this->m_imageContainer->removeFirstImg();
                 continue;
             }
+            else if (params.numSaturatedPixels > 1){
+                std::cout << "skipped image due to " <<  params.numSaturatedPixels << " saturated pixels" << std::endl;
+                this->m_imageContainer->removeFirstImg();
+                continue;
+            }
             else{
-                this->m_GaussSample.push_back(params)
+                this->m_GaussSample.fitParams.push_back(params)
             }
             this->m_imageContainer->removeFirstImg();
 

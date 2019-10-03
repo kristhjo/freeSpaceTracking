@@ -1,5 +1,7 @@
+#include <math>
 #include "imageprocessing.h"
 #include "datacontainers.h"
+
 namespace imageprocessing {
 
 
@@ -55,13 +57,14 @@ datacontainers::gaussianFitParams getGaussianFitParams(const cv::Mat &img, int w
   cv::Moments m = moments(croppedImg,true);
   datacontainers::gaussianFitParams params;
   cv::Point center = findCentroid(cropWindow);
-  params.intensitymax = cropWindow(center);
-  params.center_x = m.m10;
-  params.center_y = m.m01;
-  params.sigma_x = m.m20;
-  params.sigma_y = m.m02;
+  params.intensitymax = cropWindow.at<uchar>(center);
+  params.center_x = center.x;
+  params.center_y = center.y;
+  params.var_x = m.m20;//pow(m.m20,0.5)*2.355; //sigma to FWHM conversion
+  params.var_y = m.m02;//pow(m.m02, 0.5)*2.355; //sigma to FWHM conversion
   params.sigma_cov = m.m11;
-  return params; 
+  params.numSaturatedPixels = cv::countNonZero(croppedImg == 255);
+  return params;
 }
 
 }
