@@ -43,6 +43,7 @@ void SeeingGui::startMeasurement(){
     }
     else if (this->measurementType == "Gaussian"){
         this->displayMessage("No support for Gaussian seeing measurements at this time.");
+        this->Gauss_thread = std::make_unique<std::thread>(&SeeingGui::Gaussian,this); //Initiates a real-time image processing loop while images are captured.
         return;
     }
 }
@@ -62,14 +63,25 @@ void SeeingGui::stopMeasurement(){
     while (this->isProcessing.load(std::memory_order_acquire)) {
         std::this_thread::sleep_for(std::chrono::seconds(1));
         this->displayMessage("Waiting for image processing to finish");
-     }
-     if(this->DIMM_thread->joinable()){
-        this->DIMM_thread->join();
     }
-     else {
-         this->displayMessage("Error while closing DIMM thread \n", true);
-     }
-    this->writeResultsToFile();
+    if (this->measurementType == "DIMM"){
+        if(this->DIMM_thread->joinable()){
+            this->DIMM_thread->join();
+        }
+        else {
+            this->displayMessage("Error while closing DIMM thread \n", true);
+        }
+      this->writeDIMMResultsToFile();
+    }
+    else if(this->measurementType == "Gaussian"){
+        if(this->Gauss_thread->joinable()){
+            this->Gauss_thread->join();
+        }
+        else {
+            this->displayMessage("Error while closing Gauss thread \n", true);
+        }
+        this->writeGaussResultsToFile();
+    }
 }
 
 void SeeingGui::DIMM(){
@@ -137,6 +149,66 @@ void SeeingGui::DIMM(){
     this->isProcessing.store(false, std::memory_order_release);
 }
 
+
+void SeeingGui::Gaussian(){
+    unsigned int counter = 1;
+    this->isProcessing.store(true, std::memory_order_release);
+    while ((this->isMeasuringSeeing->load(std::memory_order_acquire)==true) || (this->m_imageContainer->imgQueue.size() != 0)){
+
+        if(this->m_imageContainer->imgQueue.size() == 0){
+            emit newMessage("waiting for imgQueue to fill up"); //DIMM() is not run through the main SeeingGui thread, so interaction with the gui such as text display must be implemented through signals/slots.
+            std::this_thread::sleep_for(std::chrono::seconds(3));
+        }
+        if (counter == this->sampleSize){//When counter reaches the sample size, calculate and plot the seeing/fried values
+
+          this->m_GaussSample = {};
+        }
+
+        if (counter == 1){//At the beginning of a sample, store the timestamp. If storeImages = true, create a folder where images can be stored.
+            this->m_seeingValues.timestamps.push_back(this->m_imageContainer->startTime);
+            if(this->storeImages){
+                this->currentSubFolderName = this->timestampToFolderName(this->m_imageContainer->startTime);
+                if (!this->baseDirectory.mkdir( this->currentSubFolderName ) ){
+                    emit newMessage("Error while creating subdirectory: " + this->currentSubFolderName, true );
+                }
+            }
+        }
+
+        if (!this->m_imageContainer->imgQueue.empty()){ //If there are images queued in the m_imagecontainer, process the oldest one.
+            cv::Mat img = this->m_imageContainer->imgQueue.front();
+            if (this->storeImages){
+                if(!cv::imwrite( this->directoryPath.toStdString() + this->currentSubFolderName.toStdString()  + "/img_" + std::to_string(counter) + ".jpg", img)){
+                    emit newMessage("Failed to save image", true);
+                }
+            }
+            //Calculate the spotseparation of the image, then remove it from m_imageContainer.
+            params = imageprocessing::getGaussianFitParams(img, this->m_seeingParams.pxWindowRadius);
+            if (params.intensitymax < threshold){
+                std::cout << "skipped image due to low intensity" << std::endl;
+                this->m_imageContainer->removeFirstImg();
+                continue;
+            }
+            else{
+                this->m_GaussSample.push_back(params)
+            }
+            this->m_imageContainer->removeFirstImg();
+
+        }
+        else {
+            std::this_thread::sleep_for(std::chrono::seconds(3));
+            emit newMessage("Waiting for new images");
+            continue;
+        }
+        counter++;
+    }
+    emit newMessage("Finished seeing calculations");
+    this->isProcessing.store(false, std::memory_order_release);
+}
+
+
+
+
+
 void SeeingGui::createParameterFile(){
     this->parameterFile.setFileName(this->directoryPath + "SeeingParameters.txt");
     if(this->parameterFile.open(QIODevice::WriteOnly | QIODevice::Text)){
@@ -153,6 +225,7 @@ void SeeingGui::createParameterFile(){
         this->displayMessage("Error while creating parameter file: " + this->directoryPath + "SeeingParameters.txt", true);
     }
 }
+
 
 void SeeingGui::writeResultsToFile(){
     this->resultsFile.setFileName(this->directoryPath + "Results.txt");
@@ -306,6 +379,3 @@ void SeeingGui::initPlots(){
     this->ui->SeeingPlot->plotLayout()->addElement(0, 0, new QCPTextElement(this->ui->SeeingPlot, "Seeing"));
     this->ui->SeeingPlot->replot();
 }
-
-
-

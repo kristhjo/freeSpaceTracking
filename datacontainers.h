@@ -283,6 +283,15 @@ struct DIMMsample
     }
 };
 
+struct gaussianFitParams{
+    double intensitymax;
+    double sigma_x;
+    double sigma_y;
+    double center_x;
+    double center_y;
+    double sigma_cov;
+}
+
 /********************************************//**
  *  Container for seeing data collected continuously through the measurement
  ***********************************************/

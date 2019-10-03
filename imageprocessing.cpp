@@ -1,5 +1,5 @@
 #include "imageprocessing.h"
-
+#include "datacontainers.h"
 namespace imageprocessing {
 
 
@@ -47,6 +47,21 @@ cv::Point getSpotSeparation(const cv::Mat &img, int windowRadius = 5){
     dist.x = c2.x + img.cols/2 - c1.x;
     dist.y = c2.y - c1.y;
     return dist;
+}
+
+datacontainers::gaussianFitParams getGaussianFitParams(const cv::Mat &img, int windowRadius = 30){
+  cv::Mat croppedImg;
+  cropWindow(img, croppedImg, windowRadius = windowRadius);
+  cv::Moments m = moments(croppedImg,true);
+  datacontainers::gaussianFitParams params;
+  cv::Point center = findCentroid(cropWindow);
+  params.intensitymax = cropWindow(center);
+  params.center_x = m.m10;
+  params.center_y = m.m01;
+  params.sigma_x = m.m20;
+  params.sigma_y = m.m02;
+  params.sigma_cov = m.m11;
+  return params; 
 }
 
 }
