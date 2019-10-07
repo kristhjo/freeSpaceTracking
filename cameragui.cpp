@@ -289,7 +289,7 @@ void CameraGui::Run()
                 if (this->isCameraTracking->load(std::memory_order_acquire)){ // if tracking is activated, calculate centroids with either windowing or thresholding.
                     cv::Mat mask, croppedImg;
                     if (this->m_TrackingParameters.useWindowing.load(std::memory_order_acquire) == true){
-                        imageprocessing::cropWindow(cvimg,croppedImg,this->m_TrackingParameters.pxAiryZeros[this->m_TrackingParameters.WindowRadius]);
+                        imageprocessing::cropWindow(cvimg,croppedImg,this->m_TrackingParameters.WindowRadius);
                     }
                     else {
                         imageprocessing::cropThreshold(cvimg, croppedImg,this->m_TrackingParameters.TrackingThresh);
@@ -315,7 +315,7 @@ void CameraGui::Run()
                     cv::putText(croppedImg, centroidText, pText,cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar(128,128,256));
                     cv::imshow("tracking", croppedImg);
 
-                }                
+                }
                 else if (this->isMeasuringSeeing->load(std::memory_order_acquire) == true){ //if a seeing measurement is activated, share image with seeinggui.
                     if (this->m_imageContainer->imgCounter == 1){
                         this->m_imageContainer->startTime = time(nullptr);
@@ -479,9 +479,3 @@ void CameraGui::printCamInfo(std::stringstream &ss) {
     ss << "XOffset: " << this->m_CamInfo.OffsetX << "\n";
     ss << "YOffset: " << this->m_CamInfo.OffsetY << "\n";
 }
-
-
-
-
-
-
