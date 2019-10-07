@@ -253,6 +253,9 @@ void CameraGui::Start(std::stringstream &ss)
 
     this->pm_pDataStream->StartAcquisitionContinuous();
     this->pm_pDevice->GetRemoteNode("AcquisitionStart")->Execute();
+    std::cout<< this->pm_pDevice->GetRemoteNode("AcquisitionFrameRateEnable")->GetBool() << std::endl;
+    this->pm_pDevice->GetRemoteNode("AcquisitionFrameRateEnable")->SetBool(true);
+    this->pm_pDevice->GetRemoteNode("AcquisitionFrameRate")->SetValue(1);
     this->isCameraRunning->store(true, std::memory_order_release);
     this->isPictureInProcess.store(true, std::memory_order_release);
     this->acquireImages.store(true, std::memory_order_release);
@@ -303,7 +306,7 @@ void CameraGui::Run()
                         this->centroidContainer->addCentroid(centroid);
                         //this->centroidContainer->newCentroid.store(true, std::memory_order_release);
                     }
-		    if (this->isHedyLamarrStabilizing->load(std::memory_order_acquire)){ //if hexapodstabilization is activated, share the centroids with hexapodgui.
+                    if (this->isHedyLamarrStabilizing->load(std::memory_order_acquire)){ //if hexapodstabilization is activated, share the centroids with hexapodgui.
                         this->centroidContainerHedy->currentCentroid = centroid;
                         this->centroidContainerHedy->addCentroid(centroid);
                         //this->centroidContainer->newCentroid.store(true, std::memory_order_release);
