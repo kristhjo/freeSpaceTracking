@@ -14,7 +14,7 @@ HexapodGui::HexapodGui(QWidget *parent) :
     ui->setupUi(this);
 
     this->ui->HS_IncrementSize->setMinimum(1);
-    this->ui->HS_IncrementSize->setMaximum(1000);
+    this->ui->HS_IncrementSize->setMaximum(10000);
     this->ui->HS_IncrementSize->setValue(1);
     this->ui->TE_LogHexapod->setReadOnly(true);
 
@@ -122,11 +122,6 @@ void HexapodGui::stopStabilization(std::stringstream &ss){
 
 void HexapodGui::Stabilize(){
     this->stabilizationInProcess.store(true, std::memory_order_release);
-    PI_qVEL(this->ID, "X Y Z U V W", this->velocity);
-    this->updateRate = 2;
-    std::cout << this->velocity << std::endl;
-    //double maxMovPerUpdate = this->updateRate*this->velocity[5]*57.296/1000;  //s*mrad/s, multiply by rad to deg conversion
-    //std::cout << maxMovPerUpdate << std::endl;
     double maxMovePerUpdate = 0.2;
     while(this->stabilize.load(std::memory_order_acquire)){
 
@@ -147,26 +142,11 @@ void HexapodGui::Stabilize(){
         }
 
         double newPos[6] = { -this->currentPos[0], -this->currentPos[1], -this->currentPos[2], -this->currentPos[3], 0, 0}; //subtract any movement along other axes than V,W, that may have occured from previous rotations.
-        //Horizontal and vertical deviation assumed to align with V,W rotations.
-       // if (abs(dHorizontal) < maxMovPerUpdate){
-            newPos[5] -= dHorizontal*this->hexapodParams.pixToHex;
-      //  }
-        //else if (dHorizontal > maxMovPerUpdate){//If deviation is larger than the distance the hexapod can move in between centroid updates, move maxMovPerUpdate instead.
-        //    newPos[5] += maxMovPerUpdate;
-        //}
-        //else if (dHorizontal < -maxMovPerUpdate){
-        //    newPos[5] -= maxMovPerUpdate;
-       // }
 
-        //if (abs(dVertical) < maxMovPerUpdate){
-            newPos[4] += dVertical*this->hexapodParams.pixToHex;
-      //  }
-       // else if (dVertical > maxMovPerUpdate){//If deviation is larger than the distance the hexapod can move in between centroid updates, move maxMovPerUpdate instead.
-       //     newPos[4] += maxMovPerUpdate;
-       // }
-      //  else if (dVertical < -maxMovPerUpdate){
-       //     newPos[4] -= maxMovPerUpdate;
-      //  }
+        newPos[5] -= dHorizontal*this->hexapodParams.pixToHex;
+
+        newPos[4] += dVertical*this->hexapodParams.pixToHex;
+
         if ( (abs(newPos[4])  > maxMovePerUpdate) || (abs(newPos[5]) > maxMovePerUpdate) ){
             continue;
         }
@@ -174,8 +154,8 @@ void HexapodGui::Stabilize(){
         //this->isStabMoving.load(std::memory_order_acquire);
 
 
-        this->horizontalTilts.push_back(this->currentPos[4]*1000);
-        this->verticalTilts.push_back(this->currentPos[5]*1000);
+        this->horizontalTilts.push_back(this->currentPos[4]*1e6*this->degToRad); //convert to micro radians
+        this->verticalTilts.push_back(this->currentPos[5]*1e6*this->degToRad); //convert to micro radians
         this->timestamps.push_back(time(nullptr));
         emit updateStabilizationPlot();
     }
@@ -379,32 +359,32 @@ void HexapodGui::keyPressEvent(QKeyEvent * event)
     }
     if (event->key() == Qt::Key_U){
         //increase U
-        newPos[3] +=  this->stepSize*this->hexapodParams.dU*10;
+        newPos[3] +=  this->stepSize*this->hexapodParams.dU;
         move = true;
     }
     if (event->key() == Qt::Key_I){
         //decrease U
-        newPos[3] -=  this->stepSize*this->hexapodParams.dU*10;
+        newPos[3] -=  this->stepSize*this->hexapodParams.dU;
         move = true;
     }
     if (event->key() == Qt::Key_V){
         //increase U
-        newPos[4] +=  this->stepSize*this->hexapodParams.dV*10;
+        newPos[4] +=  this->stepSize*this->hexapodParams.dV;
         move = true;
     }
     if (event->key() == Qt::Key_B){
         //decrease U
-        newPos[4] -=  this->stepSize*this->hexapodParams.dV*10;
+        newPos[4] -=  this->stepSize*this->hexapodParams.dV;
         move = true;
     }
     if (event->key() == Qt::Key_K){
         //increase W
-        newPos[5] +=  this->stepSize*this->hexapodParams.dW*10;
+        newPos[5] +=  this->stepSize*this->hexapodParams.dW;
         move = true;
     }
     if (event->key() == Qt::Key_L){
         //decrease W
-        newPos[5] -=  this->stepSize*this->hexapodParams.dW*10;
+        newPos[5] -=  this->stepSize*this->hexapodParams.dW;
         move = true;
     }
     if(move){
@@ -477,46 +457,67 @@ void HexapodGui::initPlot(){
     //set the time format of the x-axis.
     QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime);
     this->ui->StabilizationPlot->clearGraphs(); // clear old graphs
-    this->plotData.clear();
-    this->plotData2.clear();
-    this->plotData3.clear();
-    this->plotData4.clear();
+    this->ui->StabilizationPlot->plotLayout()->clear();
+    this->plotData_hTilt.clear();
+    this->plotData_vTilt.clear();
+    this->plotData_hPix.clear();
+    this->plotData_vPix.clear();
     dateTicker->setDateTimeFormat("hh:mm:ss");
+    QFont titleFont =  QFont("sans", 12, QFont::Bold);
+    QFont legendFont =  QFont("sans", 8, QFont::Bold);
+    QFont axisFont = QFont("sans", 12, QFont::Bold);
+    QPen pixelPen;
+    QPen tiltPen;
+    pixelPen.setStyle(Qt::DotLine);
+    pixelPen.setWidthF(2);
+    tiltPen.setStyle(Qt::DotLine);
+    tiltPen.setWidthF(2);
+
     this->ui->StabilizationPlot->addGraph(this->ui->StabilizationPlot->xAxis, this->ui->StabilizationPlot->yAxis);
-    this->ui->StabilizationPlot->graph(0)->setPen(QPen(QColor(40, 110, 255)));
-    this->ui->StabilizationPlot->graph(0)->setName(QString("W"));
+    tiltPen.setColor(Qt::blue);
+    this->ui->StabilizationPlot->graph(0)->setPen(tiltPen);
+    this->ui->StabilizationPlot->graph(0)->setName(QString("Horizontal tilt"));
+
+    this->ui->StabilizationPlot->addGraph(this->ui->StabilizationPlot->xAxis, this->ui->StabilizationPlot->yAxis);
+    tiltPen.setColor(Qt::red);
+    this->ui->StabilizationPlot->graph(0)->setPen(tiltPen);
+    this->ui->StabilizationPlot->graph(1)->setName(QString("Vertical tilt"));
+
+    this->ui->StabilizationPlot->addGraph(this->ui->StabilizationPlot->xAxis2, this->ui->StabilizationPlot->yAxis2);
+    pixelPen.setColor(Qt::red)
+    this->ui->StabilizationPlot->graph(2)->setPen(pixelPen);
+    this->ui->StabilizationPlot->graph(2)->setBrush(QBrush(Qt::red));
+    this->ui->StabilizationPlot->graph(2)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssSquare, 5));
+    this->ui->StabilizationPlot->graph(2)->setName(QString("Vertical pixel offset"));
+
+    this->ui->StabilizationPlot->addGraph(this->ui->StabilizationPlot->xAxis2, this->ui->StabilizationPlot->yAxis2);
+    pixelPen.setColor(Qt::blue)
+    this->ui->StabilizationPlot->graph(2)->setPen(pixelPen);
+    this->ui->StabilizationPlot->graph(3)->setBrush(QBrush(Qt::blue));
+    this->ui->StabilizationPlot->graph(3)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssSquare, 5));
+    this->ui->StabilizationPlot->graph(3)->setName(QString("Horizontal pixel offset"));
+
     this->ui->StabilizationPlot->xAxis->setLabel("");
     this->ui->StabilizationPlot->xAxis->setTicker(dateTicker);
+    this->ui->StabilizationPlot->xAxis->setFont(axisFont);
     this->ui->StabilizationPlot->yAxis->setLabel("[urad]");
+    this->ui->StabilizationPlot->yAxis->setFont(axisFont);
     this->ui->StabilizationPlot->yAxis2->setVisible(true);
-    this->ui->StabilizationPlot->yAxis2->setLabel("pixels");
+    this->ui->StabilizationPlot->yAxis2->setLabel("Pixels");
+    this->ui->StabilizationPlot->yAxis2->setFont(axisFont);
     this->ui->StabilizationPlot->plotLayout()->insertRow(0);
-    this->ui->StabilizationPlot->plotLayout()->addElement(0, 0, new QCPTextElement(this->ui->StabilizationPlot, "Stabilization History"));
-    this->ui->StabilizationPlot->addGraph(this->ui->StabilizationPlot->xAxis, this->ui->StabilizationPlot->yAxis);
-    this->ui->StabilizationPlot->graph(1)->setName(QString("V"));
-    this->ui->StabilizationPlot->graph(1)->setPen(QPen(Qt::red));
-    this->ui->StabilizationPlot->legend->setVisible(true);
-    this->ui->StabilizationPlot->legend->setBrush(QColor(255, 255, 255, 150));
-    this->ui->StabilizationPlot->replot();
+    this->ui->StabilizationPlot->plotLayout()->addElement(0, 0, new QCPTextElement(this->ui->StabilizationPlot, "Stabilization History", titleFont));
 
-    this->ui->StabilizationPlot->addGraph(this->ui->StabilizationPlot->xAxis2, this->ui->StabilizationPlot->yAxis2);
-    this->ui->StabilizationPlot->graph(2)->setName(QString("Y"));
-    this->ui->StabilizationPlot->graph(2)->setPen(QPen(Qt::red));
-    this->ui->StabilizationPlot->graph(2)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCross, 5));
     this->ui->StabilizationPlot->legend->setVisible(true);
-
-    this->ui->StabilizationPlot->addGraph(this->ui->StabilizationPlot->xAxis2, this->ui->StabilizationPlot->yAxis2);
-    this->ui->StabilizationPlot->graph(3)->setName(QString("X"));
-    this->ui->StabilizationPlot->graph(3)->setPen(QPen(QColor(40, 110, 255)));
-    this->ui->StabilizationPlot->graph(3)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCross, 5));
-    this->ui->StabilizationPlot->legend->setVisible(true);
+    this->ui->StabilizationPlot->legend->setFont(legendFont);
+    this->ui->StabilizationPlot->legend->setBrush(QBrush(QColor(255, 255, 255, 230)));
 
     this->ui->StabilizationPlot->replot();
 }
 
 void HexapodGui::updatePlot(){
     QCPGraphData dataPoint(this->timestamps.last(), this->horizontalTilts.last());
-    this->plotData.push_back(dataPoint);
+    this->plotData_hTilt.push_back(dataPoint);
     if(abs(horizontalTilts.last())>this->maxRange_tilt){
         this->maxRange_tilt = abs(horizontalTilts.last());
     }
@@ -524,18 +525,27 @@ void HexapodGui::updatePlot(){
         this->maxRange_px = abs(xCentroids.last());
     }
     dataPoint.value  = this->verticalTilts.last();
-    this->plotData2.push_back(dataPoint);
+    this->plotData_vTilt.push_back(dataPoint);
     dataPoint.value  = this->xCentroids.last();
-    this->plotData3.push_back(dataPoint);
+    this->plotData_hPix.push_back(dataPoint);
     dataPoint.value  = this->yCentroids.last();
-    this->plotData4.push_back(dataPoint);
+    this->plotData_vPix.push_back(dataPoint);
+
+    if (this->plotData_hTilt.size() > this->xAxisLimit){
+        this->plotData_hTilt.erase(this.plotData_hTilt->begin());
+        this->plotData_vTilt.erase(this.plotData_vTilt->begin());
+        this->plotData_hPix.erase(this.plotData_hPix->begin());
+        this->plotData_vPix.erase(this.plotData_vPix->begin());
+    }
+
+
     this->ui->StabilizationPlot->yAxis->setRange(-this->maxRange_tilt*1.2, this->maxRange_tilt*1.2);
     this->ui->StabilizationPlot->yAxis2->setRange(-this->maxRange_px*1.2, this->maxRange_px*1.2);
     this->ui->StabilizationPlot->rescaleAxes();
-    this->ui->StabilizationPlot->graph(0)->data()->set(plotData);
-    this->ui->StabilizationPlot->graph(1)->data()->set(plotData2);
-    this->ui->StabilizationPlot->graph(2)->data()->set(plotData4);
-    this->ui->StabilizationPlot->graph(3)->data()->set(plotData3);
+    this->ui->StabilizationPlot->graph(0)->data()->set(plotData_hTilt);
+    this->ui->StabilizationPlot->graph(1)->data()->set(plotData_vTilt);
+    this->ui->StabilizationPlot->graph(2)->data()->set(plotData_vPix);
+    this->ui->StabilizationPlot->graph(3)->data()->set(plotData_hPix);
 
     this->ui->StabilizationPlot->replot();
     this->ui->StabilizationPlot->savePdf(this->folderName + "/StabilizationPlot.pdf" );

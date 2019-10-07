@@ -45,7 +45,7 @@ public:
     void activateManualControl(std::stringstream &ss); ///<
     std::shared_ptr<datacontainers::CentroidStabilization> centroidContainer = nullptr;
 
-    double updateRate; //Set to the camera exposure time.
+    //double updateRate; //Set to the camera exposure time.
 private:
     Ui::HexapodGui *ui;
     KeyPressEater *keyPressEater = new KeyPressEater();   //Qt eventfilter for keyboard input. This is activated whenever manual control should be deactivated.
@@ -60,7 +60,9 @@ private:
     std::atomic<bool> stabilizationInProcess; ///<
     std::atomic<bool> stabilize;
     std::atomic<bool> isStabMoving;
-
+    double updateRate = 2; //seconds
+    double degToRad = 6.28/360;
+    double radToDeg = 360/6.28;
     datacontainers::HexapodInfo hexapodParams;
     void MoveToPosition(double *dVal, bool moveRelative);
     void Stabilize(); ///<
@@ -77,16 +79,17 @@ private:
     void initPlot();
     QVector<double> horizontalTilts;
     QVector<double> verticalTilts;
-    QVector<QCPGraphData> plotData;
-    QVector<QCPGraphData> plotData2;
+    QVector<QCPGraphData> plotData_hTilt;
+    QVector<QCPGraphData> plotData_vTilt;
     QVector<double> xCentroids;
     QVector<double> yCentroids;
-    QVector<QCPGraphData> plotData3;
-    QVector<QCPGraphData> plotData4;
+    QVector<QCPGraphData> plotData_hPix;
+    QVector<QCPGraphData> plotData_vPix;
 
     QVector<time_t> timestamps;
     double maxRange_tilt = 0.0;
     double maxRange_px = 0.0;
+    int xAxisLimit = 600;
 
     QString folderName;
     std::fstream stabilizationDataStream;
