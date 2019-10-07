@@ -145,8 +145,10 @@ struct CamInfo
         FrameWidth=2044;
         OffsetX=0;
         OffsetY=0;
+        FrameRate=10;
     }
     std::string DeviceNr;
+    double FrameRate;
     double ExposureMax;
     double ExposureMin;
     double ExposureActual;
