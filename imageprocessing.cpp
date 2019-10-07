@@ -1,4 +1,4 @@
-#include <math>
+//#include <math>
 #include "imageprocessing.h"
 #include "datacontainers.h"
 
@@ -56,8 +56,8 @@ datacontainers::gaussianFitParams getGaussianFitParams(const cv::Mat &img, int w
   cropWindow(img, croppedImg, windowRadius = windowRadius);
   cv::Moments m = moments(croppedImg,true);
   datacontainers::gaussianFitParams params;
-  cv::Point center = findCentroid(cropWindow);
-  params.intensitymax = cropWindow.at<uchar>(center);
+  cv::Point center = findCentroid(croppedImg);
+  params.intensitymax = croppedImg.at<uchar>(center);
   params.center_x = center.x;
   params.center_y = center.y;
   params.var_x = m.m20;//pow(m.m20,0.5)*2.355; //sigma to FWHM conversion

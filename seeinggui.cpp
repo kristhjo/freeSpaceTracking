@@ -153,6 +153,7 @@ void SeeingGui::DIMM(){
 void SeeingGui::Gaussian(){
     unsigned int counter = 1;
     this->isProcessing.store(true, std::memory_order_release);
+    datacontainers::gaussianFitParams tempParams;
     while ((this->isMeasuringSeeing->load(std::memory_order_acquire)==true) || (this->m_imageContainer->imgQueue.size() != 0)){
 
         if(this->m_imageContainer->imgQueue.size() == 0){
@@ -164,8 +165,8 @@ void SeeingGui::Gaussian(){
             this->m_seeingValues.seeing_x.push_back(this->m_GaussSample.FWHM_x());
             this->m_seeingValues.seeing_y.push_back(this->m_GaussSample.FWHM_y());
 
-            this->m_seeingValues.fried_x.push_back(this->getFriedFromSeeing_x(this->m_seeingValues.seeing_x.last(), this->m_seeingParams.wavelength);
-            this->m_seeingValues.fried_y.push_back(this->getFriedFromSeeing_y(this->m_seeingValues.seeing_y.last(), this->m_seeingParams.wavelength);
+            this->m_seeingValues.fried_x.push_back(this->getFriedFromSeeing(this->m_seeingValues.seeing_x.last(), this->m_seeingParams.wavelength));
+            this->m_seeingValues.fried_y.push_back(this->getFriedFromSeeing(this->m_seeingValues.seeing_y.last(), this->m_seeingParams.wavelength));
             this->m_seeingValues.fried.push_back(( this->m_seeingValues.fried_x.last() + this->m_seeingValues.fried_y.last() )/2.0);
             this->m_seeingValues.seeing.push_back( (this->m_seeingValues.seeing_x.last() + this->m_seeingValues.seeing_y.last() )/2.0);//    getSeeingFromFried(this->m_seeingValues.fried.last(), this->m_seeingParams.wavelength));
             emit newSeeingValues(); // updates the plots and display in gui
@@ -192,19 +193,19 @@ void SeeingGui::Gaussian(){
                 }
             }
             //Calculate the spotseparation of the image, then remove it from m_imageContainer.
-            params = imageprocessing::getGaussianFitParams(img, this->m_seeingParams.pxWindowRadius);
-            if (params.intensitymax < 10){
+            tempParams = imageprocessing::getGaussianFitParams(img, this->m_seeingParams.pxWindowRadius);
+            if (tempParams.intensitymax < 10){
                 std::cout << "skipped image due to low intensity" << std::endl;
                 this->m_imageContainer->removeFirstImg();
                 continue;
             }
-            else if (params.numSaturatedPixels > 1){
-                std::cout << "skipped image due to " <<  params.numSaturatedPixels << " saturated pixels" << std::endl;
+            else if (tempParams.numSaturatedPixels > 1){
+                std::cout << "skipped image due to " <<  tempParams.numSaturatedPixels << " saturated pixels" << std::endl;
                 this->m_imageContainer->removeFirstImg();
                 continue;
             }
             else{
-                this->m_GaussSample.fitParams.push_back(params)
+                this->m_GaussSample.fitParams.push_back(tempParams);
             }
             this->m_imageContainer->removeFirstImg();
 
@@ -330,13 +331,13 @@ void SeeingGui::replotSeeing(){
     this->ui->FriedPlot->graph(0)->data()->set(this->m_seeingValues.friedData_y);
     this->ui->FriedPlot->graph(1)->data()->set(this->m_seeingValues.friedData_x);
 
-    this->m_seeingValue.avgFriedPlot.clear();
+    this->m_seeingValues.avgFriedPlot.clear();
     QCPGraphData dataPoint2(this->m_seeingValues.timestamps.first(), this->m_seeingValues.meanFried());
-    this->m_seeingValue.avgFriedPlot.push_back(dataPoint2);
+    this->m_seeingValues.avgFriedPlot.push_back(dataPoint2);
     dataPoint2.key = this->m_seeingValues.timestamps.last();
-    this->m_seeingValue.avgFriedPlot.push_back(dataPoint2);
-    this->ui->FriedPlot->graph(2)->data()->set(this->m_seeingValue.avgFriedPlot);
-    this->avgFriedLabel->setText("Average Fried parameter: " + QString::number(dataPoint2.value, this->displayFormat, this->displayPrecision))
+    this->m_seeingValues.avgFriedPlot.push_back(dataPoint2);
+    this->ui->FriedPlot->graph(2)->data()->set(this->m_seeingValues.avgFriedPlot);
+    this->avgFriedLabel->setText("Average Fried parameter: " + QString::number(dataPoint2.value, this->displayFormat, this->displayPrecision));
 
     this->ui->FriedPlot->replot();
     this->ui->FriedPlot->savePdf(this->directoryPath + "FriedPlot.pdf" );
@@ -385,10 +386,10 @@ void SeeingGui::initPlots(){
     QPen yPen;
     xPen.setStyle(Qt::DotLine);
     xPen.setWidthF(2);
-    xPen->setColor(Qt::blue);
+    xPen.setColor(Qt::blue);
     yPen.setStyle(Qt::DotLine);
     yPen.setWidthF(2);
-    yPen->setColor(Qt::red);
+    yPen.setColor(Qt::red);
 
     this->ui->FriedPlot->addGraph();
     this->ui->FriedPlot->graph(0)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
@@ -408,14 +409,17 @@ void SeeingGui::initPlots(){
     this->ui->FriedPlot->addGraph();
     this->ui->FriedPlot->graph(2)->setPen(yPen);
     this->avgFriedLabel->setText("Average Fried parameter: ");
-    this->ui->FriedPlot->plotLayout()->addElement(.8, .9, this->avgFriedLabel, legendFont));
+    this->avgFriedLabel->setFont(legendFont);
+    if (this->ui->FriedPlot->legend->hasElement(3, 0)) // if top cell isn't empty, insert an empty row at top
+        this->ui->FriedPlot->legend->insertRow(3);
+    this->ui->FriedPlot->legend->addElement(3,0, this->avgFriedLabel);
 
 
     this->ui->FriedPlot->xAxis->setLabel("");
     this->ui->FriedPlot->xAxis->setTicker(dateTicker);
-    this->ui->FriedPlot->xAxis->setFont(axisFont);
+    this->ui->FriedPlot->xAxis->setLabelFont(axisFont);
     this->ui->FriedPlot->yAxis->setLabel("[cm]");
-    this->ui->FriedPlot->yAxis->setFont(axisFont);
+    this->ui->FriedPlot->yAxis->setLabelFont(axisFont);
 
     this->ui->FriedPlot->plotLayout()->insertRow(0);
     this->ui->FriedPlot->plotLayout()->addElement(0, 0, new QCPTextElement(this->ui->FriedPlot, "Fried parameter", titleFont));
@@ -434,9 +438,9 @@ void SeeingGui::initPlots(){
 
     this->ui->SeeingPlot->xAxis->setLabel("");
     this->ui->SeeingPlot->xAxis->setTicker(dateTicker);
-    this->ui->SeeingPlot->xAxis->setFont(axisFont);
+    this->ui->SeeingPlot->xAxis->setLabelFont(axisFont);
     this->ui->SeeingPlot->yAxis->setLabel("[mu rad]");
-    this->ui->SeeingPlot->yAxis->setFont(axisFont);
+    this->ui->SeeingPlot->yAxis->setLabelFont(axisFont);
 
     this->ui->SeeingPlot->plotLayout()->insertRow(0);
     this->ui->SeeingPlot->plotLayout()->addElement(0, 0, new QCPTextElement(this->ui->SeeingPlot, "Seeing", titleFont));

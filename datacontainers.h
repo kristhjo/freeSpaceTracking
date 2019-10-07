@@ -174,7 +174,7 @@ struct TrackingParameters
 {
     int TrackingThresh = 100; //brightness threshold 0-255
     int WindowRadius = 1; //pixels from center
-    std::atomic<bool> useWindowing = false;
+    std::atomic<bool> useWindowing;
 };
 
 /********************************************//**
@@ -199,6 +199,7 @@ struct seeingParameters
     double pxHeight = receiverOptics.pixSize; //Baumer cam
     //double magnification = receiverOptics.magnification;
     int pxAiryZeros [20];//location of airy minimas in the image plane in pixels.
+    int pxWindowRadius = 10;
     //int pxWindowRadius = 10; //radius of crop window used in windowing algorithm. Is set through the seeinggui.
     //parameters for DIMM calculations
     double K_l = 0.364*( 1-0.532 * std::pow((maskApertureSeparation/maskApertureDiameter), -1/3) - 0.024 * std::pow((maskApertureSeparation/maskApertureDiameter),-7./3.));
@@ -279,38 +280,23 @@ struct gaussianFitParams{
     double numSaturatedPixels;
 };
 
-struct gaussSample{
+struct GaussSample{
     std::vector<gaussianFitParams> fitParams;
     inline double FWHM_x(){
         double avg = 0.0;
         for (unsigned int i = 0; i < fitParams.size(); i++){
-            avg+= pow(fitParams.at(i)[1],0.5)*2.355;
+            avg+= pow(fitParams.at(i).var_x,0.5)*2.355;
         }
         return avg/fitParams.size();
     }
     inline double FWHM_y(){
-        double var = 0.0;
+        double avg = 0.0;
         for (unsigned int i = 0; i < fitParams.size(); i++){
-            avg+= pow(fitParams.at(i)[2],0.5)*2.355;
+            avg+= pow(fitParams.at(i).var_y,0.5)*2.355;
         }
         return avg/fitParams.size();
     }
-
-    inline double average_x(){
-        double sum = 0.0;
-        for (unsigned int i = 0; i < fitParams.size(); i++){
-            sum+= fitParams.at(i)[1];
-        }
-        return (sum/fitParams.size());
-    }
-    inline double average_y(){
-        double sum = 0.0;
-        for (unsigned int i = 0; i < fitParams.size(); i++){
-            sum+= fitParams.at(i)[2];
-        }
-        return (sum/fitParams.size());
-    }
-}
+};
 
 /********************************************//**
  *  Container for seeing data collected continuously through the measurement

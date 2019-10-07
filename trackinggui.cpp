@@ -494,7 +494,7 @@ void TrackingGui::ConnectToCamera(){
     this->pm_Camera->isMeasuringSeeing = &this->isMeasuringSeeing;
     this->pm_Camera->isHexapodStabilizing = &this->isHexapodStabilizing;
     this->pm_Camera->isHedyLamarrStabilizing = &this->isHedyLamarrStabilizing;
-
+    this->pm_Camera->m_TrackingParameters.useWindowing.store(true,std::memory_order_release);
     this->pm_Camera->Connect(ss);
     this->ui->TE_LogCam->append(QString::fromStdString(ss.str()));
 
