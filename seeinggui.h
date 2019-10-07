@@ -56,8 +56,8 @@ private:
     double getFriedParameter(); ///< Calculates the Fried parameter of m_DIMMsample.
     double getFriedParameter_x(); ///< Calculates the Fried parameter of m_DIMMsample.
     double getFriedParameter_y(); ///< Calculates the Fried parameter of m_DIMMsample.
-
     double getSeeingFromFried(double FriedParameter, double wavelength); ///< Converts a Fried parameter to a seeing value.
+    double getFriedFromSeeing(double SeeingParameter, double wavelength); ///< Converts a Seeing value into a Fried parameter
 
     int displayPrecision = 3; ///< Precision used for Qstring representation of the display values
     char displayFormat = 'f'; ///< Format used for Qstring representation of the display values
@@ -83,6 +83,8 @@ private:
     void setMeasurementSettings(); ///< Reads the measurement settings chosen in the gui.
     QString timestampToFolderName(time_t timestamp); ///< Formats a more readable folder name from the current unix timestamp.
     void setSecPerDataPoint(); ///< Displays the length in seconds of each measurement interval. I.e. the sample size times the exposure time of the camera.
+
+    QCPTextElement *avgFriedLabel;
 private slots:
     void replotSeeing(); ///< Updates the plots of seeing values and fried parameters in the gui.
     void updateSeeingPanel(); ///< Updates the display of the maximum, minimum, mean and current fried parameter and seeing value in the gui.
