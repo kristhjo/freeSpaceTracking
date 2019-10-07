@@ -41,6 +41,7 @@ protected slots:
     void SetYOffsetSB(); ///< Changes the vertical offset of the BaumerCam upon interaction with the gui spin box
     void SetXOffset(); ///< Changes the horizontal offset of the BaumerCam upon interaction with the gui slider
     void SetXOffsetSB(); ///< Changes the horizontaloffset of the BaumerCam upon interaction with the gui spin box
+    void SetFrameRateSB();
 
     void StartTracking(); ///< Flags that CameraGui shall start calculating and displaying the image centroids
     void StopTracking(); ///< Flags that CameraGui shall stop calculating and displaying the image centroids

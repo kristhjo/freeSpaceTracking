@@ -115,7 +115,10 @@ void CameraGui::Connect(std::stringstream &ss)
     for(InterfaceList::iterator ifc = pm_interfaceList->begin(); ifc != pm_interfaceList->end(); ifc++){
         ifc->second->Open();
         m_sInterfaceID = ifc->first;
-        break;
+        std::cout<<m_sInterfaceID<<std::endl;
+        if (m_sInterfaceID == "enp4s0"){
+            break;
+        }
     }
 
     if (m_sInterfaceID == ""){
@@ -141,8 +144,8 @@ void CameraGui::Connect(std::stringstream &ss)
     for (DeviceList::iterator dev = pm_deviceList->begin(); dev != pm_deviceList->end(); dev++){ //loops through the detected Baumer devices in the network. Connects to the one with ID identical to BaumerID in the CamInfo struct.
         try {
 
-        dev->second->Open();
-        temp_sDeviceID = dev->first;
+            dev->second->Open();
+            temp_sDeviceID = dev->first;
 
         } catch (...) {
             continue;
@@ -253,9 +256,7 @@ void CameraGui::Start(std::stringstream &ss)
 
     this->pm_pDataStream->StartAcquisitionContinuous();
     this->pm_pDevice->GetRemoteNode("AcquisitionStart")->Execute();
-    std::cout<< this->pm_pDevice->GetRemoteNode("AcquisitionFrameRateEnable")->GetBool() << std::endl;
     this->pm_pDevice->GetRemoteNode("AcquisitionFrameRateEnable")->SetBool(true);
-    this->pm_pDevice->GetRemoteNode("AcquisitionFrameRate")->SetValue(1);
     this->isCameraRunning->store(true, std::memory_order_release);
     this->isPictureInProcess.store(true, std::memory_order_release);
     this->acquireImages.store(true, std::memory_order_release);
@@ -361,6 +362,9 @@ void CameraGui::updateCamParameters(){
 
     if (this->pm_pDevice->GetRemoteNode("Gain")->IsWriteable() == true){
         this->pm_pDevice->GetRemoteNode("Gain")->SetInt(this->m_CamInfo.GainActual);
+    }
+    if (this->pm_pDevice->GetRemoteNode("AcquisitionFrameRate")->IsWriteable() == true){
+        this->pm_pDevice->GetRemoteNode("AcquisitionFrameRate")->SetDouble(this->m_CamInfo.FrameRate);
     }
 
     if (this->pm_pDevice->GetRemoteNode("Width")->IsWriteable() == true){
