@@ -74,8 +74,8 @@ TrackingGui::TrackingGui(QWidget *parent) :
     this->ui->SB_TrackingThresh->setMaximum(255);
 
     this->ui->SB_WindowRadius->setMinimum(1);
-    this->ui->SB_WindowRadius->setMaximum(20);
-    this->ui->SB_WindowRadius->setValue(5);
+    this->ui->SB_WindowRadius->setMaximum(50);
+    this->ui->SB_WindowRadius->setValue(10);
 
     QObject::connect(this->ui->PB_ConnectCam,&QPushButton::clicked,this,&TrackingGui::ConnectToCamera,Qt::UniqueConnection);
     QObject::connect(this->ui->PB_StopCam,&QPushButton::clicked,this,&TrackingGui::StopCamera,Qt::UniqueConnection);
@@ -282,7 +282,7 @@ void TrackingGui::StartStabilization(){
     this->pm_Camera->centroidContainer = this->centroidContainer; //Establishes shared connection between the centroidContainer of cameragui and hexpodgui.
     this->pm_hexapod->centroidContainer = this->centroidContainer;
 
-    this->pm_hexapod->updateRate = this->pm_Camera->m_CamInfo.ExposureActual;
+    //this->pm_hexapod->updateRate = this->pm_Camera->m_CamInfo.ExposureActual;
     std::stringstream ss;
     this->pm_hexapod->startStabilization(ss);
     this->pm_hexapod->show();
@@ -321,8 +321,8 @@ void TrackingGui::StopTracking(){
         this->ui->TE_LogCam->append("Camera is not started \n");
         return;
     }
-    this->isCameraTracking.store(false, std::memory_order_release);//this->pm_Camera->m_TrackingParameters.isTracking.store(false,std::memory_order_release);
-}
+    this->isCameraTracking.store(false, std::memory_order_release);
+  }
 
 void TrackingGui::setTrackingThreshold(){
     if(!this->isCameraConnected){
@@ -353,7 +353,7 @@ void TrackingGui::setWindowRadius(){
         this->ui->TE_LogCam->append("Camera is not connected \n");
         return;
     }
-    this->pm_Camera->m_TrackingParameters.WindowRadius = this->ui->SB_WindowRadius->value();
+    this->pm_Camera->m_TrackingParameters.WindowRadius = this->ui->SB_WindowRadius->value();//radius in pixels
 }
 
 void TrackingGui::SetExposureTime(){
