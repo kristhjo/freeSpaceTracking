@@ -55,7 +55,7 @@ FORMS += \
 INCLUDEPATH += $$PWD/inc/hexapod
 DEPENDPATH += $$PWD/inc/hexapod
 
-LIBS += -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_imgcodecs -lboost_system -lboost_filesystem
+LIBS += -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_imgcodecs
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
