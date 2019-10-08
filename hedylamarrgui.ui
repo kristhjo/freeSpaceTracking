@@ -14,41 +14,34 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QTextEdit" name="TE_LogHedyLamarr">
-    <property name="geometry">
-     <rect>
-      <x>590</x>
-      <y>20</y>
-      <width>461</width>
-      <height>61</height>
-     </rect>
-    </property>
-   </widget>
    <widget class="QCustomPlot" name="StabilizationPlot" native="true">
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>170</y>
+      <y>240</y>
       <width>1031</width>
-      <height>341</height>
+      <height>271</height>
      </rect>
     </property>
    </widget>
-   <widget class="QLineEdit" name="LE_yLastCentroid">
+   <widget class="QLineEdit" name="LE_yCurrentCentroid">
     <property name="geometry">
      <rect>
       <x>230</x>
       <y>60</y>
       <width>91</width>
+      <x>240</x>
+      <y>180</y>
+      <width>71</width>
       <height>25</height>
      </rect>
     </property>
    </widget>
-   <widget class="QLabel" name="label_7">
+   <widget class="QLabel" name="label_currentX">
     <property name="geometry">
      <rect>
-      <x>200</x>
-      <y>60</y>
+      <x>210</x>
+      <y>180</y>
       <width>16</width>
       <height>17</height>
      </rect>
@@ -57,11 +50,11 @@
      <string>X</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_8">
+   <widget class="QLabel" name="label_currentY">
     <property name="geometry">
      <rect>
-      <x>200</x>
-      <y>110</y>
+      <x>210</x>
+      <y>210</y>
       <width>16</width>
       <height>17</height>
      </rect>
@@ -70,21 +63,27 @@
      <string>Y</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="LE_xLastCentroid">
+   <widget class="QLineEdit" name="LE_xCurrentCentroid">
     <property name="geometry">
      <rect>
+<<<<<<< HEAD
       <x>230</x>
       <y>110</y>
       <width>91</width>
+=======
+      <x>240</x>
+      <y>210</y>
+      <width>71</width>
+>>>>>>> 7303966e14dfc638ac57bd522457e4814bbc7968
       <height>25</height>
      </rect>
     </property>
    </widget>
-   <widget class="QLabel" name="label_3">
+   <widget class="QLabel" name="label_homeX">
     <property name="geometry">
      <rect>
       <x>50</x>
-      <y>60</y>
+      <y>180</y>
       <width>16</width>
       <height>17</height>
      </rect>
@@ -97,17 +96,22 @@
     <property name="geometry">
      <rect>
       <x>80</x>
+<<<<<<< HEAD
       <y>60</y>
       <width>91</width>
+=======
+      <y>180</y>
+      <width>71</width>
+>>>>>>> 7303966e14dfc638ac57bd522457e4814bbc7968
       <height>25</height>
      </rect>
     </property>
    </widget>
-   <widget class="QLabel" name="label_4">
+   <widget class="QLabel" name="label_homeY">
     <property name="geometry">
      <rect>
       <x>50</x>
-      <y>110</y>
+      <y>210</y>
       <width>16</width>
       <height>17</height>
      </rect>
@@ -120,18 +124,23 @@
     <property name="geometry">
      <rect>
       <x>80</x>
+<<<<<<< HEAD
       <y>110</y>
       <width>91</width>
+=======
+      <y>210</y>
+      <width>71</width>
+>>>>>>> 7303966e14dfc638ac57bd522457e4814bbc7968
       <height>25</height>
      </rect>
     </property>
    </widget>
-   <widget class="QLabel" name="label_16">
+   <widget class="QLabel" name="label_homeCentroid">
     <property name="geometry">
      <rect>
-      <x>50</x>
-      <y>30</y>
-      <width>191</width>
+      <x>40</x>
+      <y>160</y>
+      <width>111</width>
       <height>17</height>
      </rect>
     </property>
@@ -139,24 +148,24 @@
      <string>Home centroid</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_17">
+   <widget class="QLabel" name="label_currentCentroid">
     <property name="geometry">
      <rect>
-      <x>170</x>
-      <y>30</y>
-      <width>191</width>
+      <x>210</x>
+      <y>160</y>
+      <width>121</width>
       <height>17</height>
      </rect>
     </property>
     <property name="text">
-     <string>Last centroid</string>
+     <string>Current centroid</string>
     </property>
    </widget>
    <widget class="QPushButton" name="PB_North">
     <property name="geometry">
      <rect>
-      <x>430</x>
-      <y>10</y>
+      <x>450</x>
+      <y>110</y>
       <width>51</width>
       <height>41</height>
      </rect>
@@ -168,9 +177,9 @@
    <widget class="QTextEdit" name="TE_HedyResponse">
     <property name="geometry">
      <rect>
-      <x>590</x>
-      <y>100</y>
-      <width>461</width>
+      <x>620</x>
+      <y>80</y>
+      <width>421</width>
       <height>61</height>
      </rect>
     </property>
@@ -178,8 +187,8 @@
    <widget class="QPushButton" name="PB_West">
     <property name="geometry">
      <rect>
-      <x>380</x>
-      <y>50</y>
+      <x>400</x>
+      <y>150</y>
       <width>51</width>
       <height>41</height>
      </rect>
@@ -191,8 +200,8 @@
    <widget class="QPushButton" name="PB_South">
     <property name="geometry">
      <rect>
-      <x>430</x>
-      <y>90</y>
+      <x>450</x>
+      <y>190</y>
       <width>51</width>
       <height>41</height>
      </rect>
@@ -204,8 +213,8 @@
    <widget class="QPushButton" name="PB_East">
     <property name="geometry">
      <rect>
-      <x>480</x>
-      <y>50</y>
+      <x>500</x>
+      <y>150</y>
       <width>51</width>
       <height>41</height>
      </rect>
@@ -217,24 +226,178 @@
    <widget class="QSpinBox" name="SB_stepSize">
     <property name="geometry">
      <rect>
-      <x>490</x>
-      <y>140</y>
+      <x>470</x>
+      <y>50</y>
       <width>48</width>
       <height>26</height>
      </rect>
     </property>
    </widget>
-   <widget class="QLabel" name="label">
+   <widget class="QLabel" name="label_stepsize">
     <property name="geometry">
      <rect>
-      <x>320</x>
-      <y>140</y>
-      <width>121</width>
+      <x>390</x>
+      <y>50</y>
+      <width>61</width>
       <height>20</height>
      </rect>
     </property>
     <property name="text">
-     <string>Step size (arcsec)</string>
+     <string>Step size </string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="LE_initialNSoffset">
+    <property name="geometry">
+     <rect>
+      <x>80</x>
+      <y>70</y>
+      <width>71</width>
+      <height>25</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="LE_initialEWoffset">
+    <property name="geometry">
+     <rect>
+      <x>80</x>
+      <y>110</y>
+      <width>71</width>
+      <height>25</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_initialNSoffset">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>70</y>
+      <width>31</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>N/S</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_initialEWoffset">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>110</y>
+      <width>31</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>E/W</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_currentOffset">
+    <property name="geometry">
+     <rect>
+      <x>210</x>
+      <y>40</y>
+      <width>101</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Current offset</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_currentEWoffset">
+    <property name="geometry">
+     <rect>
+      <x>210</x>
+      <y>110</y>
+      <width>31</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>E/W</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_currentNSoffset">
+    <property name="geometry">
+     <rect>
+      <x>210</x>
+      <y>70</y>
+      <width>31</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>N/S</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="LE_currentNSoffset">
+    <property name="geometry">
+     <rect>
+      <x>250</x>
+      <y>70</y>
+      <width>71</width>
+      <height>25</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="LE_currentEWoffset">
+    <property name="geometry">
+     <rect>
+      <x>250</x>
+      <y>110</y>
+      <width>71</width>
+      <height>25</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_ASAreminder">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>40</y>
+      <width>141</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>(from ASA software)</string>
+    </property>
+   </widget>
+   <widget class="QTextEdit" name="TE_LogHedyLamarr">
+    <property name="geometry">
+     <rect>
+      <x>620</x>
+      <y>160</y>
+      <width>421</width>
+      <height>61</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_arcsec">
+    <property name="geometry">
+     <rect>
+      <x>390</x>
+      <y>70</y>
+      <width>51</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>(arcsec)</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="PB_setInitialOffset">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>10</y>
+      <width>131</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Set initial offset </string>
     </property>
    </widget>
   </widget>

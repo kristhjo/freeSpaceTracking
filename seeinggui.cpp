@@ -125,6 +125,10 @@ void SeeingGui::DIMM(){
                     emit newMessage("Failed to save image", true);
                 }
             }
+
+            if (this->debug){
+                this->debugDIMM(img, counter);
+            }
             //Calculate the spotseparation of the image, then remove it from m_imageContainer.
             cv::Point spotDist = imageprocessing::getSpotSeparation(img, this->m_seeingParams.pxWindowRadius);
             if (spotDist.x == 10000){
@@ -149,6 +153,22 @@ void SeeingGui::DIMM(){
     this->isProcessing.store(false, std::memory_order_release);
 }
 
+void SeeingGui::debugDIMM(cv::Mat image, int label){
+    cv::Mat img1, img2, croppedImg1, croppedImg2;
+    img1 = image(cv::Rect(0, 0, image.cols/2, image.rows)); //splits the original image in left and right halves. This assumes the spots are distributed this way, and not for example top-bottom.
+    img2 = image(cv::Rect(image.cols/2, 0, image.cols/2, image.rows));
+    imageprocessing::cropWindow(img1, croppedImg1, this->m_seeingParams.pxWindowRadius);
+    imageprocessing::cropWindow(img2, croppedImg2, this->m_seeingParams.pxWindowRadius);
+    cv::Point c1, c2;
+    c1 = imageprocessing::findCentroid(croppedImg1);
+    c2 = imageprocessing::findCentroid(croppedImg2);
+    cv::circle(croppedImg1,c1,5,cv::Scalar(128,0,0),-1); //creates circle on img following the centroid.
+    cv::circle(croppedImg2,c2,5,cv::Scalar(128,0,0),-1); //creates circle on img following the centroid.
+    cv::hconcat(croppedImg1, croppedImg2, croppedImg1);
+    if(!cv::imwrite( this->directoryPath.toStdString() + this->currentSubFolderName.toStdString()  + "/debug_img_" + std::to_string(label) + ".jpg", croppedImg1)){
+        emit newMessage("Failed to save debug image", true);
+    }
+}
 
 void SeeingGui::Gaussian(){
     unsigned int counter = 1;
@@ -192,6 +212,9 @@ void SeeingGui::Gaussian(){
                     emit newMessage("Failed to save image", true);
                 }
             }
+            if (this->debug){
+                this->debugGaussian(img, counter);
+            }
             //Calculate the spotseparation of the image, then remove it from m_imageContainer.
             tempParams = imageprocessing::getGaussianFitParams(img, this->m_seeingParams.pxWindowRadius);
             if (tempParams.intensitymax < 10){
@@ -219,6 +242,17 @@ void SeeingGui::Gaussian(){
     }
     emit newMessage("Finished seeing calculations");
     this->isProcessing.store(false, std::memory_order_release);
+}
+
+void SeeingGui::debugGaussian(cv::Mat image, int label){
+    cv::Mat gaussFitImg, croppedImg;
+    datacontainers::gaussianFitParams fitParams = imageprocessing::getGaussianFitParams(image, this->m_seeingParams.pxWindowRadius);
+    imageprocessing::cropWindow(image, croppedImg, this->m_seeingParams.pxWindowRadius);
+    imageprocessing::drawGaussian(gaussFitImg, fitParams);
+    cv::hconcat(croppedImg, gaussFitImg, croppedImg);
+    if(!cv::imwrite( this->directoryPath.toStdString() + this->currentSubFolderName.toStdString()  + "/debug_img_" + std::to_string(label) + ".jpg", croppedImg)){
+        emit newMessage("Failed to save debug image", true);
+    }
 }
 
 
@@ -286,6 +320,7 @@ double SeeingGui::getFriedFromSeeing(double SeeingParameter, double wavelength){
 void SeeingGui::setMeasurementSettings(){
     this->m_seeingParams.pxWindowRadius = this->m_seeingParams.pxAiryZeros[this->ui->SB_WindowingRadius->value()]; //this->ui->SB_WindowingRadius->value();
     this->storeImages = this->ui->CheckB_Yes->isChecked();
+    this->debug = this->ui->CheckB_Debug->isChecked();
     this->measurementType = this->ui->ComboB_MeasurementType->currentText();
     if(this->ui->LE_DirectoryPath->text().back() != "/"){   //corrects for a missing "/" at the end of the directory path in the user input
         this->directoryPath = this->ui->LE_DirectoryPath->text() + "/";

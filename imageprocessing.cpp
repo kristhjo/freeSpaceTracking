@@ -56,7 +56,7 @@ datacontainers::gaussianFitParams getGaussianFitParams(const cv::Mat &img, int w
   cropWindow(img, croppedImg, windowRadius = windowRadius);
   cv::Moments m = moments(croppedImg,true);
   datacontainers::gaussianFitParams params;
-  cv::Point center = findCentroid(croppedImg);
+  cv::Point center(m.m10/m.m00, m.m01/m.m00);
   params.intensitymax = croppedImg.at<uchar>(center);
   params.center_x = center.x;
   params.center_y = center.y;
@@ -65,6 +65,10 @@ datacontainers::gaussianFitParams getGaussianFitParams(const cv::Mat &img, int w
   params.sigma_cov = m.m11;
   params.numSaturatedPixels = cv::countNonZero(croppedImg == 255);
   return params;
+}
+
+void drawGaussian(cv::Mat &gaussImg, datacontainers::gaussianFitParams fitParams){
+    cv::Mat gauss;
 }
 
 }

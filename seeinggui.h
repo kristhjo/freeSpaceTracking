@@ -48,7 +48,9 @@ private:
 
     bool storeImages; ///< flags if the data from the DIMM measurement should be stored or thrown away.
     unsigned int sampleSize; ///< sets the number of images used as sample size for each data point.
-
+    bool debug;
+    void debugDIMM(cv::Mat image, int label);
+    void debugGaussian(cv::Mat image, int label);
     datacontainers::GaussSample m_GaussSample;
     datacontainers::DIMMsample m_DIMMsample; ///< Contains the spotseparations of a DIMM sample, as well as functions for calculating the average and variance of the sample.
     datacontainers::seeingValues m_seeingValues; ///< Container for fried and seeing values implemented with QCPGraphData Qvectors for ease of plotting and max, min, mean functions.
