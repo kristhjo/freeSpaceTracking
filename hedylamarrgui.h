@@ -47,20 +47,25 @@ private:
     void moveSouth();
     void moveWest();
     void moveEast();
-
+    void setCurrentOffset();
     double NSoffset;
     double EWoffset;
     double stepSize;
 
     //Format variables for the values in the gui display.
-    int positionPrecision = 6;
+    int positionPrecision = 4;
     char positionFormat = 'f';
     //Plot functions and variables
     void initPlot();
-    QVector<QCPGraphData> plotDataHTilt;
-    QVector<QCPGraphData> plotDataVTilt;
-    QVector<QCPGraphData> plotDataXDeviation;
-    QVector<QCPGraphData> plotDataYDeviation;
+    //QVector<QCPGraphData> plotDataHTilt;
+    //QVector<QCPGraphData> plotDataVTilt;
+    //QVector<QCPGraphData> plotDataXDeviation;
+    //QVector<QCPGraphData> plotDataYDeviation;
+
+    QVector<QCPGraphData> plotData_hTilt;
+    QVector<QCPGraphData> plotData_vTilt;
+    QVector<QCPGraphData> plotData_hPix;
+    QVector<QCPGraphData> plotData_vPix;
     double maxYRangePlot = 10.0; //
     int maxXRangePlot = 300; //5 min
 

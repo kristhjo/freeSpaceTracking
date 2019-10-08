@@ -32,6 +32,10 @@ TrackingGui::TrackingGui(QWidget *parent) :
     this->ui->SB_GainCam->setMinimum(1);
     this->ui->SB_GainCam->setMaximum(8);
 
+    this->ui->SB_FrameRate->setMinimum(1);
+    this->ui->SB_FrameRate->setMaximum(50);
+    this->ui->SB_FrameRate->setValue(10);
+
     this->ui->HS_Width->setMinimum(5);
     this->ui->HS_Width->setMaximum(511);
     this->ui->HS_Width->setValue(60);
@@ -88,6 +92,7 @@ TrackingGui::TrackingGui(QWidget *parent) :
     QObject::connect(this->ui->HS_ExposureCam, SIGNAL(valueChanged(int)),this->ui->SB_ExposureCam, SLOT(setValue(int)));
 
     QObject::connect(this->ui->SB_GainCam,QOverload<int>::of(&QSpinBox::valueChanged),this,&TrackingGui::SetGain,Qt::UniqueConnection);
+    QObject::connect(this->ui->SB_FrameRate,QOverload<int>::of(&QSpinBox::valueChanged),this,&TrackingGui::SetFrameRateSB,Qt::UniqueConnection);
 
     QObject::connect(this->ui->HS_Width,&QSlider::sliderMoved,this,&TrackingGui::SetWidth,Qt::UniqueConnection);
     QObject::connect(this->ui->SB_Width,QOverload<int>::of(&QSpinBox::valueChanged),this,&TrackingGui::SetWidthSB,Qt::UniqueConnection);
@@ -382,6 +387,15 @@ void TrackingGui::SetGain(){
         return;
     }
     this->pm_Camera->m_CamInfo.GainActual = this->ui->SB_GainCam->value();
+    this->pm_Camera->newCamParameter.store(true,std::memory_order_release);
+}
+
+void TrackingGui::SetFrameRateSB(){
+    if (!this->isCameraConnected){
+        this->ui->TE_LogCam->append("Camera is not connected \n");
+        return;
+    }
+    this->pm_Camera->m_CamInfo.FrameRate = this->ui->SB_FrameRate->value();
     this->pm_Camera->newCamParameter.store(true,std::memory_order_release);
 }
 
