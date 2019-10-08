@@ -145,6 +145,7 @@ struct CamInfo
         FrameWidth=2044;
         OffsetX=0;
         OffsetY=0;
+        frameRate=10.0;//Hz
     }
     std::string DeviceNr;
     double ExposureMax;
@@ -162,6 +163,7 @@ struct CamInfo
     int FrameWidth;
     int OffsetX;
     int OffsetY;
+    double frameRate;
     std::string BaumerID;
     std::string BaumerIQOQI = "devicemodul00_06_be_00_8f_92";
     std::string BaumerBisamberg = "devicemodul00_06_be_00_9d_56";
