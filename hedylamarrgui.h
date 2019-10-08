@@ -89,6 +89,7 @@ public slots:
     void updatePlot();
     void SetStepSize();
     void updateOffsetDisplay();
+    void moveToDisplayOffset();
 };
 
 

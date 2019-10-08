@@ -27,13 +27,10 @@
    <widget class="QLineEdit" name="LE_yCurrentCentroid">
     <property name="geometry">
      <rect>
-      <x>230</x>
-      <y>60</y>
-      <width>91</width>
       <x>240</x>
       <y>180</y>
       <width>71</width>
-      <height>25</height>
+      <height>21</height>
      </rect>
     </property>
    </widget>
@@ -66,15 +63,9 @@
    <widget class="QLineEdit" name="LE_xCurrentCentroid">
     <property name="geometry">
      <rect>
-<<<<<<< HEAD
-      <x>230</x>
-      <y>110</y>
-      <width>91</width>
-=======
       <x>240</x>
       <y>210</y>
       <width>71</width>
->>>>>>> 7303966e14dfc638ac57bd522457e4814bbc7968
       <height>25</height>
      </rect>
     </property>
@@ -96,13 +87,8 @@
     <property name="geometry">
      <rect>
       <x>80</x>
-<<<<<<< HEAD
-      <y>60</y>
-      <width>91</width>
-=======
       <y>180</y>
       <width>71</width>
->>>>>>> 7303966e14dfc638ac57bd522457e4814bbc7968
       <height>25</height>
      </rect>
     </property>
@@ -124,13 +110,8 @@
     <property name="geometry">
      <rect>
       <x>80</x>
-<<<<<<< HEAD
-      <y>110</y>
-      <width>91</width>
-=======
       <y>210</y>
       <width>71</width>
->>>>>>> 7303966e14dfc638ac57bd522457e4814bbc7968
       <height>25</height>
      </rect>
     </property>
@@ -398,6 +379,71 @@
     </property>
     <property name="text">
      <string>Set initial offset </string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="PB_goToOffset">
+    <property name="geometry">
+     <rect>
+      <x>620</x>
+      <y>20</y>
+      <width>131</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Go to offset</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_goToOffsetNS">
+    <property name="geometry">
+     <rect>
+      <x>760</x>
+      <y>20</y>
+      <width>31</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>N/S</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_goToOffsetEW">
+    <property name="geometry">
+     <rect>
+      <x>900</x>
+      <y>20</y>
+      <width>31</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>E/W</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="LE_goToOffsetEW">
+    <property name="geometry">
+     <rect>
+      <x>940</x>
+      <y>20</y>
+      <width>71</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>0.0</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="LE_goToOffsetNS">
+    <property name="geometry">
+     <rect>
+      <x>800</x>
+      <y>20</y>
+      <width>71</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>0.0</string>
     </property>
    </widget>
   </widget>

@@ -29,6 +29,7 @@ HedyLamarrGui::HedyLamarrGui(QWidget *parent) :
     QObject::connect(this, SIGNAL(newCommand(QString)), this, SLOT(sendCommand(QString)), Qt::AutoConnection);
     QObject::connect(this->ui->PB_setInitialOffset, &QPushButton::clicked, this, &HedyLamarrGui::setInitialOffset, Qt::UniqueConnection);
     QObject::connect(this, SIGNAL(newOffset()), this, SLOT(updateOffsetDisplay()), Qt::UniqueConnection);
+    QObject::connect(this->ui->PB_goToOffset, &QPushButton::clicked, this, &HedyLamarrGui::moveToDisplayOffset, Qt::UniqueConnection);
 }
 
 HedyLamarrGui::~HedyLamarrGui(){
@@ -135,9 +136,9 @@ void HedyLamarrGui::Stabilize(){
         this->NSoffset += newNS;
         this->EWoffset += newEW;
         std::cout << newEW << " " << newNS << std::endl;
-        QString NScommand = "$SOR,0000000056,94,2,41=51:164,164=48:" + QString::number(NSoffset, 'f', 6) + ",$EOM,$EOR";
+        QString NScommand = "$SOR,0000000056,94,2,41=51:164,164=48:" + QString::number(this->NSoffset, 'f', 6) + ",$EOM,$EOR";
         emit newCommand(NScommand);
-        QString EWcommand = "$SOR,0000000056,94,2,41=51:163,163=48:"+  QString::number(EWoffset, 'f', 6) + ",$EOM,$EOR";
+        QString EWcommand = "$SOR,0000000056,94,2,41=51:163,163=48:"+  QString::number(this->EWoffset, 'f', 6) + ",$EOM,$EOR";
         emit newCommand(EWcommand);
         QCPGraphData HTilt(time(nullptr), dHorizontal*this->HedyLamarrParams.pixFieldOfView);//this->HedyLamarrParams.pixToHedyLamarr/this->HedyLamarrParams.radToArcSec);
         QCPGraphData VTilt(time(nullptr), dVertical*this->HedyLamarrParams.pixFieldOfView);//*this->HedyLamarrParams.pixToHedyLamarr/this->HedyLamarrParams.radToArcSec);
@@ -273,8 +274,8 @@ void HedyLamarrGui::setCurrentOffset(){
 
 
 void HedyLamarrGui::updateOffsetDisplay(){
-    this->ui->LE_currentNSoffset->text() = QString::number(this->NSoffset);
-    this->ui->LE_currentEWoffset->text() = QString::number(this->EWoffset);
+    this->ui->LE_currentNSoffset->setText(QString::number(this->NSoffset));
+    this->ui->LE_currentEWoffset->setText(QString::number(this->EWoffset));
 }
 
 void HedyLamarrGui::setInitialOffset(){
@@ -300,6 +301,16 @@ void HedyLamarrGui::displayResponse(QString response){
     this->ui->TE_HedyResponse->append(response);
     this->ui->TE_HedyResponse->update();
 }
+
+void HedyLamarrGui::moveToDisplayOffset(){
+    this->NSoffset = this->ui->LE_goToOffsetNS->text().toDouble();
+    this->EWoffset = this->ui->LE_goToOffsetEW->text().toDouble();
+    QString NScommand = "$SOR,0000000056,94,2,41=51:164,164=48:" + QString::number(this->NSoffset, 'f', 6) + ",$EOM,$EOR";
+    emit newCommand(NScommand);
+    QString EWcommand = "$SOR,0000000056,94,2,41=51:163,163=48:"+  QString::number(this->EWoffset, 'f', 6) + ",$EOM,$EOR";
+    emit newCommand(EWcommand);
+}
+
 void HedyLamarrGui::initPlot(){
     //set the time format of the x-axis.
     QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime);
