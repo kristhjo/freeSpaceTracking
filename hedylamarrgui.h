@@ -32,7 +32,7 @@ public:
     void disconnectFromHedyLamarr(std::stringstream &ss);
     std::shared_ptr<datacontainers::CentroidStabilization> centroidContainer = nullptr;
 
-    double updateRate; //Set to 1 sec, independent of camera exposure time
+    //double updateRate; //Set to 1 sec, independent of camera exposure time
 private:
     Ui::HedyLamarrGui *ui;
     QTcpSocket hedylamarr_socket;
@@ -41,6 +41,7 @@ private:
     std::atomic<bool> stabilize;
     std::atomic<bool> isStabMoving;
 
+    int updateRate = 2; //seconds
     datacontainers::HedyLamarrInfo HedyLamarrParams;
     void Stabilize(); ///<
     void moveNorth();

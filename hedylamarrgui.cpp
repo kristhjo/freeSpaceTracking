@@ -102,7 +102,7 @@ void HedyLamarrGui::Stabilize(){
     double maxPixMovPerUpdate = 5;
     while(this->stabilize.load(std::memory_order_acquire)){
 
-        std::this_thread::sleep_for(std::chrono::seconds(static_cast<int>(3))); //WAITS FOR NEW CENTROID MEASUREMENTS.
+        std::this_thread::sleep_for(std::chrono::seconds(this->updateRate)); //WAITS FOR NEW CENTROID MEASUREMENTS.
         this->centroidContainer->updateMeanCentroid();
         this->centroidContainer->emptyHistroy();
         emit newCentroid();
@@ -250,6 +250,8 @@ void HedyLamarrGui::setCurrentOffset(){
     }
     QString NScommand = "$SOR,0000000040,93,1,41=51:164,$EOM,$EOR";
     this->hedylamarr_socket.write(NScommand.toUtf8());
+    std::this_thread::sleep_for(std::chrono::seconds(this->updateRate));
+
     QString NSresponse = QTextCodec::codecForMib(106)->toUnicode(this->hedylamarr_socket.readAll());
     std::cout << NSresponse.toStdString() <<std::endl;
     this->displayResponse(NSresponse);

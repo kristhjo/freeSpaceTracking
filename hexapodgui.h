@@ -79,10 +79,10 @@ private:
     void initPlot();
     QVector<double> horizontalTilts;
     QVector<double> verticalTilts;
-    QVector<QCPGraphData> plotData_hTilt;
-    QVector<QCPGraphData> plotData_vTilt;
     QVector<double> xCentroids;
     QVector<double> yCentroids;
+    QVector<QCPGraphData> plotData_hTilt;
+    QVector<QCPGraphData> plotData_vTilt;
     QVector<QCPGraphData> plotData_hPix;
     QVector<QCPGraphData> plotData_vPix;
 
