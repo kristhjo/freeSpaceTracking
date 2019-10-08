@@ -486,14 +486,14 @@ void HexapodGui::initPlot(){
     this->ui->StabilizationPlot->addGraph(this->ui->StabilizationPlot->xAxis2, this->ui->StabilizationPlot->yAxis2);
     pixelPen.setColor(Qt::red);
     this->ui->StabilizationPlot->graph(2)->setPen(pixelPen);
-    this->ui->StabilizationPlot->graph(2)->setBrush(QBrush(Qt::red));
+    //this->ui->StabilizationPlot->graph(2)->setBrush(QBrush(Qt::red));
     this->ui->StabilizationPlot->graph(2)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssSquare, 5));
     this->ui->StabilizationPlot->graph(2)->setName(QString("Vertical pixel offset"));
 
     this->ui->StabilizationPlot->addGraph(this->ui->StabilizationPlot->xAxis2, this->ui->StabilizationPlot->yAxis2);
     pixelPen.setColor(Qt::blue);
     this->ui->StabilizationPlot->graph(2)->setPen(pixelPen);
-    this->ui->StabilizationPlot->graph(3)->setBrush(QBrush(Qt::blue));
+    //this->ui->StabilizationPlot->graph(3)->setBrush(QBrush(Qt::blue));
     this->ui->StabilizationPlot->graph(3)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssSquare, 5));
     this->ui->StabilizationPlot->graph(3)->setName(QString("Horizontal pixel offset"));
 
@@ -532,10 +532,10 @@ void HexapodGui::updatePlot(){
     this->plotData_vPix.push_back(dataPoint);
 
     if (this->plotData_hTilt.size() > this->xAxisLimit){
-        this->plotData_hTilt.erase(this->plotData_hTilt.begin());
-        this->plotData_vTilt.erase(this->plotData_vTilt.begin());
-        this->plotData_hPix.erase(this->plotData_hPix.begin());
-        this->plotData_vPix.erase(this->plotData_vPix.begin());
+        this->plotData_hTilt.pop_front();
+        this->plotData_vTilt.pop_front();
+        this->plotData_hPix.pop_front();
+        this->plotData_vPix.pop_front();
     }
 
 

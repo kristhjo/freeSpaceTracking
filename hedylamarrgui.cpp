@@ -27,6 +27,8 @@ HedyLamarrGui::HedyLamarrGui(QWidget *parent) :
     QObject::connect(this->ui->PB_East, &QPushButton::clicked,this,&HedyLamarrGui::moveEast,Qt::UniqueConnection);
     QObject::connect(this->ui->SB_stepSize, QOverload<int>::of(&QSpinBox::valueChanged),this,&HedyLamarrGui::SetStepSize);
     QObject::connect(this, SIGNAL(newCommand(QString)), this, SLOT(sendCommand(QString)), Qt::AutoConnection);
+    QObject::connect(this->ui->PB_setInitialOffset, &QPushButton::clicked, this, &HedyLamarrGui::setInitialOffset, Qt::UniqueConnection);
+    QObject::connect(this, SIGNAL(newOffset()), this, SLOT(updateOffsetDisplay()), Qt::UniqueConnection);
 }
 
 HedyLamarrGui::~HedyLamarrGui(){
@@ -50,7 +52,7 @@ void HedyLamarrGui::connectToHedyLamarr(std::stringstream &ss){
         ss << "connection to hedy lamarr failed \n";
         this->isHedyLamarrConnected->store(false, std::memory_order_release);
     }
-    this->setCurrentOffset();
+    //this->setCurrentOffset();
 }
 void HedyLamarrGui::disconnectFromHedyLamarr(std::stringstream &ss){
     this->hedylamarr_socket.disconnectFromHost();
@@ -147,6 +149,7 @@ void HedyLamarrGui::Stabilize(){
         this->plotData_hPix.push_back(XDev);
         this->plotData_vPix.push_back(YDev);
         emit updateStabilizationPlot();
+        emit newOffset();
     }
     this->stabilizationInProcess.store(false, std::memory_order_release);
 }
@@ -173,13 +176,14 @@ void HedyLamarrGui::stopStabilization(std::stringstream &ss){
 
 void HedyLamarrGui::moveNorth(){
     if(!this->isHedyLamarrStabilizing->load(std::memory_order_acquire)){
-        if (this->hedylamarr_socket.state() == QAbstractSocket::UnconnectedState){
-            this->hedylamarr_socket.connectToHost(QHostAddress("127.0.0.1"),2400);
-        }
+       // if (this->hedylamarr_socket.state() == QAbstractSocket::UnconnectedState){
+      //      this->hedylamarr_socket.connectToHost(QHostAddress("127.0.0.1"),2400);
+       // }
         this->NSoffset += this->ui->SB_stepSize->value();
         QString command = "$SOR,0000000056,94,2,41=51:164,164=48:" + QString::number(NSoffset, 'f', 6) + ",$EOM,$EOR";
-        this->hedylamarr_socket.write(command.toUtf8());
-        this->displayResponse(QTextCodec::codecForMib(106)->toUnicode(this->hedylamarr_socket.readAll()));
+        emit newCommand(command);
+        //this->hedylamarr_socket.write(command.toUtf8());
+        //this->displayResponse(QTextCodec::codecForMib(106)->toUnicode(this->hedylamarr_socket.readAll()));
     }
     else{
         this->displayMessage("Can't use manual commands while stabilizing");
@@ -188,13 +192,14 @@ void HedyLamarrGui::moveNorth(){
 
 void HedyLamarrGui::moveSouth(){
     if(!this->isHedyLamarrStabilizing->load(std::memory_order_acquire)){
-        if (this->hedylamarr_socket.state() == QAbstractSocket::UnconnectedState){
-            this->hedylamarr_socket.connectToHost(QHostAddress("127.0.0.1"),2400);
-        }
+        //if (this->hedylamarr_socket.state() == QAbstractSocket::UnconnectedState){
+       //     this->hedylamarr_socket.connectToHost(QHostAddress("127.0.0.1"),2400);
+       // }
         this->NSoffset -= this->ui->SB_stepSize->value();
         QString command = "$SOR,0000000056,94,2,41=51:164,164=48:"+ QString::number(NSoffset, 'f', 6) + ",$EOM,$EOR";
-        this->hedylamarr_socket.write(command.toUtf8());
-         this->displayResponse(QTextCodec::codecForMib(106)->toUnicode(this->hedylamarr_socket.readAll()));
+        emit newCommand(command);
+        //this->hedylamarr_socket.write(command.toUtf8());
+        // this->displayResponse(QTextCodec::codecForMib(106)->toUnicode(this->hedylamarr_socket.readAll()));
     }
     else{
         this->displayMessage("Can't use manual commands while stabilizing");
@@ -204,13 +209,14 @@ void HedyLamarrGui::moveSouth(){
 
 void HedyLamarrGui::moveWest(){
     if(!this->isHedyLamarrStabilizing->load(std::memory_order_acquire)){
-        if (this->hedylamarr_socket.state() == QAbstractSocket::UnconnectedState){
-            this->hedylamarr_socket.connectToHost(QHostAddress("127.0.0.1"),2400);
-        }
+       // if (this->hedylamarr_socket.state() == QAbstractSocket::UnconnectedState){
+       //     this->hedylamarr_socket.connectToHost(QHostAddress("127.0.0.1"),2400);
+       // }
         this->EWoffset += this->ui->SB_stepSize->value();
         QString command = "$SOR,0000000056,94,2,41=51:163,163=48:"+  QString::number(EWoffset, 'f', 6)  + ",$EOM,$EOR";
-        this->hedylamarr_socket.write(command.toUtf8());
-        this->displayResponse(QTextCodec::codecForMib(106)->toUnicode(this->hedylamarr_socket.readAll()));
+        emit newCommand(command);
+        //this->hedylamarr_socket.write(command.toUtf8());
+        //this->displayResponse(QTextCodec::codecForMib(106)->toUnicode(this->hedylamarr_socket.readAll()));
     }
     else{
         this->displayMessage("Can't use manual commands while stabilizing");
@@ -219,13 +225,14 @@ void HedyLamarrGui::moveWest(){
 
 void HedyLamarrGui::moveEast(){
     if(!this->isHedyLamarrStabilizing->load(std::memory_order_acquire)){
-        if (this->hedylamarr_socket.state() == QAbstractSocket::UnconnectedState){
-            this->hedylamarr_socket.connectToHost(QHostAddress("127.0.0.1"),2400);
-        }
+        //if (this->hedylamarr_socket.state() == QAbstractSocket::UnconnectedState){
+       //     this->hedylamarr_socket.connectToHost(QHostAddress("127.0.0.1"),2400);
+       // }
         this->EWoffset -= this->ui->SB_stepSize->value();
         QString command = "$SOR,0000000056,94,2,41=51:163,163=48:"+  QString::number(EWoffset, 'f', 6) + ",$EOM,$EOR";
-        this->hedylamarr_socket.write(command.toUtf8());
-        this->displayResponse(QTextCodec::codecForMib(106)->toUnicode(this->hedylamarr_socket.readAll()));
+        emit newCommand(command);
+        //this->hedylamarr_socket.write(command.toUtf8());
+        //this->displayResponse(QTextCodec::codecForMib(106)->toUnicode(this->hedylamarr_socket.readAll()));
     }
     else{
         this->displayMessage("Can't use manual commands while stabilizing");
@@ -242,8 +249,9 @@ void HedyLamarrGui::sendCommand(QString command){
     }
     this->hedylamarr_socket.write(command.toUtf8());
     this->displayResponse(QTextCodec::codecForMib(106)->toUnicode(this->hedylamarr_socket.readAll()));
+    emit newOffset();
 }
-
+/*
 void HedyLamarrGui::setCurrentOffset(){
     if (this->hedylamarr_socket.state() == QAbstractSocket::UnconnectedState){
         this->hedylamarr_socket.connectToHost(QHostAddress("127.0.0.1"),2400);
@@ -259,6 +267,19 @@ void HedyLamarrGui::setCurrentOffset(){
     std::cout << EWresponse.mid(38,8).toDouble() <<std::endl;
     this->displayResponse(EWresponse);
 }
+*/
+
+
+void HedyLamarrGui::updateOffsetDisplay(){
+    this->ui->LE_currentNSoffset->text() = QString::number(this->NSoffset);
+    this->ui->LE_currentEWoffset->text() = QString::number(this->EWoffset);
+}
+
+void HedyLamarrGui::setInitialOffset(){
+    this->NSoffset = this->ui->LE_initialNSoffset->text().toDouble();
+    this->EWoffset = this->ui->LE_initialEWoffset->text().toDouble();
+    emit newOffset();
+}
 
 void HedyLamarrGui::displayMessage(QString message, bool error){
      this->ui->TE_LogHedyLamarr->append(message);
@@ -269,9 +290,10 @@ void HedyLamarrGui::displayMessage(QString message, bool error){
 }
 
 void HedyLamarrGui::updateDisplay(){
-    this->ui->LE_xLastCentroid->setText(QString::number(this->centroidContainer->meanCentroidX, this->positionFormat, this->positionPrecision));
-    this->ui->LE_yLastCentroid->setText(QString::number(this->centroidContainer->meanCentroidX, this->positionFormat, this->positionPrecision));
+    this->ui->LE_xCurrentCentroid->setText(QString::number(this->centroidContainer->meanCentroidX, this->positionFormat, this->positionPrecision));
+    this->ui->LE_yCurrentCentroid->setText(QString::number(this->centroidContainer->meanCentroidX, this->positionFormat, this->positionPrecision));
 }
+
 void HedyLamarrGui::displayResponse(QString response){
     this->ui->TE_HedyResponse->append(response);
     this->ui->TE_HedyResponse->update();

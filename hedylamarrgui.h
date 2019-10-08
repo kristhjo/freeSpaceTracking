@@ -48,6 +48,7 @@ private:
     void moveWest();
     void moveEast();
     void setCurrentOffset();
+    void setInitialOffset();
     double NSoffset;
     double EWoffset;
     double stepSize;
@@ -70,12 +71,15 @@ private:
     int maxXRangePlot = 300; //5 min
 
     QString folderName;
+
     std::fstream stabilizationDataStream;
 signals:
     void newCommand(QString command);
     void newCentroid();
     void newMessage(QString message, bool error = false);
     void updateStabilizationPlot();
+    void newOffset();
+
 public slots:
     void sendCommand(QString command);
     void displayMessage(QString message, bool error = false);
@@ -83,6 +87,7 @@ public slots:
     void updateDisplay();
     void updatePlot();
     void SetStepSize();
+    void updateOffsetDisplay();
 };
 
 
