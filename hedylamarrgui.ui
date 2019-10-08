@@ -24,7 +24,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="QLineEdit" name="LE_yCurrentCentroid">
+   <widget class="QLineEdit" name="LE_xCurrentCentroid">
     <property name="geometry">
      <rect>
       <x>240</x>
@@ -60,7 +60,7 @@
      <string>Y</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="LE_xCurrentCentroid">
+   <widget class="QLineEdit" name="LE_yCurrentCentroid">
     <property name="geometry">
      <rect>
       <x>240</x>

@@ -102,7 +102,7 @@ void HedyLamarrGui::startStabilization(std::stringstream &ss){
 
 void HedyLamarrGui::Stabilize(){
     this->stabilizationInProcess.store(true, std::memory_order_release);
-    double maxPixMovPerUpdate = 5;
+    double maxPixMovPerUpdate = 10;
     while(this->stabilize.load(std::memory_order_acquire)){
 
         std::this_thread::sleep_for(std::chrono::seconds(this->updateRate)); //WAITS FOR NEW CENTROID MEASUREMENTS.
@@ -115,33 +115,39 @@ void HedyLamarrGui::Stabilize(){
         double newNS = 0.0;
         double newEW = 0.0;
 
-        if (abs(dHorizontal) < maxPixMovPerUpdate){
-            newNS = dVertical*this->HedyLamarrParams.pixToHedyLamarr;
+        //if (abs(dVertical) < maxPixMovPerUpdate){
+        newNS = dVertical*this->HedyLamarrParams.pixToHedyLamarr;
+        //}
+        //else if (dVertical > maxPixMovPerUpdate){//If deviation is larger than the distance the hexapod can move in between centroid updates, move maxMovPerUpdate instead.
+        //    newNS = maxPixMovPerUpdate*this->HedyLamarrParams.pixToHedyLamarr;
+        //}
+        //else if (dVertical < -maxPixMovPerUpdate){
+        //    newNS = -maxPixMovPerUpdate*this->HedyLamarrParams.pixToHedyLamarr;
+        //}
+        //if (abs(dHorizontal) < maxPixMovPerUpdate){
+        newEW = dHorizontal*this->HedyLamarrParams.pixToHedyLamarr;
+        //}
+        //else if (dHorizontal > maxPixMovPerUpdate){//If deviation is larger than the distance the hexapod can move in between centroid updates, move maxMovPerUpdate instead.
+        //    newEW = maxPixMovPerUpdate*this->HedyLamarrParams.pixToHedyLamarr;
+        //}
+        //else if (dHorizontal < -maxPixMovPerUpdate){
+        //    newEW = -maxPixMovPerUpdate*this->HedyLamarrParams.pixToHedyLamarr;
+        //}
+        if (abs(dVertical) > maxPixMovPerUpdate){
+            newNS = 0;
         }
-        else if (dHorizontal > maxPixMovPerUpdate){//If deviation is larger than the distance the hexapod can move in between centroid updates, move maxMovPerUpdate instead.
-            newNS = maxPixMovPerUpdate*this->HedyLamarrParams.pixToHedyLamarr;
+        if (abs(dHorizontal) > maxPixMovPerUpdate){
+            newEW = 0;
         }
-        else if (dHorizontal < -maxPixMovPerUpdate){
-            newNS = -maxPixMovPerUpdate*this->HedyLamarrParams.pixToHedyLamarr;
-        }
-        if (abs(dVertical) < maxPixMovPerUpdate){
-            newEW = dVertical*this->HedyLamarrParams.pixToHedyLamarr;
-        }
-        else if (dVertical > maxPixMovPerUpdate){//If deviation is larger than the distance the hexapod can move in between centroid updates, move maxMovPerUpdate instead.
-            newEW = maxPixMovPerUpdate*this->HedyLamarrParams.pixToHedyLamarr;
-        }
-        else if (dVertical < -maxPixMovPerUpdate){
-            newEW = -maxPixMovPerUpdate*this->HedyLamarrParams.pixToHedyLamarr;
-        }
-        this->NSoffset += newNS;
-        this->EWoffset += newEW;
+        this->NSoffset -= newNS*0.2;
+        this->EWoffset -= newEW*0.2;
         std::cout << newEW << " " << newNS << std::endl;
         QString NScommand = "$SOR,0000000056,94,2,41=51:164,164=48:" + QString::number(this->NSoffset, 'f', 6) + ",$EOM,$EOR";
         emit newCommand(NScommand);
         QString EWcommand = "$SOR,0000000056,94,2,41=51:163,163=48:"+  QString::number(this->EWoffset, 'f', 6) + ",$EOM,$EOR";
         emit newCommand(EWcommand);
-        QCPGraphData HTilt(time(nullptr), dHorizontal*this->HedyLamarrParams.pixFieldOfView);//this->HedyLamarrParams.pixToHedyLamarr/this->HedyLamarrParams.radToArcSec);
-        QCPGraphData VTilt(time(nullptr), dVertical*this->HedyLamarrParams.pixFieldOfView);//*this->HedyLamarrParams.pixToHedyLamarr/this->HedyLamarrParams.radToArcSec);
+        QCPGraphData HTilt(time(nullptr), dHorizontal*this->HedyLamarrParams.pixFieldOfView*1e6);//this->HedyLamarrParams.pixToHedyLamarr/this->HedyLamarrParams.radToArcSec);
+        QCPGraphData VTilt(time(nullptr), dVertical*this->HedyLamarrParams.pixFieldOfView*1e6);//*this->HedyLamarrParams.pixToHedyLamarr/this->HedyLamarrParams.radToArcSec);
         QCPGraphData XDev(time(nullptr), dHorizontal);
         QCPGraphData YDev(time(nullptr), dVertical);
 
@@ -294,7 +300,7 @@ void HedyLamarrGui::displayMessage(QString message, bool error){
 
 void HedyLamarrGui::updateDisplay(){
     this->ui->LE_xCurrentCentroid->setText(QString::number(this->centroidContainer->meanCentroidX, this->positionFormat, this->positionPrecision));
-    this->ui->LE_yCurrentCentroid->setText(QString::number(this->centroidContainer->meanCentroidX, this->positionFormat, this->positionPrecision));
+    this->ui->LE_yCurrentCentroid->setText(QString::number(this->centroidContainer->meanCentroidY, this->positionFormat, this->positionPrecision));
 }
 
 void HedyLamarrGui::displayResponse(QString response){
@@ -318,6 +324,8 @@ void HedyLamarrGui::initPlot(){
     //clear plot if necessary
     //this->ui->StabilizationPlot->plotLayout()->clear();
     this->ui->StabilizationPlot->clearGraphs();
+    //this->ui->StabilizationPlot->plotLayout()->remove(this->ui->StabilizationPlot->plotLayout()->element(0,0));
+    //this->ui->StabilizationPlot->plotLayout()->simplify();
     this->plotData_hTilt.clear();
     this->plotData_vTilt.clear();
     this->plotData_hPix.clear();
@@ -339,7 +347,7 @@ void HedyLamarrGui::initPlot(){
 
     this->ui->StabilizationPlot->addGraph(this->ui->StabilizationPlot->xAxis, this->ui->StabilizationPlot->yAxis);
     tiltPen.setColor(Qt::red);
-    this->ui->StabilizationPlot->graph(0)->setPen(tiltPen);
+    this->ui->StabilizationPlot->graph(1)->setPen(tiltPen);
     this->ui->StabilizationPlot->graph(1)->setName(QString("Vertical tilt"));
 
     this->ui->StabilizationPlot->addGraph(this->ui->StabilizationPlot->xAxis2, this->ui->StabilizationPlot->yAxis2);
@@ -351,7 +359,7 @@ void HedyLamarrGui::initPlot(){
 
     this->ui->StabilizationPlot->addGraph(this->ui->StabilizationPlot->xAxis2, this->ui->StabilizationPlot->yAxis2);
     pixelPen.setColor(Qt::blue);
-    this->ui->StabilizationPlot->graph(2)->setPen(pixelPen);
+    this->ui->StabilizationPlot->graph(3)->setPen(pixelPen);
     //this->ui->StabilizationPlot->graph(3)->setBrush(QBrush(Qt::blue));
     this->ui->StabilizationPlot->graph(3)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssSquare, 5));
     this->ui->StabilizationPlot->graph(3)->setName(QString("Horizontal pixel offset"));

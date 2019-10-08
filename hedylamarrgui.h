@@ -41,7 +41,7 @@ private:
     std::atomic<bool> stabilize;
     std::atomic<bool> isStabMoving;
 
-    int updateRate = 2; //seconds
+    int updateRate = 5; //seconds
     datacontainers::HedyLamarrInfo HedyLamarrParams;
     void Stabilize(); ///<
     void moveNorth();

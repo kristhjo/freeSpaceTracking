@@ -530,6 +530,7 @@ void TrackingGui::StartCamera(){
     this->pm_Camera->m_CamInfo.FrameHeight = this->ui->HS_Height->value()*2;
     this->pm_Camera->m_CamInfo.FrameWidth = this->ui->HS_Width->value()*4;
     this->pm_Camera->m_CamInfo.ExposureActual= this->ui->HS_ExposureCam->value();
+    this->pm_Camera->m_CamInfo.FrameRate = this->ui->SB_FrameRate->value();
     //
     this->pm_Camera->Start(ss);
     this->ui->TE_LogCam->append(QString::fromStdString(ss.str()));
