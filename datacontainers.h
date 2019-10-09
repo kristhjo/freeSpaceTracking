@@ -192,6 +192,7 @@ struct seeingParameters
          }
     }
     double exposureTime;
+    double frameRate;
     receiverOpticsInfo receiverOptics;
     //meters
     double maskApertureDiameter = 0.026; //DIMM mask

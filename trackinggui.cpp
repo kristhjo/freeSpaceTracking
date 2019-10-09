@@ -162,6 +162,7 @@ void TrackingGui::ConfigureSeeing(){
     this->pm_seeing->m_imageContainer = this->m_imageContainer;
     this->pm_seeing->isMeasuringSeeing = &this->isMeasuringSeeing;
     this->pm_seeing->m_seeingParams.exposureTime = this->pm_Camera->m_CamInfo.ExposureActual;
+    this->pm_seeing->m_seeingParams.frameRate = this->pm_Camera->m_CamInfo.FrameRate;
     this->pm_seeing->show();
 }
 

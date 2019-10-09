@@ -347,7 +347,7 @@ void SeeingGui::displayMessage(QString message, bool error){
 }
 
 void SeeingGui::setSecPerDataPoint(){
-    this->ui->LE_SecPerDataPoint->setText(QString::number(this->ui->LE_SampleSize->text().toInt()*this->m_seeingParams.exposureTime*0.000001, this->displayFormat, 2));
+    this->ui->LE_SecPerDataPoint->setText(QString::number(this->ui->LE_SampleSize->text().toInt()/this->m_seeingParams.frameRate, this->displayFormat, 2));
 }
 void SeeingGui::replotSeeing(){
 
@@ -361,23 +361,23 @@ void SeeingGui::replotSeeing(){
     dataPoint.value = getSeeingFromFried(this->m_seeingValues.fried.last(), this->m_seeingParams.wavelength)*1e6;
     this->m_seeingValues.seeingData.push_back(dataPoint);
 
-    this->ui->FriedPlot->yAxis->setRange(0, this->m_seeingValues.maxFried()*1.5);
+    this->ui->FriedPlot->yAxis->setRange(0, this->m_seeingValues.maxFried()*1e2*1.5);
     this->ui->FriedPlot->rescaleAxes();
-    this->ui->FriedPlot->graph(0)->data()->set(this->m_seeingValues.friedData_y);
-    this->ui->FriedPlot->graph(1)->data()->set(this->m_seeingValues.friedData_x);
+    this->ui->FriedPlot->graph(0)->data()->set(this->m_seeingValues.friedData);
+    //this->ui->FriedPlot->graph(1)->data()->set(this->m_seeingValues.friedData_x);
 
     this->m_seeingValues.avgFriedPlot.clear();
-    QCPGraphData dataPoint2(this->m_seeingValues.timestamps.first(), this->m_seeingValues.meanFried());
+    QCPGraphData dataPoint2(this->m_seeingValues.timestamps.first(), this->m_seeingValues.meanFried()*1e2);
     this->m_seeingValues.avgFriedPlot.push_back(dataPoint2);
     dataPoint2.key = this->m_seeingValues.timestamps.last();
     this->m_seeingValues.avgFriedPlot.push_back(dataPoint2);
-    this->ui->FriedPlot->graph(2)->data()->set(this->m_seeingValues.avgFriedPlot);
+    this->ui->FriedPlot->graph(1)->data()->set(this->m_seeingValues.avgFriedPlot);
     this->avgFriedLabel->setText("Average Fried parameter: " + QString::number(dataPoint2.value, this->displayFormat, this->displayPrecision));
 
     this->ui->FriedPlot->replot();
     this->ui->FriedPlot->savePdf(this->directoryPath + "FriedPlot.pdf" );
 
-    this->ui->SeeingPlot->yAxis->setRange(0, this->m_seeingValues.maxSeeing()*1.5);
+    this->ui->SeeingPlot->yAxis->setRange(0, this->m_seeingValues.maxSeeing()*1e6*1.5);
     this->ui->SeeingPlot->rescaleAxes();
     this->ui->SeeingPlot->graph(0)->data()->set(this->m_seeingValues.seeingData);
 
@@ -415,7 +415,7 @@ void SeeingGui::initPlots(){
 
     dateTicker->setDateTimeFormat("hh:mm:ss");
     QFont titleFont =  QFont("sans", 12, QFont::Bold);
-    QFont legendFont =  QFont("sans", 8, QFont::Bold);
+    QFont legendFont =  QFont("sans", 12, QFont::Bold);
     QFont axisFont = QFont("sans", 12, QFont::Bold);
     QPen xPen;
     QPen yPen;
@@ -427,28 +427,25 @@ void SeeingGui::initPlots(){
     yPen.setColor(Qt::red);
 
     this->ui->FriedPlot->addGraph();
-    this->ui->FriedPlot->graph(0)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
-    this->ui->FriedPlot->graph(0)->setPen(xPen);
     this->ui->FriedPlot->graph(0)->setLineStyle(QCPGraph::lsNone);
-    this->ui->FriedPlot->graph(0)->setBrush(QBrush(Qt::blue));
-    this->ui->FriedPlot->graph(0)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssSquare, 5));
-    this->ui->FriedPlot->graph(0)->setName(QString("Horizontal Fried parameter"));
+    this->ui->FriedPlot->graph(0)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssSquare, QPen(Qt::black, 1.5), QBrush(Qt::blue), 5));
+    this->ui->FriedPlot->graph(0)->setName(QString("Fried parameter"));
+
+    //this->ui->FriedPlot->addGraph();
+    //this->ui->FriedPlot->graph(1)->setLineStyle(QCPGraph::lsNone);
+   // this->ui->FriedPlot->graph(1)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssSquare, QPen(Qt::black, 1.5), QBrush(Qt::red), 5));
+   // this->ui->FriedPlot->graph(1)->setName(QString("Vertical Fried parameter"));
 
     this->ui->FriedPlot->addGraph();
     this->ui->FriedPlot->graph(1)->setPen(yPen);
-    this->ui->FriedPlot->graph(1)->setBrush(QBrush(Qt::red));
-    this->ui->FriedPlot->graph(1)->setLineStyle(QCPGraph::lsNone);
-    this->ui->FriedPlot->graph(1)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssSquare, 5));
-    this->ui->FriedPlot->graph(1)->setName(QString("Vertical Fried parameter"));
-
-    this->ui->FriedPlot->addGraph();
-    this->ui->FriedPlot->graph(2)->setPen(yPen);
+    if (this->ui->FriedPlot->legend->hasElement(3, 0)){ // if top cell isn't empty, insert an empty row at top
+        this->ui->FriedPlot->legend->insertRow(3);
+    }
+    this->avgFriedLabel = new QCPTextElement(this->ui->FriedPlot);
     this->avgFriedLabel->setText("Average Fried parameter: ");
     this->avgFriedLabel->setFont(legendFont);
-    if (this->ui->FriedPlot->legend->hasElement(3, 0)) // if top cell isn't empty, insert an empty row at top
-        this->ui->FriedPlot->legend->insertRow(3);
-    this->ui->FriedPlot->legend->addElement(3,0, this->avgFriedLabel);
 
+    this->ui->FriedPlot->legend->addElement(3,0, this->avgFriedLabel);
 
     this->ui->FriedPlot->xAxis->setLabel("");
     this->ui->FriedPlot->xAxis->setTicker(dateTicker);
@@ -465,11 +462,8 @@ void SeeingGui::initPlots(){
     this->ui->FriedPlot->replot();
 
     this->ui->SeeingPlot->addGraph();
-    this->ui->SeeingPlot->graph(0)->setPen(QPen(QColor(255, 110, 40)));
-    this->ui->SeeingPlot->graph(0)->setBrush(QBrush(Qt::green));
     this->ui->SeeingPlot->graph(0)->setLineStyle(QCPGraph::lsNone);
-    this->ui->SeeingPlot->graph(0)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssSquare, 5));
-
+    this->ui->SeeingPlot->graph(0)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssSquare, QPen(Qt::black, 1.5), QBrush(Qt::green),5));
 
     this->ui->SeeingPlot->xAxis->setLabel("");
     this->ui->SeeingPlot->xAxis->setTicker(dateTicker);

@@ -115,24 +115,9 @@ void HedyLamarrGui::Stabilize(){
         double newNS = 0.0;
         double newEW = 0.0;
 
-        //if (abs(dVertical) < maxPixMovPerUpdate){
         newNS = dVertical*this->HedyLamarrParams.pixToHedyLamarr;
-        //}
-        //else if (dVertical > maxPixMovPerUpdate){//If deviation is larger than the distance the hexapod can move in between centroid updates, move maxMovPerUpdate instead.
-        //    newNS = maxPixMovPerUpdate*this->HedyLamarrParams.pixToHedyLamarr;
-        //}
-        //else if (dVertical < -maxPixMovPerUpdate){
-        //    newNS = -maxPixMovPerUpdate*this->HedyLamarrParams.pixToHedyLamarr;
-        //}
-        //if (abs(dHorizontal) < maxPixMovPerUpdate){
         newEW = dHorizontal*this->HedyLamarrParams.pixToHedyLamarr;
-        //}
-        //else if (dHorizontal > maxPixMovPerUpdate){//If deviation is larger than the distance the hexapod can move in between centroid updates, move maxMovPerUpdate instead.
-        //    newEW = maxPixMovPerUpdate*this->HedyLamarrParams.pixToHedyLamarr;
-        //}
-        //else if (dHorizontal < -maxPixMovPerUpdate){
-        //    newEW = -maxPixMovPerUpdate*this->HedyLamarrParams.pixToHedyLamarr;
-        //}
+
         if (abs(dVertical) > maxPixMovPerUpdate){
             newNS = 0;
         }
@@ -183,14 +168,9 @@ void HedyLamarrGui::stopStabilization(std::stringstream &ss){
 
 void HedyLamarrGui::moveNorth(){
     if(!this->isHedyLamarrStabilizing->load(std::memory_order_acquire)){
-       // if (this->hedylamarr_socket.state() == QAbstractSocket::UnconnectedState){
-      //      this->hedylamarr_socket.connectToHost(QHostAddress("127.0.0.1"),2400);
-       // }
         this->NSoffset += this->ui->SB_stepSize->value();
         QString command = "$SOR,0000000056,94,2,41=51:164,164=48:" + QString::number(NSoffset, 'f', 6) + ",$EOM,$EOR";
         emit newCommand(command);
-        //this->hedylamarr_socket.write(command.toUtf8());
-        //this->displayResponse(QTextCodec::codecForMib(106)->toUnicode(this->hedylamarr_socket.readAll()));
     }
     else{
         this->displayMessage("Can't use manual commands while stabilizing");
@@ -199,14 +179,9 @@ void HedyLamarrGui::moveNorth(){
 
 void HedyLamarrGui::moveSouth(){
     if(!this->isHedyLamarrStabilizing->load(std::memory_order_acquire)){
-        //if (this->hedylamarr_socket.state() == QAbstractSocket::UnconnectedState){
-       //     this->hedylamarr_socket.connectToHost(QHostAddress("127.0.0.1"),2400);
-       // }
         this->NSoffset -= this->ui->SB_stepSize->value();
         QString command = "$SOR,0000000056,94,2,41=51:164,164=48:"+ QString::number(NSoffset, 'f', 6) + ",$EOM,$EOR";
         emit newCommand(command);
-        //this->hedylamarr_socket.write(command.toUtf8());
-        // this->displayResponse(QTextCodec::codecForMib(106)->toUnicode(this->hedylamarr_socket.readAll()));
     }
     else{
         this->displayMessage("Can't use manual commands while stabilizing");
@@ -216,14 +191,9 @@ void HedyLamarrGui::moveSouth(){
 
 void HedyLamarrGui::moveWest(){
     if(!this->isHedyLamarrStabilizing->load(std::memory_order_acquire)){
-       // if (this->hedylamarr_socket.state() == QAbstractSocket::UnconnectedState){
-       //     this->hedylamarr_socket.connectToHost(QHostAddress("127.0.0.1"),2400);
-       // }
         this->EWoffset += this->ui->SB_stepSize->value();
         QString command = "$SOR,0000000056,94,2,41=51:163,163=48:"+  QString::number(EWoffset, 'f', 6)  + ",$EOM,$EOR";
         emit newCommand(command);
-        //this->hedylamarr_socket.write(command.toUtf8());
-        //this->displayResponse(QTextCodec::codecForMib(106)->toUnicode(this->hedylamarr_socket.readAll()));
     }
     else{
         this->displayMessage("Can't use manual commands while stabilizing");
@@ -232,14 +202,9 @@ void HedyLamarrGui::moveWest(){
 
 void HedyLamarrGui::moveEast(){
     if(!this->isHedyLamarrStabilizing->load(std::memory_order_acquire)){
-        //if (this->hedylamarr_socket.state() == QAbstractSocket::UnconnectedState){
-       //     this->hedylamarr_socket.connectToHost(QHostAddress("127.0.0.1"),2400);
-       // }
         this->EWoffset -= this->ui->SB_stepSize->value();
         QString command = "$SOR,0000000056,94,2,41=51:163,163=48:"+  QString::number(EWoffset, 'f', 6) + ",$EOM,$EOR";
         emit newCommand(command);
-        //this->hedylamarr_socket.write(command.toUtf8());
-        //this->displayResponse(QTextCodec::codecForMib(106)->toUnicode(this->hedylamarr_socket.readAll()));
     }
     else{
         this->displayMessage("Can't use manual commands while stabilizing");
@@ -372,8 +337,10 @@ void HedyLamarrGui::initPlot(){
     this->ui->StabilizationPlot->yAxis2->setVisible(true);
     this->ui->StabilizationPlot->yAxis2->setLabel("Pixels");
     this->ui->StabilizationPlot->yAxis2->setLabelFont(axisFont);
-    this->ui->StabilizationPlot->plotLayout()->insertRow(0);
-    this->ui->StabilizationPlot->plotLayout()->addElement(0, 0, new QCPTextElement(this->ui->StabilizationPlot, "Stabilization History", titleFont));
+    if (!this->ui->StabilizationPlot->plotLayout()->hasElement(0, 0)){
+        this->ui->StabilizationPlot->plotLayout()->insertRow(0);
+        this->ui->StabilizationPlot->plotLayout()->addElement(0, 0, new QCPTextElement(this->ui->StabilizationPlot, "Stabilization History", titleFont));
+    }
 
     this->ui->StabilizationPlot->legend->setVisible(true);
     this->ui->StabilizationPlot->legend->setFont(legendFont);

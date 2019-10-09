@@ -391,6 +391,9 @@
        <height>25</height>
       </rect>
      </property>
+     <property name="text">
+      <string>10</string>
+     </property>
     </widget>
     <widget class="QSpinBox" name="SB_WindowingRadius">
      <property name="geometry">
@@ -438,7 +441,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>/media/bisamlinux/Maxtor/</string>
+      <string>/home/kristian/Desktop/seeingTests</string>
      </property>
     </widget>
     <widget class="QLabel" name="Label_StoreImages">
