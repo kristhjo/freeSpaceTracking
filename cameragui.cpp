@@ -111,16 +111,58 @@ void CameraGui::Connect(std::stringstream &ss)
     pm_interfaceList = pm_pSystem->GetInterfaces();
     pm_interfaceList->Refresh(100);
     ss << "5.1.4 Detected interfaces: " << pm_interfaceList->size() << '\n';
-    //Open Interface
+
+    std::string temp_sDeviceID;
+    //Open Interface and look for devices
+
     for(InterfaceList::iterator ifc = pm_interfaceList->begin(); ifc != pm_interfaceList->end(); ifc++){
         ifc->second->Open();
         m_sInterfaceID = ifc->first;
-        std::cout<<m_sInterfaceID<<std::endl;
-        if (m_sInterfaceID == "enp4s0"){
-            break;
+        pm_pInterface = (*pm_interfaceList)[m_sInterfaceID]; //access an interface and look for devices
+
+        //---------------------    Load Devices     --------------------------------------
+        //---------------------        Start       --------------------------------------
+        pm_deviceList = pm_pInterface->GetDevices();
+        pm_deviceList->Refresh(100);
+
+        ss << "Interface: " << m_sInterfaceID << "\n";
+        ss << "5.1.6 Detected devices: " << pm_deviceList->size() << '\n';
+
+
+        for (DeviceList::iterator dev = pm_deviceList->begin(); dev != pm_deviceList->end(); dev++){ //loops through the detected Baumer devices in the network. Connects to the one with ID identical to BaumerID in the CamInfo struct.
+            try { //opening a device cause an error if it is already accesed by another user.
+                dev->second->Open();
+                temp_sDeviceID = dev->first;
+                ss << "Device: " << temp_sDeviceID << "\n";
+            } catch (...) {
+                continue;
+            }
+            if (this->m_CamInfo.BaumerID == "Baumer Bisamberg"){
+                    if (temp_sDeviceID == this->m_CamInfo.BaumerBisamberg){
+                        std::cout << "connecting to Baumer Bisamberg" << std::endl;
+                        m_sDeviceID = dev->first;
+                        goto end_loop;
+                        //break;
+                    }
+                }
+                else if (this->m_CamInfo.BaumerID == "Baumer IQOQI"){
+                    if (temp_sDeviceID == this->m_CamInfo.BaumerIQOQI){
+                        std::cout << "connecting to Baumer IQOQI" << std::endl;
+                        m_sDeviceID = dev->first;
+                        goto end_loop;
+                        //break;
+                    }
+                }
         }
+        //---------------------        End       --------------------------------------
+        //---------------------  Load Devices  --------------------------------------
+
     }
 
+    //---------------------        End       --------------------------------------
+    //---------------------  Load Interface  --------------------------------------
+
+    end_loop:
     if (m_sInterfaceID == ""){
         ss<<"no interface found \n";
         pm_pSystem->Close();
@@ -130,42 +172,6 @@ void CameraGui::Connect(std::stringstream &ss)
     else{
         pm_pInterface = (*pm_interfaceList)[m_sInterfaceID];
     }
-    //---------------------        End       --------------------------------------
-    //---------------------  Load Interface  --------------------------------------
-
-
-    //---------------------    Load Devices     --------------------------------------
-    //---------------------        Start       --------------------------------------
-    //defining devices
-    pm_deviceList = pm_pInterface->GetDevices();
-    pm_deviceList->Refresh(100);
-    ss << "5.1.6 Detected devices: " << pm_deviceList->size() << '\n';
-    std::string temp_sDeviceID;
-    for (DeviceList::iterator dev = pm_deviceList->begin(); dev != pm_deviceList->end(); dev++){ //loops through the detected Baumer devices in the network. Connects to the one with ID identical to BaumerID in the CamInfo struct.
-        try {
-
-            dev->second->Open();
-            temp_sDeviceID = dev->first;
-
-        } catch (...) {
-            continue;
-        }
-
-	if (this->m_CamInfo.BaumerID == "Baumer Bisamberg"){
-            if (temp_sDeviceID == this->m_CamInfo.BaumerBisamberg){
-                std::cout << "connecting to Baumer Bisamberg" << std::endl;
-                m_sDeviceID = dev->first;
-                break;
-            }
-        }
-        else if (this->m_CamInfo.BaumerID == "Baumer IQOQI"){
-            if (temp_sDeviceID == this->m_CamInfo.BaumerIQOQI){
-                std::cout << "connecting to Baumer IQOQI" << std::endl;
-                m_sDeviceID = dev->first;
-                break;
-            }
-        }
-    }
 
     if (m_sDeviceID == ""){
         ss << "no device found \n";
@@ -174,6 +180,10 @@ void CameraGui::Connect(std::stringstream &ss)
     else{
         pm_pDevice = (*pm_deviceList)[m_sDeviceID];
     }
+
+
+
+
 
     this->m_CamInfo.DeviceNr = static_cast<std::string>(m_sDeviceID);
      //------------------  Set Camera Parameters -------------------------------------
