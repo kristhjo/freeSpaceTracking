@@ -457,7 +457,6 @@ void HexapodGui::initPlot(){
     //set the time format of the x-axis.
     QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime);
     this->ui->StabilizationPlot->clearGraphs(); // clear old graphs
-    this->ui->StabilizationPlot->plotLayout()->clear();
     this->plotData_hTilt.clear();
     this->plotData_vTilt.clear();
     this->plotData_hPix.clear();
@@ -480,21 +479,23 @@ void HexapodGui::initPlot(){
 
     this->ui->StabilizationPlot->addGraph(this->ui->StabilizationPlot->xAxis, this->ui->StabilizationPlot->yAxis);
     tiltPen.setColor(Qt::red);
-    this->ui->StabilizationPlot->graph(0)->setPen(tiltPen);
+    this->ui->StabilizationPlot->graph(1)->setPen(tiltPen);
     this->ui->StabilizationPlot->graph(1)->setName(QString("Vertical tilt"));
 
     this->ui->StabilizationPlot->addGraph(this->ui->StabilizationPlot->xAxis2, this->ui->StabilizationPlot->yAxis2);
     pixelPen.setColor(Qt::red);
     this->ui->StabilizationPlot->graph(2)->setPen(pixelPen);
+    //this->ui->StabilizationPlot->graph(2)->setLineStyle(QCPGraph::lsNone);
     //this->ui->StabilizationPlot->graph(2)->setBrush(QBrush(Qt::red));
-    this->ui->StabilizationPlot->graph(2)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssSquare, 5));
+    this->ui->StabilizationPlot->graph(2)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssSquare, QPen(Qt::black, 1.5), QBrush(Qt::red), 5));
     this->ui->StabilizationPlot->graph(2)->setName(QString("Vertical pixel offset"));
 
     this->ui->StabilizationPlot->addGraph(this->ui->StabilizationPlot->xAxis2, this->ui->StabilizationPlot->yAxis2);
     pixelPen.setColor(Qt::blue);
-    this->ui->StabilizationPlot->graph(2)->setPen(pixelPen);
+    this->ui->StabilizationPlot->graph(3)->setPen(pixelPen);
+    //this->ui->StabilizationPlot->graph(3)->setLineStyle(QCPGraph::lsNone);
     //this->ui->StabilizationPlot->graph(3)->setBrush(QBrush(Qt::blue));
-    this->ui->StabilizationPlot->graph(3)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssSquare, 5));
+    this->ui->StabilizationPlot->graph(3)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssSquare, QPen(Qt::black, 1.5), QBrush(Qt::blue), 5));
     this->ui->StabilizationPlot->graph(3)->setName(QString("Horizontal pixel offset"));
 
     this->ui->StabilizationPlot->xAxis->setLabel("");
@@ -508,6 +509,7 @@ void HexapodGui::initPlot(){
     if (!this->titlePresent){
         this->ui->StabilizationPlot->plotLayout()->insertRow(0);
         this->ui->StabilizationPlot->plotLayout()->addElement(0, 0, new QCPTextElement(this->ui->StabilizationPlot, "Stabilization History", titleFont));
+        this->titlePresent = true;
     }
     this->ui->StabilizationPlot->legend->setVisible(true);
     this->ui->StabilizationPlot->legend->setFont(legendFont);
@@ -522,8 +524,14 @@ void HexapodGui::updatePlot(){
     if(abs(horizontalTilts.last())>this->maxRange_tilt){
         this->maxRange_tilt = abs(horizontalTilts.last());
     }
+    if(abs(verticalTilts.last())>this->maxRange_tilt){
+        this->maxRange_tilt = abs(verticalTilts.last());
+    }
     if(abs(xCentroids.last())>this->maxRange_px){
         this->maxRange_px = abs(xCentroids.last());
+    }
+    if(abs(yCentroids.last())>this->maxRange_px){
+        this->maxRange_px = abs(yCentroids.last());
     }
     dataPoint.value  = this->verticalTilts.last();
     this->plotData_vTilt.push_back(dataPoint);
@@ -542,11 +550,14 @@ void HexapodGui::updatePlot(){
 
     this->ui->StabilizationPlot->yAxis->setRange(-this->maxRange_tilt*1.2, this->maxRange_tilt*1.2);
     this->ui->StabilizationPlot->yAxis2->setRange(-this->maxRange_px*1.2, this->maxRange_px*1.2);
-    this->ui->StabilizationPlot->rescaleAxes();
+    this->ui->StabilizationPlot->xAxis->rescale();
+     this->ui->StabilizationPlot->xAxis2->rescale();
+    //this->ui->StabilizationPlot->rescaleAxes();
     this->ui->StabilizationPlot->graph(0)->data()->set(plotData_hTilt);
     this->ui->StabilizationPlot->graph(1)->data()->set(plotData_vTilt);
     this->ui->StabilizationPlot->graph(2)->data()->set(plotData_vPix);
     this->ui->StabilizationPlot->graph(3)->data()->set(plotData_hPix);
+    std::cout << this->yCentroids.last() << std::endl;
 
     this->ui->StabilizationPlot->replot();
     this->ui->StabilizationPlot->savePdf(this->folderName + "/StabilizationPlot.pdf" );
