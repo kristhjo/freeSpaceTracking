@@ -505,9 +505,10 @@ void HexapodGui::initPlot(){
     this->ui->StabilizationPlot->yAxis2->setVisible(true);
     this->ui->StabilizationPlot->yAxis2->setLabel("Pixels");
     this->ui->StabilizationPlot->yAxis2->setLabelFont(axisFont);
-    this->ui->StabilizationPlot->plotLayout()->insertRow(0);
-    this->ui->StabilizationPlot->plotLayout()->addElement(0, 0, new QCPTextElement(this->ui->StabilizationPlot, "Stabilization History", titleFont));
-
+    if (!this->titlePresent){
+        this->ui->StabilizationPlot->plotLayout()->insertRow(0);
+        this->ui->StabilizationPlot->plotLayout()->addElement(0, 0, new QCPTextElement(this->ui->StabilizationPlot, "Stabilization History", titleFont));
+    }
     this->ui->StabilizationPlot->legend->setVisible(true);
     this->ui->StabilizationPlot->legend->setFont(legendFont);
     this->ui->StabilizationPlot->legend->setBrush(QBrush(QColor(255, 255, 255, 230)));

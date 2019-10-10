@@ -85,8 +85,11 @@ private:
     void setMeasurementSettings(); ///< Reads the measurement settings chosen in the gui.
     QString timestampToFolderName(time_t timestamp); ///< Formats a more readable folder name from the current unix timestamp.
     void setSecPerDataPoint(); ///< Displays the length in seconds of each measurement interval. I.e. the sample size times the exposure time of the camera.
-
+    bool friedTitlePresent = false;
+    bool seeingTitlePresent = false;
     QCPTextElement *avgFriedLabel;
+    QCPItemText *friedTextLabel;
+    QCPItemText *seeingTextLabel;
 private slots:
     void replotSeeing(); ///< Updates the plots of seeing values and fried parameters in the gui.
     void updateSeeingPanel(); ///< Updates the display of the maximum, minimum, mean and current fried parameter and seeing value in the gui.

@@ -321,6 +321,7 @@ struct seeingValues
     QVector<QCPGraphData> seeingData;
     QVector<double> plotTimes;
     QVector<QCPGraphData> avgFriedPlot;
+    QVector<QCPGraphData> avgSeeingPlot;
     double minFried(){
         return *std::min_element(fried.constBegin(), fried.constEnd());
     }

@@ -265,6 +265,7 @@ void SeeingGui::createParameterFile(){
         this->writeParametersToFile << "Measurement type: " << this->measurementType << "\n";
         this->writeParametersToFile << "Sample size: " << this->sampleSize << "\n";
         this->writeParametersToFile << "Exposure time: " << this->m_seeingParams.exposureTime << "\n";
+        this->writeParametersToFile << "Frame rate: " << this->m_seeingParams.frameRate << "\n";
         this->writeParametersToFile << "Window radius: " << this->m_seeingParams.pxWindowRadius << "\n";
         this->parameterFile.close();
     }
@@ -352,35 +353,43 @@ void SeeingGui::setSecPerDataPoint(){
 void SeeingGui::replotSeeing(){
 
     //First convert fried and seeing values to QCPGraphData format.
-    QCPGraphData dataPoint(this->m_seeingValues.timestamps.last(), this->m_seeingValues.fried.last()*1e2);
-    this->m_seeingValues.friedData.push_back(dataPoint);
-    dataPoint.value = this->m_seeingValues.fried_x.last()*1e2;
-    this->m_seeingValues.friedData_x.push_back(dataPoint);
-    dataPoint.value = this->m_seeingValues.fried_y.last()*1e2;
-    this->m_seeingValues.friedData_y.push_back(dataPoint);
-    dataPoint.value = getSeeingFromFried(this->m_seeingValues.fried.last(), this->m_seeingParams.wavelength)*1e6;
-    this->m_seeingValues.seeingData.push_back(dataPoint);
-
-    this->ui->FriedPlot->yAxis->setRange(0, this->m_seeingValues.maxFried()*1e2*1.5);
-    this->ui->FriedPlot->rescaleAxes();
+    //QCPGraphData dataPoint(this->m_seeingValues.timestamps.last(), this->m_seeingValues.fried.last()*1e2);
+    this->m_seeingValues.friedData.push_back(QCPGraphData(this->m_seeingValues.timestamps.last(), this->m_seeingValues.fried.last()*1e2));
+    //dataPoint.value = this->m_seeingValues.fried_x.last()*1e2;
+    //this->m_seeingValues.friedData_x.push_back(dataPoint);
+    //dataPoint.value = this->m_seeingValues.fried_y.last()*1e2;
+    //this->m_seeingValues.friedData_y.push_back(dataPoint);
+    //dataPoint.value = getSeeingFromFried(this->m_seeingValues.fried.last(), this->m_seeingParams.wavelength)*1e6;
+    this->m_seeingValues.seeingData.push_back(QCPGraphData(this->m_seeingValues.timestamps.last(), this->m_seeingValues.seeing.last()*1e6));
     this->ui->FriedPlot->graph(0)->data()->set(this->m_seeingValues.friedData);
+    this->ui->FriedPlot->yAxis->setRange(0, this->m_seeingValues.maxFried()*1e2*1.2);
+    this->ui->FriedPlot->xAxis->rescale();
     //this->ui->FriedPlot->graph(1)->data()->set(this->m_seeingValues.friedData_x);
 
     this->m_seeingValues.avgFriedPlot.clear();
-    QCPGraphData dataPoint2(this->m_seeingValues.timestamps.first(), this->m_seeingValues.meanFried()*1e2);
-    this->m_seeingValues.avgFriedPlot.push_back(dataPoint2);
-    dataPoint2.key = this->m_seeingValues.timestamps.last();
-    this->m_seeingValues.avgFriedPlot.push_back(dataPoint2);
+    //QCPGraphData dataPoint2(this->m_seeingValues.timestamps.first(), this->m_seeingValues.meanFried()*1e2);
+    this->m_seeingValues.avgFriedPlot.push_back(QCPGraphData(this->m_seeingValues.timestamps.first(), this->m_seeingValues.meanFried()*1e2));
+    //dataPoint2.key = this->m_seeingValues.timestamps.last();
+    this->m_seeingValues.avgFriedPlot.push_back(QCPGraphData(this->m_seeingValues.timestamps.last(), this->m_seeingValues.meanFried()*1e2));
     this->ui->FriedPlot->graph(1)->data()->set(this->m_seeingValues.avgFriedPlot);
-    this->avgFriedLabel->setText("Average Fried parameter: " + QString::number(dataPoint2.value, this->displayFormat, this->displayPrecision));
+    //this->avgFriedLabel->setText("Average Fried parameter: " + QString::number(dataPoint2.value, this->displayFormat, this->displayPrecision));
+    this->friedTextLabel->setText("Average Fried parameter: " + QString::number(this->m_seeingValues.meanFried()*1e2, this->displayFormat, this->displayPrecision) + " cm");
 
     this->ui->FriedPlot->replot();
     this->ui->FriedPlot->savePdf(this->directoryPath + "FriedPlot.pdf" );
 
-    this->ui->SeeingPlot->yAxis->setRange(0, this->m_seeingValues.maxSeeing()*1e6*1.5);
-    this->ui->SeeingPlot->rescaleAxes();
     this->ui->SeeingPlot->graph(0)->data()->set(this->m_seeingValues.seeingData);
 
+    this->m_seeingValues.avgSeeingPlot.clear();
+    this->m_seeingValues.avgSeeingPlot.push_back(QCPGraphData(this->m_seeingValues.timestamps.first(), this->m_seeingValues.meanSeeing()*1e6));
+    this->m_seeingValues.avgSeeingPlot.push_back(QCPGraphData(this->m_seeingValues.timestamps.last(), this->m_seeingValues.meanSeeing()*1e6));
+    this->ui->SeeingPlot->graph(1)->data()->set(this->m_seeingValues.avgSeeingPlot);
+    this->seeingTextLabel->setText("Average seeing: " + QString::number(this->m_seeingValues.meanSeeing()*1e6, this->displayFormat, this->displayPrecision) + " urad");
+
+    this->ui->SeeingPlot->yAxis->setRange(0, this->m_seeingValues.maxSeeing()*1e6*1.2);
+    this->ui->SeeingPlot->xAxis->rescale();
+
+    //this->ui->SeeingPlot->rescaleAxes(true);
     this->ui->SeeingPlot->replot();
     this->ui->SeeingPlot->savePdf( this->directoryPath + "SeeingPlot.pdf" );
 }
@@ -412,24 +421,23 @@ void SeeingGui::updateSeeingPanel(){
 void SeeingGui::initPlots(){
     //set the time format of the x-axis.
     QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime);
-
     dateTicker->setDateTimeFormat("hh:mm:ss");
     QFont titleFont =  QFont("sans", 12, QFont::Bold);
-    QFont legendFont =  QFont("sans", 12, QFont::Bold);
+    QFont legendFont =  QFont("sans-serif", 8, QFont::Bold);
     QFont axisFont = QFont("sans", 12, QFont::Bold);
-    QPen xPen;
-    QPen yPen;
-    xPen.setStyle(Qt::DotLine);
-    xPen.setWidthF(2);
-    xPen.setColor(Qt::blue);
-    yPen.setStyle(Qt::DotLine);
-    yPen.setWidthF(2);
-    yPen.setColor(Qt::red);
+    QPen seeingPen;
+    QPen friedPen;
+    seeingPen.setStyle(Qt::DotLine);
+    seeingPen.setWidthF(2);
+    seeingPen.setColor(Qt::red);
+    friedPen.setStyle(Qt::DotLine);
+    friedPen.setWidthF(2);
+    friedPen.setColor(Qt::blue);
 
     this->ui->FriedPlot->addGraph();
     this->ui->FriedPlot->graph(0)->setLineStyle(QCPGraph::lsNone);
     this->ui->FriedPlot->graph(0)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssSquare, QPen(Qt::black, 1.5), QBrush(Qt::blue), 5));
-    this->ui->FriedPlot->graph(0)->setName(QString("Fried parameter"));
+    //this->ui->FriedPlot->graph(0)->setName(QString("Fried parameter"));
 
     //this->ui->FriedPlot->addGraph();
     //this->ui->FriedPlot->graph(1)->setLineStyle(QCPGraph::lsNone);
@@ -437,15 +445,15 @@ void SeeingGui::initPlots(){
    // this->ui->FriedPlot->graph(1)->setName(QString("Vertical Fried parameter"));
 
     this->ui->FriedPlot->addGraph();
-    this->ui->FriedPlot->graph(1)->setPen(yPen);
-    if (this->ui->FriedPlot->legend->hasElement(3, 0)){ // if top cell isn't empty, insert an empty row at top
-        this->ui->FriedPlot->legend->insertRow(3);
-    }
-    this->avgFriedLabel = new QCPTextElement(this->ui->FriedPlot);
-    this->avgFriedLabel->setText("Average Fried parameter: ");
-    this->avgFriedLabel->setFont(legendFont);
+    this->ui->FriedPlot->graph(1)->setPen(friedPen);
+   // if (this->ui->FriedPlot->legend->hasElement(3, 0)){ // if top cell isn't empty, insert an empty row at top
+   //     this->ui->FriedPlot->legend->insertRow(3);
+   // }
+   // this->avgFriedLabel = new QCPTextElement(this->ui->FriedPlot);
+   // this->avgFriedLabel->setText("Average Fried parameter: ");
+   // this->avgFriedLabel->setFont(legendFont);
 
-    this->ui->FriedPlot->legend->addElement(3,0, this->avgFriedLabel);
+    //this->ui->FriedPlot->legend->addElement(3,0, this->avgFriedLabel);
 
     this->ui->FriedPlot->xAxis->setLabel("");
     this->ui->FriedPlot->xAxis->setTicker(dateTicker);
@@ -453,29 +461,56 @@ void SeeingGui::initPlots(){
     this->ui->FriedPlot->yAxis->setLabel("[cm]");
     this->ui->FriedPlot->yAxis->setLabelFont(axisFont);
 
-    this->ui->FriedPlot->plotLayout()->insertRow(0);
-    this->ui->FriedPlot->plotLayout()->addElement(0, 0, new QCPTextElement(this->ui->FriedPlot, "Fried parameter", titleFont));
+    if(!this->friedTitlePresent){
+        this->ui->FriedPlot->plotLayout()->insertRow(0);
+        this->ui->FriedPlot->plotLayout()->addElement(0, 0, new QCPTextElement(this->ui->FriedPlot, "Fried parameter", titleFont));
+        friedTitlePresent = true;
+    }
 
-    this->ui->FriedPlot->legend->setVisible(true);
-    this->ui->FriedPlot->legend->setFont(legendFont);
-    this->ui->FriedPlot->legend->setBrush(QBrush(QColor(255, 255, 255, 230)));
+    this->friedTextLabel = new QCPItemText(this->ui->FriedPlot);
+    this->friedTextLabel->setPositionAlignment(Qt::AlignTop|Qt::AlignHCenter);
+    this->friedTextLabel->position->setType(QCPItemPosition::ptAxisRectRatio);
+    this->friedTextLabel->position->setCoords(0.5, 0); // place position at center/top of axis rect
+    this->friedTextLabel->setText("Average Fried parameter: xx.xx");
+    this->friedTextLabel->setFont(legendFont); // make font a bit larger
+    this->friedTextLabel->setPen(QPen(Qt::black)); // show black border around text
+    this->friedTextLabel->setBrush(QBrush(QColor(245,245,220, 100)));
+    this->friedTextLabel->setPadding(QMargins(3,3,3,3));
+
+    //this->ui->FriedPlot->legend->setVisible(true);
+    //this->ui->FriedPlot->legend->setFont(legendFont);
+    //this->ui->FriedPlot->legend->setBrush(QBrush(QColor(255, 255, 255, 230)));
     this->ui->FriedPlot->replot();
 
     this->ui->SeeingPlot->addGraph();
     this->ui->SeeingPlot->graph(0)->setLineStyle(QCPGraph::lsNone);
     this->ui->SeeingPlot->graph(0)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssSquare, QPen(Qt::black, 1.5), QBrush(Qt::green),5));
 
+    this->ui->SeeingPlot->addGraph();
+    this->ui->SeeingPlot->graph(1)->setPen(seeingPen);
+
     this->ui->SeeingPlot->xAxis->setLabel("");
     this->ui->SeeingPlot->xAxis->setTicker(dateTicker);
     this->ui->SeeingPlot->xAxis->setLabelFont(axisFont);
     this->ui->SeeingPlot->yAxis->setLabel("[mu rad]");
     this->ui->SeeingPlot->yAxis->setLabelFont(axisFont);
+    if(!this->seeingTitlePresent){
+        this->ui->SeeingPlot->plotLayout()->insertRow(0);
+        this->ui->SeeingPlot->plotLayout()->addElement(0, 0, new QCPTextElement(this->ui->SeeingPlot, "Seeing", titleFont));
+        seeingTitlePresent = true;
+    }
+    this->seeingTextLabel = new QCPItemText(this->ui->SeeingPlot);
+    this->seeingTextLabel->setPositionAlignment(Qt::AlignTop|Qt::AlignHCenter);
+    this->seeingTextLabel->position->setType(QCPItemPosition::ptAxisRectRatio);
+    this->seeingTextLabel->position->setCoords(0.5, 0); // place position at center/top of axis rect
+    this->seeingTextLabel->setText("Average seeing: xx.xx");
+    this->seeingTextLabel->setFont(legendFont); // make font a bit larger
+    this->seeingTextLabel->setPen(QPen(Qt::black)); // show black border around text
+    this->seeingTextLabel->setBrush(QBrush(QColor(245,245,220, 200)));
+    this->seeingTextLabel->setPadding(QMargins(3,3,3,3));
 
-    this->ui->SeeingPlot->plotLayout()->insertRow(0);
-    this->ui->SeeingPlot->plotLayout()->addElement(0, 0, new QCPTextElement(this->ui->SeeingPlot, "Seeing", titleFont));
-
-    this->ui->SeeingPlot->legend->setVisible(true);
-    this->ui->SeeingPlot->legend->setFont(legendFont);
-    this->ui->SeeingPlot->legend->setBrush(QBrush(QColor(255, 255, 255, 230)));
+   // this->ui->SeeingPlot->legend->setVisible(true);
+    //this->ui->SeeingPlot->legend->setFont(legendFont);
+    //this->ui->SeeingPlot->legend->setBrush(QBrush(QColor(255, 255, 255, 230)));
     this->ui->SeeingPlot->replot();
 }

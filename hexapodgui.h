@@ -90,7 +90,7 @@ private:
     double maxRange_tilt = 0.0;
     double maxRange_px = 0.0;
     int xAxisLimit = 600;
-
+    bool titlePresent = false;
     QString folderName;
     std::fstream stabilizationDataStream;
 signals:
