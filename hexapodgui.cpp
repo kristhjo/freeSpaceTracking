@@ -557,7 +557,6 @@ void HexapodGui::updatePlot(){
     this->ui->StabilizationPlot->graph(1)->data()->set(plotData_vTilt);
     this->ui->StabilizationPlot->graph(2)->data()->set(plotData_vPix);
     this->ui->StabilizationPlot->graph(3)->data()->set(plotData_hPix);
-    std::cout << this->yCentroids.last() << std::endl;
 
     this->ui->StabilizationPlot->replot();
     this->ui->StabilizationPlot->savePdf(this->folderName + "/StabilizationPlot.pdf" );

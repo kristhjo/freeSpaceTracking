@@ -33,7 +33,6 @@ void SeeingGui::startMeasurement(){
         this->displayMessage("Error creating basedirectory: " + this->directoryPath, true);
         return;
     }
-
     this->createParameterFile();
     this->initPlots();
     this->isMeasuringSeeing->store(true, std::memory_order_release);
@@ -162,8 +161,8 @@ void SeeingGui::debugDIMM(cv::Mat image, int label){
     cv::Point c1, c2;
     c1 = imageprocessing::findCentroid(croppedImg1);
     c2 = imageprocessing::findCentroid(croppedImg2);
-    cv::circle(croppedImg1,c1,5,cv::Scalar(128,0,0),-1); //creates circle on img following the centroid.
-    cv::circle(croppedImg2,c2,5,cv::Scalar(128,0,0),-1); //creates circle on img following the centroid.
+    cv::circle(croppedImg1,c1,1,cv::Scalar(128,0,0),-1); //creates circle on img following the centroid.
+    cv::circle(croppedImg2,c2,1,cv::Scalar(128,0,0),-1); //creates circle on img following the centroid.
     cv::hconcat(croppedImg1, croppedImg2, croppedImg1);
     if(!cv::imwrite( this->directoryPath.toStdString() + this->currentSubFolderName.toStdString()  + "/debug_img_" + std::to_string(label) + ".jpg", croppedImg1)){
         emit newMessage("Failed to save debug image", true);
@@ -420,6 +419,10 @@ void SeeingGui::updateSeeingPanel(){
 }
 void SeeingGui::initPlots(){
     //set the time format of the x-axis.
+    this->m_seeingValues.friedData.clear();
+    this->m_seeingValues.seeingData.clear();
+    this->m_seeingValues.timestamps.clear();
+
     QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime);
     dateTicker->setDateTimeFormat("hh:mm:ss");
     QFont titleFont =  QFont("sans", 12, QFont::Bold);
