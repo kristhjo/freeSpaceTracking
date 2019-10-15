@@ -391,6 +391,9 @@
        <height>25</height>
       </rect>
      </property>
+     <property name="text">
+      <string>10</string>
+     </property>
     </widget>
     <widget class="QSpinBox" name="SB_WindowingRadius">
      <property name="geometry">
@@ -438,7 +441,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>/media/bisamlinux/Maxtor/</string>
+      <string>/home/kristian/Desktop/seeingTests</string>
      </property>
     </widget>
     <widget class="QLabel" name="Label_StoreImages">
@@ -484,6 +487,32 @@
      <property name="geometry">
       <rect>
        <x>180</x>
+       <y>90</y>
+       <width>41</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Yes</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="Label_Debug">
+     <property name="geometry">
+      <rect>
+       <x>300</x>
+       <y>90</y>
+       <width>51</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Debug</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="CheckB_Debug">
+     <property name="geometry">
+      <rect>
+       <x>370</x>
        <y>90</y>
        <width>41</width>
        <height>23</height>

@@ -32,7 +32,7 @@ public:
     void disconnectFromHedyLamarr(std::stringstream &ss);
     std::shared_ptr<datacontainers::CentroidStabilization> centroidContainer = nullptr;
 
-    double updateRate; //Set to 1 sec, independent of camera exposure time
+    //double updateRate; //Set to 1 sec, independent of camera exposure time
 private:
     Ui::HedyLamarrGui *ui;
     QTcpSocket hedylamarr_socket;
@@ -41,36 +41,46 @@ private:
     std::atomic<bool> stabilize;
     std::atomic<bool> isStabMoving;
 
+    int updateRate = 5; //seconds
     datacontainers::HedyLamarrInfo HedyLamarrParams;
     void Stabilize(); ///<
     void moveNorth();
     void moveSouth();
     void moveWest();
     void moveEast();
-
+    void setCurrentOffset();
+    void setInitialOffset();
     double NSoffset;
     double EWoffset;
     double stepSize;
 
     //Format variables for the values in the gui display.
-    int positionPrecision = 6;
+    int positionPrecision = 4;
     char positionFormat = 'f';
     //Plot functions and variables
     void initPlot();
-    QVector<QCPGraphData> plotDataHTilt;
-    QVector<QCPGraphData> plotDataVTilt;
-    QVector<QCPGraphData> plotDataXDeviation;
-    QVector<QCPGraphData> plotDataYDeviation;
+    //QVector<QCPGraphData> plotDataHTilt;
+    //QVector<QCPGraphData> plotDataVTilt;
+    //QVector<QCPGraphData> plotDataXDeviation;
+    //QVector<QCPGraphData> plotDataYDeviation;
+
+    QVector<QCPGraphData> plotData_hTilt;
+    QVector<QCPGraphData> plotData_vTilt;
+    QVector<QCPGraphData> plotData_hPix;
+    QVector<QCPGraphData> plotData_vPix;
     double maxYRangePlot = 10.0; //
     int maxXRangePlot = 300; //5 min
 
     QString folderName;
+
     std::fstream stabilizationDataStream;
 signals:
     void newCommand(QString command);
     void newCentroid();
     void newMessage(QString message, bool error = false);
     void updateStabilizationPlot();
+    void newOffset();
+
 public slots:
     void sendCommand(QString command);
     void displayMessage(QString message, bool error = false);
@@ -78,6 +88,8 @@ public slots:
     void updateDisplay();
     void updatePlot();
     void SetStepSize();
+    void updateOffsetDisplay();
+    void moveToDisplayOffset();
 };
 
 

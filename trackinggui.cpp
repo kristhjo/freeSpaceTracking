@@ -32,6 +32,10 @@ TrackingGui::TrackingGui(QWidget *parent) :
     this->ui->SB_GainCam->setMinimum(1);
     this->ui->SB_GainCam->setMaximum(8);
 
+    this->ui->SB_FrameRate->setMinimum(1);
+    this->ui->SB_FrameRate->setMaximum(50);
+    this->ui->SB_FrameRate->setValue(10);
+
     this->ui->HS_Width->setMinimum(5);
     this->ui->HS_Width->setMaximum(511);
     this->ui->HS_Width->setValue(60);
@@ -74,8 +78,8 @@ TrackingGui::TrackingGui(QWidget *parent) :
     this->ui->SB_TrackingThresh->setMaximum(255);
 
     this->ui->SB_WindowRadius->setMinimum(1);
-    this->ui->SB_WindowRadius->setMaximum(20);
-    this->ui->SB_WindowRadius->setValue(5);
+    this->ui->SB_WindowRadius->setMaximum(50);
+    this->ui->SB_WindowRadius->setValue(10);
 
     QObject::connect(this->ui->PB_ConnectCam,&QPushButton::clicked,this,&TrackingGui::ConnectToCamera,Qt::UniqueConnection);
     QObject::connect(this->ui->PB_StopCam,&QPushButton::clicked,this,&TrackingGui::StopCamera,Qt::UniqueConnection);
@@ -88,6 +92,7 @@ TrackingGui::TrackingGui(QWidget *parent) :
     QObject::connect(this->ui->HS_ExposureCam, SIGNAL(valueChanged(int)),this->ui->SB_ExposureCam, SLOT(setValue(int)));
 
     QObject::connect(this->ui->SB_GainCam,QOverload<int>::of(&QSpinBox::valueChanged),this,&TrackingGui::SetGain,Qt::UniqueConnection);
+    QObject::connect(this->ui->SB_FrameRate,QOverload<int>::of(&QSpinBox::valueChanged),this,&TrackingGui::SetFrameRateSB,Qt::UniqueConnection);
 
     QObject::connect(this->ui->HS_Width,&QSlider::sliderMoved,this,&TrackingGui::SetWidth,Qt::UniqueConnection);
     QObject::connect(this->ui->SB_Width,QOverload<int>::of(&QSpinBox::valueChanged),this,&TrackingGui::SetWidthSB,Qt::UniqueConnection);
@@ -157,6 +162,7 @@ void TrackingGui::ConfigureSeeing(){
     this->pm_seeing->m_imageContainer = this->m_imageContainer;
     this->pm_seeing->isMeasuringSeeing = &this->isMeasuringSeeing;
     this->pm_seeing->m_seeingParams.exposureTime = this->pm_Camera->m_CamInfo.ExposureActual;
+    this->pm_seeing->m_seeingParams.frameRate = this->pm_Camera->m_CamInfo.FrameRate;
     this->pm_seeing->show();
 }
 
@@ -282,7 +288,7 @@ void TrackingGui::StartStabilization(){
     this->pm_Camera->centroidContainer = this->centroidContainer; //Establishes shared connection between the centroidContainer of cameragui and hexpodgui.
     this->pm_hexapod->centroidContainer = this->centroidContainer;
 
-    this->pm_hexapod->updateRate = this->pm_Camera->m_CamInfo.ExposureActual;
+    //this->pm_hexapod->updateRate = this->pm_Camera->m_CamInfo.ExposureActual;
     std::stringstream ss;
     this->pm_hexapod->startStabilization(ss);
     this->pm_hexapod->show();
@@ -321,8 +327,8 @@ void TrackingGui::StopTracking(){
         this->ui->TE_LogCam->append("Camera is not started \n");
         return;
     }
-    this->isCameraTracking.store(false, std::memory_order_release);//this->pm_Camera->m_TrackingParameters.isTracking.store(false,std::memory_order_release);
-}
+    this->isCameraTracking.store(false, std::memory_order_release);
+  }
 
 void TrackingGui::setTrackingThreshold(){
     if(!this->isCameraConnected){
@@ -353,7 +359,7 @@ void TrackingGui::setWindowRadius(){
         this->ui->TE_LogCam->append("Camera is not connected \n");
         return;
     }
-    this->pm_Camera->m_TrackingParameters.WindowRadius = this->ui->SB_WindowRadius->value();
+    this->pm_Camera->m_TrackingParameters.WindowRadius = this->ui->SB_WindowRadius->value();//radius in pixels
 }
 
 void TrackingGui::SetExposureTime(){
@@ -382,6 +388,15 @@ void TrackingGui::SetGain(){
         return;
     }
     this->pm_Camera->m_CamInfo.GainActual = this->ui->SB_GainCam->value();
+    this->pm_Camera->newCamParameter.store(true,std::memory_order_release);
+}
+
+void TrackingGui::SetFrameRateSB(){
+    if (!this->isCameraConnected){
+        this->ui->TE_LogCam->append("Camera is not connected \n");
+        return;
+    }
+    this->pm_Camera->m_CamInfo.FrameRate = this->ui->SB_FrameRate->value();
     this->pm_Camera->newCamParameter.store(true,std::memory_order_release);
 }
 
@@ -494,7 +509,7 @@ void TrackingGui::ConnectToCamera(){
     this->pm_Camera->isMeasuringSeeing = &this->isMeasuringSeeing;
     this->pm_Camera->isHexapodStabilizing = &this->isHexapodStabilizing;
     this->pm_Camera->isHedyLamarrStabilizing = &this->isHedyLamarrStabilizing;
-
+    this->pm_Camera->m_TrackingParameters.useWindowing.store(true,std::memory_order_release);
     this->pm_Camera->Connect(ss);
     this->ui->TE_LogCam->append(QString::fromStdString(ss.str()));
 
@@ -516,6 +531,7 @@ void TrackingGui::StartCamera(){
     this->pm_Camera->m_CamInfo.FrameHeight = this->ui->HS_Height->value()*2;
     this->pm_Camera->m_CamInfo.FrameWidth = this->ui->HS_Width->value()*4;
     this->pm_Camera->m_CamInfo.ExposureActual= this->ui->HS_ExposureCam->value();
+    this->pm_Camera->m_CamInfo.FrameRate = this->ui->SB_FrameRate->value();
     //
     this->pm_Camera->Start(ss);
     this->ui->TE_LogCam->append(QString::fromStdString(ss.str()));

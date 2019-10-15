@@ -1,4 +1,6 @@
+//#include <math>
 #include "imageprocessing.h"
+#include "datacontainers.h"
 
 namespace imageprocessing {
 
@@ -47,6 +49,26 @@ cv::Point getSpotSeparation(const cv::Mat &img, int windowRadius = 5){
     dist.x = c2.x + img.cols/2 - c1.x;
     dist.y = c2.y - c1.y;
     return dist;
+}
+
+datacontainers::gaussianFitParams getGaussianFitParams(const cv::Mat &img, int windowRadius = 30){
+  cv::Mat croppedImg;
+  cropWindow(img, croppedImg, windowRadius = windowRadius);
+  cv::Moments m = moments(croppedImg,true);
+  datacontainers::gaussianFitParams params;
+  cv::Point center(m.m10/m.m00, m.m01/m.m00);
+  params.intensitymax = croppedImg.at<uchar>(center);
+  params.center_x = center.x;
+  params.center_y = center.y;
+  params.var_x = m.m20;//pow(m.m20,0.5)*2.355; //sigma to FWHM conversion
+  params.var_y = m.m02;//pow(m.m02, 0.5)*2.355; //sigma to FWHM conversion
+  params.sigma_cov = m.m11;
+  params.numSaturatedPixels = cv::countNonZero(croppedImg == 255);
+  return params;
+}
+
+void drawGaussian(cv::Mat &gaussImg, datacontainers::gaussianFitParams fitParams){
+    cv::Mat gauss;
 }
 
 }

@@ -27,6 +27,9 @@ HedyLamarrGui::HedyLamarrGui(QWidget *parent) :
     QObject::connect(this->ui->PB_East, &QPushButton::clicked,this,&HedyLamarrGui::moveEast,Qt::UniqueConnection);
     QObject::connect(this->ui->SB_stepSize, QOverload<int>::of(&QSpinBox::valueChanged),this,&HedyLamarrGui::SetStepSize);
     QObject::connect(this, SIGNAL(newCommand(QString)), this, SLOT(sendCommand(QString)), Qt::AutoConnection);
+    QObject::connect(this->ui->PB_setInitialOffset, &QPushButton::clicked, this, &HedyLamarrGui::setInitialOffset, Qt::UniqueConnection);
+    QObject::connect(this, SIGNAL(newOffset()), this, SLOT(updateOffsetDisplay()), Qt::UniqueConnection);
+    QObject::connect(this->ui->PB_goToOffset, &QPushButton::clicked, this, &HedyLamarrGui::moveToDisplayOffset, Qt::UniqueConnection);
 }
 
 HedyLamarrGui::~HedyLamarrGui(){
@@ -50,6 +53,7 @@ void HedyLamarrGui::connectToHedyLamarr(std::stringstream &ss){
         ss << "connection to hedy lamarr failed \n";
         this->isHedyLamarrConnected->store(false, std::memory_order_release);
     }
+    //this->setCurrentOffset();
 }
 void HedyLamarrGui::disconnectFromHedyLamarr(std::stringstream &ss){
     this->hedylamarr_socket.disconnectFromHost();
@@ -98,10 +102,10 @@ void HedyLamarrGui::startStabilization(std::stringstream &ss){
 
 void HedyLamarrGui::Stabilize(){
     this->stabilizationInProcess.store(true, std::memory_order_release);
-    double maxPixMovPerUpdate = 5;
+    double maxPixMovPerUpdate = 10;
     while(this->stabilize.load(std::memory_order_acquire)){
 
-        std::this_thread::sleep_for(std::chrono::seconds(static_cast<int>(3))); //WAITS FOR NEW CENTROID MEASUREMENTS.
+        std::this_thread::sleep_for(std::chrono::seconds(this->updateRate)); //WAITS FOR NEW CENTROID MEASUREMENTS.
         this->centroidContainer->updateMeanCentroid();
         this->centroidContainer->emptyHistroy();
         emit newCentroid();
@@ -111,47 +115,33 @@ void HedyLamarrGui::Stabilize(){
         double newNS = 0.0;
         double newEW = 0.0;
 
-        if (abs(dHorizontal) < maxPixMovPerUpdate){
-            newNS = dVertical*this->HedyLamarrParams.pixToHedyLamarr;
+        newNS = dVertical*this->HedyLamarrParams.pixToHedyLamarr;
+        newEW = dHorizontal*this->HedyLamarrParams.pixToHedyLamarr;
+
+        if (abs(dVertical) > maxPixMovPerUpdate){
+            newNS = 0;
         }
-        else if (dHorizontal > maxPixMovPerUpdate){//If deviation is larger than the distance the hexapod can move in between centroid updates, move maxMovPerUpdate instead.
-            newNS = maxPixMovPerUpdate*this->HedyLamarrParams.pixToHedyLamarr;
+        if (abs(dHorizontal) > maxPixMovPerUpdate){
+            newEW = 0;
         }
-        else if (dHorizontal < -maxPixMovPerUpdate){
-            newNS = -maxPixMovPerUpdate*this->HedyLamarrParams.pixToHedyLamarr;
-        }
-        if (abs(dVertical) < maxPixMovPerUpdate){
-            newEW = dVertical*this->HedyLamarrParams.pixToHedyLamarr;
-        }
-        else if (dVertical > maxPixMovPerUpdate){//If deviation is larger than the distance the hexapod can move in between centroid updates, move maxMovPerUpdate instead.
-            newEW = maxPixMovPerUpdate*this->HedyLamarrParams.pixToHedyLamarr;
-        }
-        else if (dVertical < -maxPixMovPerUpdate){
-            newEW = -maxPixMovPerUpdate*this->HedyLamarrParams.pixToHedyLamarr;
-        }
-        newNS = 1;
-        newEW = 1;
-        this->NSoffset += newNS;
-        this->EWoffset += newEW;
+        this->NSoffset -= newNS*0.2;
+        this->EWoffset -= newEW*0.2;
         std::cout << newEW << " " << newNS << std::endl;
-        QString NScommand = "$SOR,0000000056,94,2,41=51:164,164=48:" + QString::number(NSoffset, 'f', 6) + ",$EOM,$EOR";
-        //this->hedylamarr_socket.write(NScommand.toUtf8());
-        //this->displayResponse(QTextCodec::codecForMib(106)->toUnicode(this->hedylamarr_socket.readAll()));
+        QString NScommand = "$SOR,0000000056,94,2,41=51:164,164=48:" + QString::number(this->NSoffset, 'f', 6) + ",$EOM,$EOR";
         emit newCommand(NScommand);
-        QString EWcommand = "$SOR,0000000056,94,2,41=51:163,163=48:"+  QString::number(EWoffset, 'f', 6) + ",$EOM,$EOR";
-        //this->hedylamarr_socket.write(EWcommand.toUtf8());
-        //this->displayResponse(QTextCodec::codecForMib(106)->toUnicode(this->hedylamarr_socket.readAll()));
+        QString EWcommand = "$SOR,0000000056,94,2,41=51:163,163=48:"+  QString::number(this->EWoffset, 'f', 6) + ",$EOM,$EOR";
         emit newCommand(EWcommand);
-        QCPGraphData HTilt(time(nullptr), dHorizontal*this->HedyLamarrParams.pixToHedyLamarr*1000);
-        QCPGraphData VTilt(time(nullptr), dVertical*this->HedyLamarrParams.pixToHedyLamarr*1000);
+        QCPGraphData HTilt(time(nullptr), dHorizontal*this->HedyLamarrParams.pixFieldOfView*1e6);//this->HedyLamarrParams.pixToHedyLamarr/this->HedyLamarrParams.radToArcSec);
+        QCPGraphData VTilt(time(nullptr), dVertical*this->HedyLamarrParams.pixFieldOfView*1e6);//*this->HedyLamarrParams.pixToHedyLamarr/this->HedyLamarrParams.radToArcSec);
         QCPGraphData XDev(time(nullptr), dHorizontal);
         QCPGraphData YDev(time(nullptr), dVertical);
 
-        this->plotDataHTilt.push_back(HTilt);
-        this->plotDataVTilt.push_back(VTilt);
-        this->plotDataXDeviation.push_back(XDev);
-        this->plotDataYDeviation.push_back(YDev);
+        this->plotData_hTilt.push_back(HTilt);
+        this->plotData_vTilt.push_back(VTilt);
+        this->plotData_hPix.push_back(XDev);
+        this->plotData_vPix.push_back(YDev);
         emit updateStabilizationPlot();
+        emit newOffset();
     }
     this->stabilizationInProcess.store(false, std::memory_order_release);
 }
@@ -176,13 +166,11 @@ void HedyLamarrGui::stopStabilization(std::stringstream &ss){
     ss << "Hedy Lamarr stabilization turned off.";
 }
 
-
 void HedyLamarrGui::moveNorth(){
     if(!this->isHedyLamarrStabilizing->load(std::memory_order_acquire)){
         this->NSoffset += this->ui->SB_stepSize->value();
         QString command = "$SOR,0000000056,94,2,41=51:164,164=48:" + QString::number(NSoffset, 'f', 6) + ",$EOM,$EOR";
-        this->hedylamarr_socket.write(command.toUtf8());
-        this->displayResponse(QTextCodec::codecForMib(106)->toUnicode(this->hedylamarr_socket.readAll()));
+        emit newCommand(command);
     }
     else{
         this->displayMessage("Can't use manual commands while stabilizing");
@@ -193,11 +181,7 @@ void HedyLamarrGui::moveSouth(){
     if(!this->isHedyLamarrStabilizing->load(std::memory_order_acquire)){
         this->NSoffset -= this->ui->SB_stepSize->value();
         QString command = "$SOR,0000000056,94,2,41=51:164,164=48:"+ QString::number(NSoffset, 'f', 6) + ",$EOM,$EOR";
-        this->hedylamarr_socket.write(command.toUtf8());
-        //char response[200];
-        //qint64 sizeOfResponse = this->hedylamarr_socket.readLine(response, 200);
-        //std::cout << QTextCodec::codecForMib(106)->toUnicode(this->hedylamarr_socket.readAll()).toStdString() << std::endl;
-        this->displayResponse(QTextCodec::codecForMib(106)->toUnicode(this->hedylamarr_socket.readAll()));
+        emit newCommand(command);
     }
     else{
         this->displayMessage("Can't use manual commands while stabilizing");
@@ -209,8 +193,7 @@ void HedyLamarrGui::moveWest(){
     if(!this->isHedyLamarrStabilizing->load(std::memory_order_acquire)){
         this->EWoffset += this->ui->SB_stepSize->value();
         QString command = "$SOR,0000000056,94,2,41=51:163,163=48:"+  QString::number(EWoffset, 'f', 6)  + ",$EOM,$EOR";
-        this->hedylamarr_socket.write(command.toUtf8());
-        this->displayResponse(QTextCodec::codecForMib(106)->toUnicode(this->hedylamarr_socket.readAll()));
+        emit newCommand(command);
     }
     else{
         this->displayMessage("Can't use manual commands while stabilizing");
@@ -221,8 +204,7 @@ void HedyLamarrGui::moveEast(){
     if(!this->isHedyLamarrStabilizing->load(std::memory_order_acquire)){
         this->EWoffset -= this->ui->SB_stepSize->value();
         QString command = "$SOR,0000000056,94,2,41=51:163,163=48:"+  QString::number(EWoffset, 'f', 6) + ",$EOM,$EOR";
-        this->hedylamarr_socket.write(command.toUtf8());
-        this->displayResponse(QTextCodec::codecForMib(106)->toUnicode(this->hedylamarr_socket.readAll()));
+        emit newCommand(command);
     }
     else{
         this->displayMessage("Can't use manual commands while stabilizing");
@@ -234,8 +216,43 @@ void HedyLamarrGui::SetStepSize(){
 }
 
 void HedyLamarrGui::sendCommand(QString command){
+    if (this->hedylamarr_socket.state() == QAbstractSocket::UnconnectedState){
+        this->hedylamarr_socket.connectToHost(QHostAddress("127.0.0.1"),2400);
+    }
     this->hedylamarr_socket.write(command.toUtf8());
     this->displayResponse(QTextCodec::codecForMib(106)->toUnicode(this->hedylamarr_socket.readAll()));
+    emit newOffset();
+}
+/*
+void HedyLamarrGui::setCurrentOffset(){
+    if (this->hedylamarr_socket.state() == QAbstractSocket::UnconnectedState){
+        this->hedylamarr_socket.connectToHost(QHostAddress("127.0.0.1"),2400);
+    }
+    QString NScommand = "$SOR,0000000040,93,1,41=51:164,$EOM,$EOR";
+    this->hedylamarr_socket.write(NScommand.toUtf8());
+    std::this_thread::sleep_for(std::chrono::seconds(this->updateRate));
+
+    QString NSresponse = QTextCodec::codecForMib(106)->toUnicode(this->hedylamarr_socket.readAll());
+    std::cout << NSresponse.toStdString() <<std::endl;
+    this->displayResponse(NSresponse);
+    QString EWcommand = "$SOR,0000000040,93,1,41=51:163,$EOM,$EOR";
+    this->hedylamarr_socket.write(EWcommand.toUtf8());
+    QString EWresponse = QTextCodec::codecForMib(106)->toUnicode(this->hedylamarr_socket.readAll());
+    std::cout << EWresponse.mid(38,8).toDouble() <<std::endl;
+    this->displayResponse(EWresponse);
+}
+*/
+
+
+void HedyLamarrGui::updateOffsetDisplay(){
+    this->ui->LE_currentNSoffset->setText(QString::number(this->NSoffset));
+    this->ui->LE_currentEWoffset->setText(QString::number(this->EWoffset));
+}
+
+void HedyLamarrGui::setInitialOffset(){
+    this->NSoffset = this->ui->LE_initialNSoffset->text().toDouble();
+    this->EWoffset = this->ui->LE_initialEWoffset->text().toDouble();
+    emit newOffset();
 }
 
 void HedyLamarrGui::displayMessage(QString message, bool error){
@@ -247,69 +264,112 @@ void HedyLamarrGui::displayMessage(QString message, bool error){
 }
 
 void HedyLamarrGui::updateDisplay(){
-    this->ui->LE_xLastCentroid->setText(QString::number(this->centroidContainer->meanCentroidX, this->positionFormat, this->positionPrecision));
-    this->ui->LE_yLastCentroid->setText(QString::number(this->centroidContainer->meanCentroidX, this->positionFormat, this->positionPrecision));
+    this->ui->LE_xCurrentCentroid->setText(QString::number(this->centroidContainer->meanCentroidX, this->positionFormat, this->positionPrecision));
+    this->ui->LE_yCurrentCentroid->setText(QString::number(this->centroidContainer->meanCentroidY, this->positionFormat, this->positionPrecision));
 }
+
 void HedyLamarrGui::displayResponse(QString response){
     this->ui->TE_HedyResponse->append(response);
     this->ui->TE_HedyResponse->update();
 }
+
+void HedyLamarrGui::moveToDisplayOffset(){
+    this->NSoffset = this->ui->LE_goToOffsetNS->text().toDouble();
+    this->EWoffset = this->ui->LE_goToOffsetEW->text().toDouble();
+    QString NScommand = "$SOR,0000000056,94,2,41=51:164,164=48:" + QString::number(this->NSoffset, 'f', 6) + ",$EOM,$EOR";
+    emit newCommand(NScommand);
+    QString EWcommand = "$SOR,0000000056,94,2,41=51:163,163=48:"+  QString::number(this->EWoffset, 'f', 6) + ",$EOM,$EOR";
+    emit newCommand(EWcommand);
+}
+
 void HedyLamarrGui::initPlot(){
     //set the time format of the x-axis.
     QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime);
     dateTicker->setDateTimeFormat("hh:mm:ss");
     //clear plot if necessary
+    //this->ui->StabilizationPlot->plotLayout()->clear();
     this->ui->StabilizationPlot->clearGraphs();
-    //
-    this->ui->StabilizationPlot->addGraph();
-    this->ui->StabilizationPlot->graph(0)->setPen(QPen(QColor(40, 110, 255)));
-    this->ui->StabilizationPlot->graph(0)->setName(QString("W"));
+    //this->ui->StabilizationPlot->plotLayout()->remove(this->ui->StabilizationPlot->plotLayout()->element(0,0));
+    //this->ui->StabilizationPlot->plotLayout()->simplify();
+    this->plotData_hTilt.clear();
+    this->plotData_vTilt.clear();
+    this->plotData_hPix.clear();
+    this->plotData_vPix.clear();
+    QFont titleFont =  QFont("sans", 12, QFont::Bold);
+    QFont legendFont =  QFont("sans", 8, QFont::Bold);
+    QFont axisFont = QFont("sans", 12, QFont::Bold);
+    QPen pixelPen;
+    QPen tiltPen;
+    pixelPen.setStyle(Qt::DotLine);
+    pixelPen.setWidthF(2);
+    tiltPen.setStyle(Qt::DotLine);
+    tiltPen.setWidthF(2);
+
+    this->ui->StabilizationPlot->addGraph(this->ui->StabilizationPlot->xAxis, this->ui->StabilizationPlot->yAxis);
+    tiltPen.setColor(Qt::blue);
+    this->ui->StabilizationPlot->graph(0)->setPen(tiltPen);
+    this->ui->StabilizationPlot->graph(0)->setName(QString("Horizontal tilt"));
+
+    this->ui->StabilizationPlot->addGraph(this->ui->StabilizationPlot->xAxis, this->ui->StabilizationPlot->yAxis);
+    tiltPen.setColor(Qt::red);
+    this->ui->StabilizationPlot->graph(1)->setPen(tiltPen);
+    this->ui->StabilizationPlot->graph(1)->setName(QString("Vertical tilt"));
+
+    this->ui->StabilizationPlot->addGraph(this->ui->StabilizationPlot->xAxis2, this->ui->StabilizationPlot->yAxis2);
+    pixelPen.setColor(Qt::red);
+    this->ui->StabilizationPlot->graph(2)->setPen(pixelPen);
+    //this->ui->StabilizationPlot->graph(2)->setBrush(QBrush(Qt::red));
+    this->ui->StabilizationPlot->graph(2)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssSquare, 5));
+    this->ui->StabilizationPlot->graph(2)->setName(QString("Vertical pixel offset"));
+
+    this->ui->StabilizationPlot->addGraph(this->ui->StabilizationPlot->xAxis2, this->ui->StabilizationPlot->yAxis2);
+    pixelPen.setColor(Qt::blue);
+    this->ui->StabilizationPlot->graph(3)->setPen(pixelPen);
+    //this->ui->StabilizationPlot->graph(3)->setBrush(QBrush(Qt::blue));
+    this->ui->StabilizationPlot->graph(3)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssSquare, 5));
+    this->ui->StabilizationPlot->graph(3)->setName(QString("Horizontal pixel offset"));
+
     this->ui->StabilizationPlot->xAxis->setLabel("");
     this->ui->StabilizationPlot->xAxis->setTicker(dateTicker);
+    this->ui->StabilizationPlot->xAxis->setLabelFont(axisFont);
     this->ui->StabilizationPlot->yAxis->setLabel("[urad]");
-    this->ui->StabilizationPlot->plotLayout()->insertRow(0);
-    this->ui->StabilizationPlot->plotLayout()->addElement(0, 0, new QCPTextElement(this->ui->StabilizationPlot, "Stabilization History"));
-    this->ui->StabilizationPlot->addGraph();
-    this->ui->StabilizationPlot->graph(1)->setName(QString("V"));
-    this->ui->StabilizationPlot->graph(1)->setPen(QPen(Qt::red));
-    this->ui->StabilizationPlot->legend->setVisible(true);
-    this->ui->StabilizationPlot->replot();
+    this->ui->StabilizationPlot->yAxis->setLabelFont(axisFont);
+    this->ui->StabilizationPlot->yAxis2->setVisible(true);
+    this->ui->StabilizationPlot->yAxis2->setLabel("Pixels");
+    this->ui->StabilizationPlot->yAxis2->setLabelFont(axisFont);
+    if (!this->ui->StabilizationPlot->plotLayout()->hasElement(0, 0)){
+        this->ui->StabilizationPlot->plotLayout()->insertRow(0);
+        this->ui->StabilizationPlot->plotLayout()->addElement(0, 0, new QCPTextElement(this->ui->StabilizationPlot, "Stabilization History", titleFont));
+    }
 
-    this->ui->StabilizationPlot->addGraph();
-    this->ui->StabilizationPlot->graph(2)->setName(QString("Y"));
-    this->ui->StabilizationPlot->graph(2)->setPen(QPen(Qt::red));
-    this->ui->StabilizationPlot->graph(2)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCross, 5));
     this->ui->StabilizationPlot->legend->setVisible(true);
-
-    this->ui->StabilizationPlot->addGraph();
-    this->ui->StabilizationPlot->graph(3)->setName(QString("X"));
-    this->ui->StabilizationPlot->graph(3)->setPen(QPen(QColor(40, 110, 255)));
-    this->ui->StabilizationPlot->graph(3)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCross, 5));
-    this->ui->StabilizationPlot->legend->setVisible(true);
+    this->ui->StabilizationPlot->legend->setFont(legendFont);
+    this->ui->StabilizationPlot->legend->setBrush(QBrush(QColor(255, 255, 255, 230)));
 
     this->ui->StabilizationPlot->replot();
+
 }
 
 void HedyLamarrGui::updatePlot(){
 
-    if(this->plotDataHTilt.size() > this->maxXRangePlot){
-        this->plotDataHTilt.pop_front();
-        this->plotDataVTilt.pop_front();
-        this->plotDataXDeviation.pop_front();
-        this->plotDataYDeviation.pop_front();
+    if(this->plotData_hTilt.size() > this->maxXRangePlot){
+        this->plotData_hTilt.pop_front();
+        this->plotData_vTilt.pop_front();
+        this->plotData_hPix.pop_front();
+        this->plotData_vPix.pop_front();
     }
 
     this->ui->StabilizationPlot->yAxis->setRange(-this->maxYRangePlot, this->maxYRangePlot);
     this->ui->StabilizationPlot->rescaleAxes();
-    this->ui->StabilizationPlot->graph(0)->data()->set(plotDataHTilt);
-    this->ui->StabilizationPlot->graph(1)->data()->set(plotDataVTilt);
-    this->ui->StabilizationPlot->graph(2)->data()->set(plotDataYDeviation);
-    this->ui->StabilizationPlot->graph(3)->data()->set(plotDataXDeviation);
+    this->ui->StabilizationPlot->graph(0)->data()->set(plotData_hTilt);
+    this->ui->StabilizationPlot->graph(1)->data()->set(plotData_vTilt);
+    this->ui->StabilizationPlot->graph(2)->data()->set(plotData_vPix);
+    this->ui->StabilizationPlot->graph(3)->data()->set(plotData_hPix);
 
     this->ui->StabilizationPlot->replot();
     this->ui->StabilizationPlot->savePdf(this->folderName + "/HedyLamarrStabilizationPlot.pdf" );
 
-    this->stabilizationDataStream << this->plotDataHTilt.last().key << "\t" << this->plotDataXDeviation.last().value << "\t" << this->plotDataYDeviation.last().value << "\t" << this->plotDataHTilt.last().value << "\t" << this->plotDataVTilt.last().value << "\n";
+    this->stabilizationDataStream << this->plotData_hTilt.last().key << "\t" << this->plotData_hPix.last().value << "\t" << this->plotData_vPix.last().value << "\t" << this->plotData_hTilt.last().value << "\t" << this->plotData_vTilt.last().value << "\n";
     this->stabilizationDataStream.flush();
 }
 

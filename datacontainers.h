@@ -25,6 +25,19 @@ double radToArcSec = 206264.81;
 double pixToHedyLamarr = pixFieldOfView*radToArcSec; //rough calculation, pixel to degrees rotation
 };
 
+/********************************************//**
+ *  Container for relevant parameters of the receiver optics
+ ***********************************************/
+struct receiverOpticsInfo
+{
+  double f1 = 2.032; // meade telescope
+  double f2 = 0.05; // achromat collimator lens
+  double f3 = 0.05; // achromat focusing lens
+  double magnification = f1/f2; //magnification of collimation setup
+  double pixSize = 5.5e-6;
+  double pixFoVrad = pixSize/(f3*magnification);
+  double pixFoVdeg = pixFoVrad*360/(6.28);//0.00015516
+};
 
 /********************************************//**
  *  Container for relevant parameters of the H-850.H2 Hexapod
@@ -68,14 +81,8 @@ double vV = 6e-3;       //rad/s
 double vU = 6e-3;       //rad/s
 
 //conversion factor: pixel distance to hexapod motion
-double f1 = 2.032; // meade telescope
-double f2 = 0.05; // achromat collimator lens
-double f3 = 0.05; // achromat focusing lens
-double magnification = f1/f2; //magnification of collimation setup
-double pixSize = 5.5e-6;
-double pixFoVrad = pixSize/(f3*magnification);
-double pixFoVdeg = pixFoVrad*360/(6.28);//0.00015516
-double pixToHex = pixFoVdeg;
+receiverOpticsInfo receiverOptics;
+double pixToHex = receiverOptics.pixFoVdeg;
 //double pixToHex = 0.0001937*0.5;//*7.5/5; //rough calculation, pixel to degrees rotation
 };
 
@@ -138,8 +145,10 @@ struct CamInfo
         FrameWidth=2044;
         OffsetX=0;
         OffsetY=0;
+        frameRate=10.0;
     }
     std::string DeviceNr;
+    double FrameRate;
     double ExposureMax;
     double ExposureMin;
     double ExposureActual;
@@ -155,6 +164,7 @@ struct CamInfo
     int FrameWidth;
     int OffsetX;
     int OffsetY;
+    double frameRate;
     std::string BaumerID;
     std::string BaumerIQOQI = "devicemodul00_06_be_00_8f_92";
     std::string BaumerBisamberg = "devicemodul00_06_be_00_9d_56";
@@ -165,30 +175,8 @@ struct CamInfo
  ***********************************************/
 struct TrackingParameters
 {
-    TrackingParameters(){
-        Wavelength = 532e-9; //green
-        ApertureDiameter = 2.54e-2; //last lense
-        //254e-3; // 254mm
-        //ApertureDiameter = 2*2.54/100;
-        FocalLength = 7.5e-2;
-        PixelWidth = 5.5e-6;
-        TrackingThresh = 100; //brightness threshold 0-255
-        WindowRadius = 1;
-        AiryMinRatio = FocalLength*(Wavelength/ApertureDiameter)/PixelWidth;
-        for (int i = 0; i<20;i++){
-            pxAiryZeros[i] = int( (i+1.24)*AiryMinRatio +0.5 );
-        }
-        useWindowing = false;
-    }
-    int TrackingThresh;
-    int pxAiryZeros [20];
-    int WindowRadius;
-    double AiryMinRatio;
-    double Wavelength;
-    double ApertureDiameter;
-    double PixelWidth;
-    double FocalLength;
-    //std::atomic<bool> isTracking;
+    int TrackingThresh = 100; //brightness threshold 0-255
+    int WindowRadius = 1; //pixels from center
     std::atomic<bool> useWindowing;
 };
 
@@ -198,25 +186,28 @@ struct TrackingParameters
 struct seeingParameters
 {
     seeingParameters(){
-        double AiryMinRatio = focalLength*(wavelength/apertureDiameter)/pxWidth;
+        double AiryMinRatio = receiverOptics.f3*receiverOptics.magnification*(wavelength/maskApertureDiameter)/receiverOptics.pixSize;
         for (int i = 0; i<20;i++){
-            pxAiryZeros[i] = int( (i+1.24)*AiryMinRatio +0.5 );
+            pxAiryZeros[i] = int( (i+1.22)*AiryMinRatio +0.5 );
          }
     }
     double exposureTime;
+    double frameRate;
+    receiverOpticsInfo receiverOptics;
     //meters
-    double apertureDiameter = 0.026; //meade setup
-    double focalLength = 0.05;// final focusing lens
+    double maskApertureDiameter = 0.026; //DIMM mask
+    double maskApertureSeparation = 0.16; //DIMM mask
     double wavelength = 532e-9; //Green LEDs
-    double pxWidth = 5.5e-6; //Baumer cam
-    double pxHeight = 5.5e-6; //Baumer cam
+    //double focalLength = receiverOptics.f3;// final focusing lens
+    double pxWidth = receiverOptics.pixSize; //Baumer cam
+    double pxHeight = receiverOptics.pixSize; //Baumer cam
+    //double magnification = receiverOptics.magnification;
     int pxAiryZeros [20];//location of airy minimas in the image plane in pixels.
-    int pxWindowRadius = 10; //radius of crop window used in windowing algorithm. Is set through the seeinggui.
-    //parameters for DIMM measurements
-    double apertureSeparation = 0.16; //meade setup
-    double K_l = 0.364*( 1-0.532 * std::pow((apertureSeparation/apertureDiameter), -1/3) - 0.024 * std::pow((apertureSeparation/apertureDiameter),-7./3.));
-    double K_t = 0.364*( 1-0.798 * std::pow((apertureSeparation/apertureDiameter), -1/3) - 0.018 * std::pow((apertureSeparation/apertureDiameter),-7./3.));
-    double magnification = 2.032/0.05;
+    int pxWindowRadius = 10;
+    //int pxWindowRadius = 10; //radius of crop window used in windowing algorithm. Is set through the seeinggui.
+    //parameters for DIMM calculations
+    double K_l = 0.364*( 1-0.532 * std::pow((maskApertureSeparation/maskApertureDiameter), -1/3) - 0.024 * std::pow((maskApertureSeparation/maskApertureDiameter),-7./3.));
+    double K_t = 0.364*( 1-0.798 * std::pow((maskApertureSeparation/maskApertureDiameter), -1/3) - 0.018 * std::pow((maskApertureSeparation/maskApertureDiameter),-7./3.));
 };
 
 
@@ -283,6 +274,34 @@ struct DIMMsample
     }
 };
 
+struct gaussianFitParams{
+    double intensitymax;
+    double var_x;
+    double var_y;
+    double center_x;
+    double center_y;
+    double sigma_cov;
+    double numSaturatedPixels;
+};
+
+struct GaussSample{
+    std::vector<gaussianFitParams> fitParams;
+    inline double FWHM_x(){
+        double avg = 0.0;
+        for (unsigned int i = 0; i < fitParams.size(); i++){
+            avg+= pow(fitParams.at(i).var_x,0.5)*2.355;
+        }
+        return avg/fitParams.size();
+    }
+    inline double FWHM_y(){
+        double avg = 0.0;
+        for (unsigned int i = 0; i < fitParams.size(); i++){
+            avg+= pow(fitParams.at(i).var_y,0.5)*2.355;
+        }
+        return avg/fitParams.size();
+    }
+};
+
 /********************************************//**
  *  Container for seeing data collected continuously through the measurement
  ***********************************************/
@@ -301,6 +320,8 @@ struct seeingValues
     QVector<QCPGraphData> friedData_y;
     QVector<QCPGraphData> seeingData;
     QVector<double> plotTimes;
+    QVector<QCPGraphData> avgFriedPlot;
+    QVector<QCPGraphData> avgSeeingPlot;
     double minFried(){
         return *std::min_element(fried.constBegin(), fried.constEnd());
     }

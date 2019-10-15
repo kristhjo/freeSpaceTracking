@@ -42,20 +42,24 @@ public:
 private:
     Ui::SeeingGui *ui;
     std::unique_ptr<std::thread> DIMM_thread = nullptr; ///< Thread handling the real-time image processing through the DIMM() function.
+    std::unique_ptr<std::thread> Gauss_thread = nullptr; ///< Thread handling the real-time image processing through the DIMM() function.
 
     std::atomic<bool> isProcessing; ///< Flags that the real-time processing loop is active.
 
     bool storeImages; ///< flags if the data from the DIMM measurement should be stored or thrown away.
     unsigned int sampleSize; ///< sets the number of images used as sample size for each data point.
-
+    bool debug;
+    void debugDIMM(cv::Mat image, int label);
+    void debugGaussian(cv::Mat image, int label);
+    datacontainers::GaussSample m_GaussSample;
     datacontainers::DIMMsample m_DIMMsample; ///< Contains the spotseparations of a DIMM sample, as well as functions for calculating the average and variance of the sample.
     datacontainers::seeingValues m_seeingValues; ///< Container for fried and seeing values implemented with QCPGraphData Qvectors for ease of plotting and max, min, mean functions.
 
     double getFriedParameter(); ///< Calculates the Fried parameter of m_DIMMsample.
     double getFriedParameter_x(); ///< Calculates the Fried parameter of m_DIMMsample.
     double getFriedParameter_y(); ///< Calculates the Fried parameter of m_DIMMsample.
-
     double getSeeingFromFried(double FriedParameter, double wavelength); ///< Converts a Fried parameter to a seeing value.
+    double getFriedFromSeeing(double SeeingParameter, double wavelength); ///< Converts a Seeing value into a Fried parameter
 
     int displayPrecision = 3; ///< Precision used for Qstring representation of the display values
     char displayFormat = 'f'; ///< Format used for Qstring representation of the display values
@@ -72,6 +76,7 @@ private:
     QTextStream writeResults;
     std::fstream testStream;
     void DIMM(); ///< Handles the real-time processing of images in m_imageContainer. DIMM() calculates the spotseparation of each image in m_imagecontainer and subsequently the fried parameter and seeing value when the sample size is reached. It also handles the storage of data according to the setup parameters, and continuously updates the gui display. DIMM() is run in a separate thread and terminates when stopMeasurement() is called.
+    void Gaussian();
     void plotFriedParameter(); ///< Updates the fried parameter plot in the gui.
     void plotSeeing(); ///< Updates the seeing plot in the gui.
     void initPlots(); ///< Initializes the seeing and fried parameter plots in the gui.
@@ -80,6 +85,11 @@ private:
     void setMeasurementSettings(); ///< Reads the measurement settings chosen in the gui.
     QString timestampToFolderName(time_t timestamp); ///< Formats a more readable folder name from the current unix timestamp.
     void setSecPerDataPoint(); ///< Displays the length in seconds of each measurement interval. I.e. the sample size times the exposure time of the camera.
+    bool friedTitlePresent = false;
+    bool seeingTitlePresent = false;
+    QCPTextElement *avgFriedLabel;
+    QCPItemText *friedTextLabel;
+    QCPItemText *seeingTextLabel;
 private slots:
     void replotSeeing(); ///< Updates the plots of seeing values and fried parameters in the gui.
     void updateSeeingPanel(); ///< Updates the display of the maximum, minimum, mean and current fried parameter and seeing value in the gui.
@@ -91,4 +101,3 @@ signals:
 };
 
 #endif // SEEINGGUI_H
-
