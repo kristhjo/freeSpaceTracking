@@ -11,6 +11,7 @@
 #include <fstream>
 #include <algorithm>
 #include <numeric>
+#include <math.h>
 #include "imageprocessing.h"
 #include "datacontainers.h"
 

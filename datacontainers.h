@@ -285,20 +285,14 @@ struct gaussianFitParams{
 };
 
 struct GaussSample{
-    std::vector<gaussianFitParams> fitParams;
+    gaussianFitParams fitParams;
+    cv::Mat gaussImg;
+    int cropSize = 30;
     inline double FWHM_x(){
-        double avg = 0.0;
-        for (unsigned int i = 0; i < fitParams.size(); i++){
-            avg+= pow(fitParams.at(i).var_x,0.5)*2.355;
-        }
-        return avg/fitParams.size();
+        return pow(fitParams.var_x,0.5)*2.355;
     }
     inline double FWHM_y(){
-        double avg = 0.0;
-        for (unsigned int i = 0; i < fitParams.size(); i++){
-            avg+= pow(fitParams.at(i).var_y,0.5)*2.355;
-        }
-        return avg/fitParams.size();
+        return pow(fitParams.var_y,0.5)*2.355;
     }
 };
 

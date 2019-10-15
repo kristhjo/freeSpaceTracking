@@ -40,11 +40,27 @@ void SeeingGui::startMeasurement(){
     if (this->measurementType == "DIMM"){
         this->DIMM_thread = std::make_unique<std::thread>(&SeeingGui::DIMM,this); //Initiates a real-time image processing loop while images are captured.
     }
-    else if (this->measurementType == "Gaussian"){
+    else if (this->measurementType == "Gaussian fit"){
         this->displayMessage("No support for Gaussian seeing measurements at this time.");
         this->Gauss_thread = std::make_unique<std::thread>(&SeeingGui::Gaussian,this); //Initiates a real-time image processing loop while images are captured.
         return;
     }
+}
+
+void SeeingGui::setMeasurementSettings(){
+    this->m_seeingParams.pxWindowRadius = this->m_seeingParams.pxAiryZeros[this->ui->SB_WindowingRadius->value()]; //this->ui->SB_WindowingRadius->value();
+    this->storeImages = this->ui->CheckB_Yes->isChecked();
+    this->debug = this->ui->CheckB_Debug->isChecked();
+    this->measurementType = this->ui->ComboB_MeasurementType->currentText();
+    if(this->ui->LE_DirectoryPath->text().back() != "/"){   //corrects for a missing "/" at the end of the directory path in the user input
+        this->directoryPath = this->ui->LE_DirectoryPath->text() + "/";
+    }
+    else {
+        this->directoryPath = this->ui->LE_DirectoryPath->text();
+    }
+    this->baseDirectory.setPath(this->directoryPath);
+    this->sampleSize = this->ui->LE_SampleSize->text().toUInt();
+    this->m_imageContainer->sampleSize = this->sampleSize;
 }
 
 void SeeingGui::stopMeasurement(){
@@ -172,14 +188,21 @@ void SeeingGui::debugDIMM(cv::Mat image, int label){
 void SeeingGui::Gaussian(){
     unsigned int counter = 1;
     this->isProcessing.store(true, std::memory_order_release);
-    datacontainers::gaussianFitParams tempParams;
+    std::cout << "here" << std::endl;
     while ((this->isMeasuringSeeing->load(std::memory_order_acquire)==true) || (this->m_imageContainer->imgQueue.size() != 0)){
-
         if(this->m_imageContainer->imgQueue.size() == 0){
+            std::cout << "at imgQueue == 0" << std::endl;
             emit newMessage("waiting for imgQueue to fill up"); //DIMM() is not run through the main SeeingGui thread, so interaction with the gui such as text display must be implemented through signals/slots.
             std::this_thread::sleep_for(std::chrono::seconds(3));
         }
         if (counter == this->sampleSize){//When counter reaches the sample size, calculate and plot the seeing/fried values
+            if (this->debug){
+                std::cout << "at debug " << std::endl;
+                this->debugGaussian(this->m_GaussSample.gaussImg, counter);
+            }
+            std::cout << "counter == samplesize" << std::endl;
+            this->m_GaussSample.fitParams = imageprocessing::getGaussianFitParams(this->m_GaussSample.gaussImg, this->m_seeingParams.pxWindowRadius);
+            std::cout << "calculated fitparams" << std::endl;
 
             this->m_seeingValues.seeing_x.push_back(this->m_GaussSample.FWHM_x());
             this->m_seeingValues.seeing_y.push_back(this->m_GaussSample.FWHM_y());
@@ -190,11 +213,11 @@ void SeeingGui::Gaussian(){
             this->m_seeingValues.seeing.push_back( (this->m_seeingValues.seeing_x.last() + this->m_seeingValues.seeing_y.last() )/2.0);//    getSeeingFromFried(this->m_seeingValues.fried.last(), this->m_seeingParams.wavelength));
             emit newSeeingValues(); // updates the plots and display in gui
             counter = 1; //reset counter and empty m_DIMMsample
-
             this->m_GaussSample = {};
         }
 
         if (counter == 1){//At the beginning of a sample, store the timestamp. If storeImages = true, create a folder where images can be stored.
+            std::cout << "at counter == 1" << std::endl;
             this->m_seeingValues.timestamps.push_back(this->m_imageContainer->startTime);
             if(this->storeImages){
                 this->currentSubFolderName = this->timestampToFolderName(this->m_imageContainer->startTime);
@@ -205,32 +228,40 @@ void SeeingGui::Gaussian(){
         }
 
         if (!this->m_imageContainer->imgQueue.empty()){ //If there are images queued in the m_imagecontainer, process the oldest one.
+
             cv::Mat img = this->m_imageContainer->imgQueue.front();
-            if (this->storeImages){
-                if(!cv::imwrite( this->directoryPath.toStdString() + this->currentSubFolderName.toStdString()  + "/img_" + std::to_string(counter) + ".jpg", img)){
-                    emit newMessage("Failed to save image", true);
-                }
-            }
-            if (this->debug){
-                this->debugGaussian(img, counter);
-            }
-            //Calculate the spotseparation of the image, then remove it from m_imageContainer.
-            tempParams = imageprocessing::getGaussianFitParams(img, this->m_seeingParams.pxWindowRadius);
-            if (tempParams.intensitymax < 10){
+            cv::Mat croppedImg;
+            imageprocessing::cropWindow(img, croppedImg, this->m_seeingParams.pxWindowRadius);
+
+            if (cv::countNonZero(croppedImg > 10) < 1){
                 std::cout << "skipped image due to low intensity" << std::endl;
                 this->m_imageContainer->removeFirstImg();
                 continue;
             }
-            else if (tempParams.numSaturatedPixels > 1){
-                std::cout << "skipped image due to " <<  tempParams.numSaturatedPixels << " saturated pixels" << std::endl;
+            else if (cv::countNonZero(croppedImg == 255) > 10){
+                std::cout << "skipped image due to saturated pixels" << std::endl;
                 this->m_imageContainer->removeFirstImg();
                 continue;
             }
-            else{
-                this->m_GaussSample.fitParams.push_back(tempParams);
+            if(counter == 1){
+                this->m_GaussSample.gaussImg = croppedImg;
+            }
+            else {
+                cv::add(this->m_GaussSample.gaussImg, croppedImg, this->m_GaussSample.gaussImg, cv::Mat(), CV_32S);
+            }
+
+            std::cout << "added img to gaussimg" << std::endl;
+            cv::imshow("gaussian", this->m_GaussSample.gaussImg);
+            if (this->storeImages){
+                std::cout << "at store img" << std::endl;
+                if(!cv::imwrite( this->directoryPath.toStdString() + this->currentSubFolderName.toStdString()  + "/img_" + std::to_string(counter) + ".jpg", img)){
+                    emit newMessage("Failed to save image", true);
+                }
+                if(!cv::imwrite( this->directoryPath.toStdString() + this->currentSubFolderName.toStdString()  + "/gaussImg_" + std::to_string(counter) + ".jpg", this->m_GaussSample.gaussImg)){
+                    emit newMessage("Failed to save gaussimg", true);
+                }
             }
             this->m_imageContainer->removeFirstImg();
-
         }
         else {
             std::this_thread::sleep_for(std::chrono::seconds(3));
@@ -244,14 +275,63 @@ void SeeingGui::Gaussian(){
 }
 
 void SeeingGui::debugGaussian(cv::Mat image, int label){
-    cv::Mat gaussFitImg, croppedImg;
+    cv::Mat gaussPlot(image.size(), CV_32S, cv::Scalar(0));
     datacontainers::gaussianFitParams fitParams = imageprocessing::getGaussianFitParams(image, this->m_seeingParams.pxWindowRadius);
-    imageprocessing::cropWindow(image, croppedImg, this->m_seeingParams.pxWindowRadius);
-    imageprocessing::drawGaussian(gaussFitImg, fitParams);
-    cv::hconcat(croppedImg, gaussFitImg, croppedImg);
-    if(!cv::imwrite( this->directoryPath.toStdString() + this->currentSubFolderName.toStdString()  + "/debug_img_" + std::to_string(label) + ".jpg", croppedImg)){
-        emit newMessage("Failed to save debug image", true);
+    //imageprocessing::drawGaussian(gaussPlot, fitParams);
+    //cv::hconcat(image, gaussPlot, image);
+
+    // configure axis rect:
+    QCustomPlot *customPlot = new QCustomPlot(this);
+    customPlot->axisRect()->setupFullAxesBox(true);
+    customPlot->xAxis->setLabel("x");
+    customPlot->yAxis->setLabel("y");
+
+    // set up the QCPColorMap:
+    QCPColorMap *colorMap = new QCPColorMap(customPlot->xAxis, customPlot->yAxis);
+    int nx = image.size().width;
+    int ny = image.size().height;
+    colorMap->data()->setSize(nx, ny); // we want the color map to have nx * ny data points
+    colorMap->data()->setRange(QCPRange(-4, 4), QCPRange(-4, 4)); // and span the coordinate range -4..4 in both key (x) and value (y) dimensions
+    // now we assign some data, by accessing the QCPColorMapData instance of the color map:
+    double x, y, z;
+    for (int xIndex=0; xIndex<nx; ++xIndex)
+    {
+      for (int yIndex=0; yIndex<ny; ++yIndex)
+      {
+        colorMap->data()->cellToCoord(xIndex, yIndex, &x, &y);
+        z = fitParams.intensitymax*(exp(-pow((x-fitParams.center_x),2)/(2*pow(fitParams.var_x,2)) -pow((x-fitParams.center_y),2)/(2*pow(fitParams.var_y,2))));
+        colorMap->data()->setCell(xIndex, yIndex, z);
+      }
     }
+
+    // add a color scale:
+    QCPColorScale *colorScale = new QCPColorScale(customPlot);
+    customPlot->plotLayout()->addElement(0, 1, colorScale); // add it to the right of the main axis rect
+    colorScale->setType(QCPAxis::atRight); // scale shall be vertical bar with tick/axis labels right (actually atRight is already the default)
+    colorMap->setColorScale(colorScale); // associate the color map with the color scale
+    colorScale->axis()->setLabel("Magnetic Field Strength");
+
+    // set the color gradient of the color map to one of the presets:
+    colorMap->setGradient(QCPColorGradient::gpPolar);
+    // we could have also created a QCPColorGradient instance and added own colors to
+    // the gradient, see the documentation of QCPColorGradient for what's possible.
+
+    // rescale the data dimension (color) such that all data points lie in the span visualized by the color gradient:
+    colorMap->rescaleDataRange();
+
+    // make sure the axis rect and color scale synchronize their bottom and top margins (so they line up):
+    QCPMarginGroup *marginGroup = new QCPMarginGroup(customPlot);
+    customPlot->axisRect()->setMarginGroup(QCP::msBottom|QCP::msTop, marginGroup);
+    colorScale->setMarginGroup(QCP::msBottom|QCP::msTop, marginGroup);
+
+    // rescale the key (x) and value (y) axes so the whole color map is visible:
+    customPlot->rescaleAxes();
+    customPlot->savePdf(this->directoryPath + this->currentSubFolderName + "/debugGaussian.pdf");
+
+
+    //if(!cv::imwrite( this->directoryPath.toStdString() + this->currentSubFolderName.toStdString()  + "/debug_img_" + std::to_string(label) + ".jpg", image)){
+    //    emit newMessage("Failed to save debug image", true);
+    //}
 }
 
 
@@ -317,21 +397,6 @@ double SeeingGui::getFriedFromSeeing(double SeeingParameter, double wavelength){
     return 0.98*wavelength/SeeingParameter;
 }
 
-void SeeingGui::setMeasurementSettings(){
-    this->m_seeingParams.pxWindowRadius = this->m_seeingParams.pxAiryZeros[this->ui->SB_WindowingRadius->value()]; //this->ui->SB_WindowingRadius->value();
-    this->storeImages = this->ui->CheckB_Yes->isChecked();
-    this->debug = this->ui->CheckB_Debug->isChecked();
-    this->measurementType = this->ui->ComboB_MeasurementType->currentText();
-    if(this->ui->LE_DirectoryPath->text().back() != "/"){   //corrects for a missing "/" at the end of the directory path in the user input
-        this->directoryPath = this->ui->LE_DirectoryPath->text() + "/";
-    }
-    else {
-        this->directoryPath = this->ui->LE_DirectoryPath->text();
-    }
-    this->baseDirectory.setPath(this->directoryPath);
-    this->sampleSize = this->ui->LE_SampleSize->text().toUInt();
-    this->m_imageContainer->sampleSize = this->sampleSize;
-}
 
 QString SeeingGui::timestampToFolderName(time_t timestamp){
     QDateTime t(QDateTime::fromTime_t(timestamp));
