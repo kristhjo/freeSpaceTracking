@@ -18,9 +18,9 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>240</y>
+      <y>300</y>
       <width>1031</width>
-      <height>271</height>
+      <height>251</height>
      </rect>
     </property>
    </widget>
@@ -159,7 +159,7 @@
     <property name="geometry">
      <rect>
       <x>620</x>
-      <y>80</y>
+      <y>60</y>
       <width>421</width>
       <height>61</height>
      </rect>
@@ -349,7 +349,7 @@
     <property name="geometry">
      <rect>
       <x>620</x>
-      <y>160</y>
+      <y>130</y>
       <width>421</width>
       <height>61</height>
      </rect>
@@ -445,6 +445,127 @@
     <property name="text">
      <string>0.0</string>
     </property>
+   </widget>
+   <widget class="QFrame" name="stabilizationFrame">
+    <property name="geometry">
+     <rect>
+      <x>620</x>
+      <y>200</y>
+      <width>421</width>
+      <height>91</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::StyledPanel</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Raised</enum>
+    </property>
+    <widget class="QLabel" name="label_deadTime">
+     <property name="geometry">
+      <rect>
+       <x>60</x>
+       <y>30</y>
+       <width>91</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Dead time (s)</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_integrationTime">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>60</y>
+       <width>131</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Integration time (s)</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_proportionalGain">
+     <property name="geometry">
+      <rect>
+       <x>230</x>
+       <y>60</y>
+       <width>121</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Proportional gain</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_stabilizationParameters">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>181</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Stabilization parameters</string>
+     </property>
+    </widget>
+    <widget class="QSpinBox" name="SB_deadTime">
+     <property name="geometry">
+      <rect>
+       <x>170</x>
+       <y>30</y>
+       <width>48</width>
+       <height>26</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QSpinBox" name="SB_integrationTime">
+     <property name="geometry">
+      <rect>
+       <x>170</x>
+       <y>60</y>
+       <width>48</width>
+       <height>26</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QDoubleSpinBox" name="dSB_proportionalGain">
+     <property name="geometry">
+      <rect>
+       <x>360</x>
+       <y>60</y>
+       <width>51</width>
+       <height>26</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_maxMotion">
+     <property name="geometry">
+      <rect>
+       <x>230</x>
+       <y>30</y>
+       <width>121</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Max. motion (px)</string>
+     </property>
+    </widget>
+    <widget class="QSpinBox" name="SB_maxMotion">
+     <property name="geometry">
+      <rect>
+       <x>360</x>
+       <y>30</y>
+       <width>48</width>
+       <height>26</height>
+      </rect>
+     </property>
+    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">

@@ -18,6 +18,21 @@ HedyLamarrGui::HedyLamarrGui(QWidget *parent) :
     this->ui->SB_stepSize->setMaximum(3600);
     this->ui->SB_stepSize->setValue(5);
 
+    this->ui->dSB_proportionalGain->setRange(0.0,1.0);
+    this->ui->dSB_proportionalGain->setSingleStep(0.1);
+
+    this->ui->SB_deadTime->setRange(0,20);
+    this->ui->SB_deadTime->setSingleStep(1);
+    this->ui->SB_deadTime->setValue(0);
+
+    this->ui->SB_integrationTime->setRange(0,20);
+    this->ui->SB_integrationTime->setSingleStep(1);
+    this->ui->SB_integrationTime->setValue(1);
+
+    this->ui->SB_maxMotion->setRange(0,20);
+    this->ui->SB_maxMotion->setSingleStep(1);
+    this->ui->SB_maxMotion->setValue(10);
+
     QObject::connect(this, SIGNAL(newMessage(QString, bool)), this, SLOT(displayMessage(QString, bool)));
     QObject::connect(this, SIGNAL(updateStabilizationPlot()), this, SLOT(updatePlot()));
     QObject::connect(this, &HedyLamarrGui::newCentroid, this, &HedyLamarrGui::updateDisplay);
@@ -102,10 +117,9 @@ void HedyLamarrGui::startStabilization(std::stringstream &ss){
 
 void HedyLamarrGui::Stabilize(){
     this->stabilizationInProcess.store(true, std::memory_order_release);
-    double maxPixMovPerUpdate = 10;
     while(this->stabilize.load(std::memory_order_acquire)){
 
-        std::this_thread::sleep_for(std::chrono::seconds(this->updateRate)); //WAITS FOR NEW CENTROID MEASUREMENTS.
+        std::this_thread::sleep_for(std::chrono::seconds(this->ui->SB_integrationTime->value())); //WAITS FOR NEW CENTROID MEASUREMENTS.
         this->centroidContainer->updateMeanCentroid();
         this->centroidContainer->emptyHistroy();
         emit newCentroid();
@@ -118,15 +132,14 @@ void HedyLamarrGui::Stabilize(){
         newNS = dVertical*this->HedyLamarrParams.pixToHedyLamarr;
         newEW = dHorizontal*this->HedyLamarrParams.pixToHedyLamarr;
 
-        if (abs(dVertical) > maxPixMovPerUpdate){
+        if (abs(dVertical) > this->ui->SB_maxMotion->value()){
             newNS = 0;
         }
-        if (abs(dHorizontal) > maxPixMovPerUpdate){
+        if (abs(dHorizontal) > this->ui->SB_maxMotion->value()){
             newEW = 0;
         }
-        this->NSoffset -= newNS*0.2;
-        this->EWoffset -= newEW*0.2;
-        std::cout << newEW << " " << newNS << std::endl;
+        this->NSoffset -= newNS*this->ui->dSB_proportionalGain->value();
+        this->EWoffset -= newEW*this->ui->dSB_proportionalGain->value();
         QString NScommand = "$SOR,0000000056,94,2,41=51:164,164=48:" + QString::number(this->NSoffset, 'f', 6) + ",$EOM,$EOR";
         emit newCommand(NScommand);
         QString EWcommand = "$SOR,0000000056,94,2,41=51:163,163=48:"+  QString::number(this->EWoffset, 'f', 6) + ",$EOM,$EOR";
@@ -142,6 +155,11 @@ void HedyLamarrGui::Stabilize(){
         this->plotData_vPix.push_back(YDev);
         emit updateStabilizationPlot();
         emit newOffset();
+
+        //deadtime added to avoid overshooting error from the internal telescope PID
+        std::this_thread::sleep_for(std::chrono::seconds(this->ui->SB_deadTime->value()));
+        this->centroidContainer->emptyHistroy();//remove centroids calculated during telescope motion.
+        //
     }
     this->stabilizationInProcess.store(false, std::memory_order_release);
 }
