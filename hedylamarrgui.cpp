@@ -45,6 +45,12 @@ HedyLamarrGui::HedyLamarrGui(QWidget *parent) :
     QObject::connect(this->ui->PB_setInitialOffset, &QPushButton::clicked, this, &HedyLamarrGui::setInitialOffset, Qt::UniqueConnection);
     QObject::connect(this, SIGNAL(newOffset()), this, SLOT(updateOffsetDisplay()), Qt::UniqueConnection);
     QObject::connect(this->ui->PB_goToOffset, &QPushButton::clicked, this, &HedyLamarrGui::moveToDisplayOffset, Qt::UniqueConnection);
+
+    QObject::connect(this->ui->SB_deadTime, QOverload<int>::of(&QSpinBox::valueChanged), this, &HedyLamarrGui::setDeadTimeSB, Qt::UniqueConnection);
+    QObject::connect(this->ui->SB_integrationTime, QOverload<int>::of(&QSpinBox::valueChanged), this, &HedyLamarrGui::setIntegrationTimeSB, Qt::UniqueConnection);
+    QObject::connect(this->ui->SB_maxMotion, QOverload<int>::of(&QSpinBox::valueChanged), this, &HedyLamarrGui::setMaxMotionSB, Qt::UniqueConnection);
+    QObject::connect(this->ui->dSB_proportionalGain, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &HedyLamarrGui::setProportionalGainSB, Qt::UniqueConnection);
+
 }
 
 HedyLamarrGui::~HedyLamarrGui(){
@@ -56,6 +62,21 @@ HedyLamarrGui::~HedyLamarrGui(){
         this->isHedyLamarrConnected->store(false, std::memory_order_release);
         delete ui;
     }
+}
+void HedyLamarrGui::setMaxMotionSB(){
+    this->maxMotion = this->ui->SB_maxMotion->value();
+}
+
+void HedyLamarrGui::setDeadTimeSB(){
+    this->deadTime = this->ui->SB_deadTime->value();
+}
+
+void HedyLamarrGui::setIntegrationTimeSB(){
+    this->integrationTime = this->ui->SB_integrationTime->value();
+}
+
+void HedyLamarrGui::setProportionalGainSB(){
+    this->proportionalGain = this->ui->dSB_proportionalGain->value();
 }
 
 void HedyLamarrGui::connectToHedyLamarr(std::stringstream &ss){
@@ -119,27 +140,30 @@ void HedyLamarrGui::Stabilize(){
     this->stabilizationInProcess.store(true, std::memory_order_release);
     while(this->stabilize.load(std::memory_order_acquire)){
 
-        std::this_thread::sleep_for(std::chrono::seconds(this->ui->SB_integrationTime->value())); //WAITS FOR NEW CENTROID MEASUREMENTS.
+        std::this_thread::sleep_for(std::chrono::seconds(this->integrationTime)); //WAITS FOR NEW CENTROID MEASUREMENTS.
         this->centroidContainer->updateMeanCentroid();
         this->centroidContainer->emptyHistroy();
         emit newCentroid();
         double dHorizontal = this->centroidContainer->meanCentroidX - this->centroidContainer->homeX; //horizontal pixel deviation from home position
         double dVertical = this->centroidContainer->meanCentroidY - this->centroidContainer->homeY; //vertical pixel deviation from home position
 
+        std::cout << "homeX " << this->centroidContainer->homeX << " homeV " << this->centroidContainer->homeY << std::endl;
+        std::cout << "dHorizontal " << dHorizontal << " dVertical " << dVertical << std::endl;
         double newNS = 0.0;
         double newEW = 0.0;
 
         newNS = dVertical*this->HedyLamarrParams.pixToHedyLamarr;
         newEW = dHorizontal*this->HedyLamarrParams.pixToHedyLamarr;
 
-        if (abs(dVertical) > this->ui->SB_maxMotion->value()){
+        if (abs(dVertical) > this->maxMotion){
             newNS = 0;
         }
-        if (abs(dHorizontal) > this->ui->SB_maxMotion->value()){
+        if (abs(dHorizontal) > this->maxMotion){
             newEW = 0;
         }
-        this->NSoffset -= newNS*this->ui->dSB_proportionalGain->value();
-        this->EWoffset -= newEW*this->ui->dSB_proportionalGain->value();
+        this->NSoffset -= newNS*this->proportionalGain/3;
+        this->EWoffset -= newEW*this->proportionalGain;
+        std::cout << newEW*this->proportionalGain << " " << newNS*this->proportionalGain << std::endl;
         QString NScommand = "$SOR,0000000056,94,2,41=51:164,164=48:" + QString::number(this->NSoffset, 'f', 6) + ",$EOM,$EOR";
         emit newCommand(NScommand);
         QString EWcommand = "$SOR,0000000056,94,2,41=51:163,163=48:"+  QString::number(this->EWoffset, 'f', 6) + ",$EOM,$EOR";
@@ -157,7 +181,7 @@ void HedyLamarrGui::Stabilize(){
         emit newOffset();
 
         //deadtime added to avoid overshooting error from the internal telescope PID
-        std::this_thread::sleep_for(std::chrono::seconds(this->ui->SB_deadTime->value()));
+        std::this_thread::sleep_for(std::chrono::seconds(this->deadTime));
         this->centroidContainer->emptyHistroy();//remove centroids calculated during telescope motion.
         //
     }

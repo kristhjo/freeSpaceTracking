@@ -41,7 +41,11 @@ private:
     std::atomic<bool> stabilize;
     std::atomic<bool> isStabMoving;
 
-    int updateRate = 5; //seconds
+    int deadTime = 1;
+    int integrationTime = 1;
+    double proportionalGain = 0.0;
+    int maxMotion = 5;
+
     datacontainers::HedyLamarrInfo HedyLamarrParams;
     void Stabilize(); ///<
     void moveNorth();
@@ -90,6 +94,10 @@ public slots:
     void SetStepSize();
     void updateOffsetDisplay();
     void moveToDisplayOffset();
+    void setDeadTimeSB();
+    void setIntegrationTimeSB();
+    void setProportionalGainSB();
+    void setMaxMotionSB();
 };
 
 
