@@ -152,7 +152,7 @@ void HedyLamarrGui::Stabilize(){
         double newNS = 0.0;
         double newEW = 0.0;
 
-        newNS = dVertical*this->HedyLamarrParams.pixToHedyLamarr;
+        newNS = dVertical*this->HedyLamarrParams.pixToHedyLamarr/3;
         newEW = dHorizontal*this->HedyLamarrParams.pixToHedyLamarr;
 
         if (abs(dVertical) > this->maxMotion){
@@ -161,13 +161,15 @@ void HedyLamarrGui::Stabilize(){
         if (abs(dHorizontal) > this->maxMotion){
             newEW = 0;
         }
-        this->NSoffset -= newNS*this->proportionalGain/3;
+        this->NSoffset -= newNS*this->proportionalGain;
         this->EWoffset -= newEW*this->proportionalGain;
         std::cout << newEW*this->proportionalGain << " " << newNS*this->proportionalGain << std::endl;
         QString NScommand = "$SOR,0000000056,94,2,41=51:164,164=48:" + QString::number(this->NSoffset, 'f', 6) + ",$EOM,$EOR";
         emit newCommand(NScommand);
+        std::this_thread::sleep_for(std::chrono::seconds(1));
         QString EWcommand = "$SOR,0000000056,94,2,41=51:163,163=48:"+  QString::number(this->EWoffset, 'f', 6) + ",$EOM,$EOR";
         emit newCommand(EWcommand);
+        std::this_thread::sleep_for(std::chrono::seconds(1));
         QCPGraphData HTilt(time(nullptr), dHorizontal*this->HedyLamarrParams.pixFieldOfView*1e6);//this->HedyLamarrParams.pixToHedyLamarr/this->HedyLamarrParams.radToArcSec);
         QCPGraphData VTilt(time(nullptr), dVertical*this->HedyLamarrParams.pixFieldOfView*1e6);//*this->HedyLamarrParams.pixToHedyLamarr/this->HedyLamarrParams.radToArcSec);
         QCPGraphData XDev(time(nullptr), dHorizontal);
