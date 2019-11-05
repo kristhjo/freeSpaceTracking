@@ -191,9 +191,13 @@ struct seeingParameters
             pxAiryZeros[i] = int( (i+1.22)*AiryMinRatio +0.5 );
          }
     }
+    int intensityThreshold = 1;
     double exposureTime;
     double frameRate;
+    double pixFov;
     receiverOpticsInfo receiverOptics;
+    double iqoqiPixFov = receiverOptics.pixSize/1.140;
+    double bisamPixFov = receiverOptics.pixFoVrad;
     //meters
     double maskApertureDiameter = 0.026; //DIMM mask
     double maskApertureSeparation = 0.16; //DIMM mask

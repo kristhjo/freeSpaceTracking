@@ -55,11 +55,30 @@ datacontainers::gaussianFitParams getGaussianFitParams(const cv::Mat &img, int w
     cv::Moments m = moments(img,true);
     datacontainers::gaussianFitParams params;
     cv::Point center(m.m10/m.m00, m.m01/m.m00);
-    params.intensitymax = img.at<uchar>(center);
+    double min, max1;
+    cv::Point minLoc, maxLoc;
+    cv::minMaxLoc(img, &min, &max1, &minLoc, &maxLoc);
+    params.intensitymax = max1;
     params.center_x = center.x;
     params.center_y = center.y;
-    params.var_x = m.m20;//pow(m.m20,0.5)*2.355; //sigma to FWHM conversion
-    params.var_y = m.m02;//pow(m.m02, 0.5)*2.355; //sigma to FWHM conversion
+    double varx = 0;
+    double vary = 0;
+    double sumx=0;
+    double sumy=0;
+    for (int i = 0; i < img.rows; i++){
+        sumx+=img.at<ushort>(cv::Point(i, center.y));
+        varx+= pow( img.at<ushort>(cv::Point(center.x, center.y)) - img.at<ushort>(cv::Point(i, center.y)), 2);
+    }
+    for (int j = 0; j < img.cols; j++){
+        sumy+=img.at<ushort>(cv::Point(center.x, j));
+        vary+= pow( img.at<ushort>(cv::Point(center.x, center.y)) - img.at<ushort>(cv::Point(center.x, j)), 2);
+    }
+    //std::cout << img << std::endl;
+    std::cout << img.at<ushort>(cv::Point(center.x, center.y)) << " " <<  img.at<ushort>(cv::Point(0, center.y))  << " " << img.at<ushort>(cv::Point(center.x, 0))  << std::endl;
+
+    std::cout << sumx << " " <<  varx  << " " << sumy << " " << vary << std::endl;
+    params.var_x = varx/(sumx*(img.rows-1));//m.m20/m.m00;//pow(m.m20,0.5)*2.355; //sigma to FWHM conversion
+    params.var_y = vary/(sumy*(img.cols-1));//pow(m.m02, 0.5)*2.355; //sigma to FWHM conversion
     params.sigma_cov = m.m11;
     params.numSaturatedPixels = cv::countNonZero(img == 255);
 

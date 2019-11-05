@@ -26,53 +26,53 @@ TrackingGui::TrackingGui(QWidget *parent) :
     this->ui->HS_ExposureCam->setMaximum(1000000);
     this->ui->SB_ExposureCam->setMinimum(15);
     this->ui->SB_ExposureCam->setMaximum(1000000);
-    this->ui->SB_ExposureCam->setValue(100000);
-    this->ui->HS_ExposureCam->setValue(100000);
+    this->ui->SB_ExposureCam->setValue(50);
+    this->ui->HS_ExposureCam->setValue(50);
 
     this->ui->SB_GainCam->setMinimum(1);
     this->ui->SB_GainCam->setMaximum(8);
 
     this->ui->SB_FrameRate->setMinimum(1);
     this->ui->SB_FrameRate->setMaximum(50);
-    this->ui->SB_FrameRate->setValue(10);
+    this->ui->SB_FrameRate->setValue(2);
 
     this->ui->HS_Width->setMinimum(5);
     this->ui->HS_Width->setMaximum(511);
-    this->ui->HS_Width->setValue(60);
+    this->ui->HS_Width->setValue(33);
     this->ui->HS_Width->setSingleStep(1);
 
     this->ui->SB_Width->setMinimum(5);
     this->ui->SB_Width->setMaximum(511);
-    this->ui->SB_Width->setValue(60);
+    this->ui->SB_Width->setValue(33);
     this->ui->SB_Width->setSingleStep(1);
 
     this->ui->HS_Height->setMinimum(5);
     this->ui->HS_Height->setMaximum(541);
-    this->ui->HS_Height->setValue(100);
+    this->ui->HS_Height->setValue(65);
     this->ui->HS_Height->setSingleStep(1);
 
     this->ui->SB_Height->setMinimum(5);
     this->ui->SB_Height->setMaximum(541);
-    this->ui->SB_Height->setValue(100);
+    this->ui->SB_Height->setValue(60);
     this->ui->SB_Height->setSingleStep(1);
 
     this->ui->HS_OffsetX->setMinimum(0);
     this->ui->HS_OffsetX->setMaximum(2044/4 - this->ui->HS_Width->value());
     this->ui->HS_OffsetX->setSingleStep(1);
-    this->ui->HS_OffsetX->setValue(204);
+    this->ui->HS_OffsetX->setValue(393);
     this->ui->SB_OffsetX->setMinimum(0);
     this->ui->SB_OffsetX->setMaximum(2044/4 - this->ui->HS_Width->value());
     this->ui->SB_OffsetX->setSingleStep(1);
-    this->ui->SB_OffsetX->setValue(204);
+    this->ui->SB_OffsetX->setValue(393);
 
     this->ui->HS_OffsetY->setMinimum(0);
     this->ui->HS_OffsetY->setMaximum(1084/2 - this->ui->HS_Height->value());
     this->ui->HS_OffsetY->setSingleStep(1);
-    this->ui->HS_OffsetY->setValue(144);
+    this->ui->HS_OffsetY->setValue(397);
     this->ui->SB_OffsetY->setMinimum(0);
     this->ui->SB_OffsetY->setMaximum(1084/2 - this->ui->HS_Height->value());
     this->ui->SB_OffsetY->setSingleStep(1);
-    this->ui->SB_OffsetY->setValue(144);
+    this->ui->SB_OffsetY->setValue(397);
 
     this->ui->SB_TrackingThresh->setMinimum(1);
     this->ui->SB_TrackingThresh->setMaximum(255);
@@ -100,7 +100,7 @@ TrackingGui::TrackingGui(QWidget *parent) :
     QObject::connect(this->ui->HS_Width, SIGNAL(valueChanged(int)),this->ui->SB_Width, SLOT(setValue(int)));
 
     QObject::connect(this->ui->HS_Height,&QSlider::sliderMoved,this,&TrackingGui::SetHeight,Qt::UniqueConnection);
-    QObject::connect(this->ui->SB_Height,QOverload<int>::of(&QSpinBox::valueChanged),this,&TrackingGui::SetWidthSB,Qt::UniqueConnection);
+    QObject::connect(this->ui->SB_Height,QOverload<int>::of(&QSpinBox::valueChanged),this,&TrackingGui::SetHeightSB,Qt::UniqueConnection);
     QObject::connect(this->ui->SB_Height, SIGNAL(valueChanged(int)),this->ui->HS_Height, SLOT(setValue(int)));
     QObject::connect(this->ui->HS_Height, SIGNAL(valueChanged(int)),this->ui->SB_Height, SLOT(setValue(int)));
 
@@ -153,14 +153,25 @@ void TrackingGui::ConfigureSeeing(){
         this->ui->TE_LogCam->append("You need to stop tracking to do a Seeing measurement  \n");
         return;
     }
+    if (!this->pm_seeing){
+        std::cout << "here"<< std::endl;
+         this->pm_seeing =std::make_unique<SeeingGui>();
+    }
+    if (!this->pm_seeing->isMeasuringSeeing){
+        std::cout << "here2"<< std::endl;
+          this->pm_seeing->isMeasuringSeeing = &this->isMeasuringSeeing;
+    }
+    if (!this->pm_seeing->m_imageContainer){
 
-    this->ui->TE_LogCam->append("Make sure to mount the meade twin-aperture cover and to use an appropriate exposure time\n");
-    this->ui->TE_LogCam->append("Reminder: no rotation matrix is calculated in this software \n the baseline of the DIMM setup should be approximately parallel with the sensor x-axis for accurate calculations\n");
+        std::cout << "here3"<< std::endl;
+        this->pm_seeing->m_imageContainer = this->m_imageContainer;
+    }
+
+    //this->ui->TE_LogCam->append("Make sure to mount the meade twin-aperture cover and to use an appropriate exposure time\n");
+    //this->ui->TE_LogCam->append("Reminder: no rotation matrix is calculated in this software \n the baseline of the DIMM setup should be approximately parallel with the sensor x-axis for accurate calculations\n");
 
     //Initate the SeeingGui. Connect imageContainer and isMeasuringSeeing to CameraGui.
-    this->pm_seeing =std::make_unique<SeeingGui>();
-    this->pm_seeing->m_imageContainer = this->m_imageContainer;
-    this->pm_seeing->isMeasuringSeeing = &this->isMeasuringSeeing;
+
     this->pm_seeing->m_seeingParams.exposureTime = this->pm_Camera->m_CamInfo.ExposureActual;
     this->pm_seeing->m_seeingParams.frameRate = this->pm_Camera->m_CamInfo.FrameRate;
     this->pm_seeing->show();
@@ -172,6 +183,7 @@ void TrackingGui::StartSeeingMeasurement(){
         return;
     }
     this->pm_seeing->show();
+    std::cout << "debug line 1 " << std::endl;
     this->pm_seeing->startMeasurement();
     //Disables all but the stopMeasurement button in the main gui, so that camera parameters cannot be altered during a measurement.
     this->disableWidgets(true);

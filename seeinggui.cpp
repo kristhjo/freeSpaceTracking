@@ -16,6 +16,11 @@ SeeingGui::SeeingGui(QWidget *parent):
     this->ui->SB_WindowingRadius->setMaximum(10);
     this->ui->SB_WindowingRadius->setValue(1);
 
+    this->ui->SB_Threshold->setMinimum(1);
+    this->ui->SB_Threshold->setMaximum(255);
+    this->ui->SB_Threshold->setValue(20);
+
+
     QObject::connect(this->ui->LE_SampleSize,&QLineEdit::textChanged,this,&SeeingGui::setSecPerDataPoint,Qt::UniqueConnection);
     QObject::connect(this, SIGNAL(newSeeingValues()), this, SLOT(replotSeeing()));
     QObject::connect(this, SIGNAL(newSeeingValues()), this, SLOT(updateSeeingPanel()));
@@ -35,6 +40,7 @@ void SeeingGui::startMeasurement(){
     }
     this->createParameterFile();
     this->initPlots();
+
     this->isMeasuringSeeing->store(true, std::memory_order_release);
      this->testStream.open("testData.dat",std::fstream::out|std::fstream::app);
     if (this->measurementType == "DIMM"){
@@ -48,7 +54,15 @@ void SeeingGui::startMeasurement(){
 }
 
 void SeeingGui::setMeasurementSettings(){
+    if (this->ui->ComboB_Setup->currentText() == "Bisam"){
+        this->m_seeingParams.pixFov = this->m_seeingParams.bisamPixFov;
+    }
+    if (this->ui->ComboB_Setup->currentText() == "IQOQI"){
+        this->m_seeingParams.pixFov = this->m_seeingParams.iqoqiPixFov;
+    }
     this->m_seeingParams.pxWindowRadius = this->m_seeingParams.pxAiryZeros[this->ui->SB_WindowingRadius->value()]; //this->ui->SB_WindowingRadius->value();
+    this->m_seeingParams.intensityThreshold = this->ui->SB_Threshold->value(); //this->ui->SB_WindowingRadius->value();
+
     this->storeImages = this->ui->CheckB_Yes->isChecked();
     this->debug = this->ui->CheckB_Debug->isChecked();
     this->measurementType = this->ui->ComboB_MeasurementType->currentText();
@@ -88,8 +102,9 @@ void SeeingGui::stopMeasurement(){
         }
         this->writeResultsToFile();
     }
-    else if(this->measurementType == "Gaussian"){
+    else if(this->measurementType == "Gaussian fit"){
         if(this->Gauss_thread->joinable()){
+            std::cout << "joined gauss thread" << std::endl;
             this->Gauss_thread->join();
         }
         else {
@@ -202,10 +217,9 @@ void SeeingGui::Gaussian(){
             }
             std::cout << "counter == samplesize" << std::endl;
             this->m_GaussSample.fitParams = imageprocessing::getGaussianFitParams(this->m_GaussSample.gaussImg, this->m_seeingParams.pxWindowRadius);
-            std::cout << "calculated fitparams" << std::endl;
 
-            this->m_seeingValues.seeing_x.push_back(this->m_GaussSample.FWHM_x());
-            this->m_seeingValues.seeing_y.push_back(this->m_GaussSample.FWHM_y());
+            this->m_seeingValues.seeing_x.push_back(this->m_GaussSample.FWHM_x()*1e-6);//*this->m_seeingParams.pixFov);
+            this->m_seeingValues.seeing_y.push_back(this->m_GaussSample.FWHM_y()*1e-6);//*this->m_seeingParams.pixFov);
 
             this->m_seeingValues.fried_x.push_back(this->getFriedFromSeeing(this->m_seeingValues.seeing_x.last(), this->m_seeingParams.wavelength));
             this->m_seeingValues.fried_y.push_back(this->getFriedFromSeeing(this->m_seeingValues.seeing_y.last(), this->m_seeingParams.wavelength));
@@ -231,8 +245,8 @@ void SeeingGui::Gaussian(){
 
             cv::Mat img = this->m_imageContainer->imgQueue.front();
             cv::Mat croppedImg;
-            imageprocessing::cropWindow(img, croppedImg, this->m_seeingParams.pxWindowRadius);
-
+            imageprocessing::cropThreshold(img, croppedImg, this->m_seeingParams.intensityThreshold);
+            croppedImg.convertTo(croppedImg, CV_16UC1);
             if (cv::countNonZero(croppedImg > 10) < 1){
                 std::cout << "skipped image due to low intensity" << std::endl;
                 this->m_imageContainer->removeFirstImg();
@@ -243,15 +257,15 @@ void SeeingGui::Gaussian(){
                 this->m_imageContainer->removeFirstImg();
                 continue;
             }
+
             if(counter == 1){
                 this->m_GaussSample.gaussImg = croppedImg;
             }
             else {
-                cv::add(this->m_GaussSample.gaussImg, croppedImg, this->m_GaussSample.gaussImg, cv::Mat(), CV_32S);
+                cv::add(this->m_GaussSample.gaussImg, croppedImg, this->m_GaussSample.gaussImg, cv::Mat(), CV_16UC1);
             }
 
             std::cout << "added img to gaussimg" << std::endl;
-            cv::imshow("gaussian", this->m_GaussSample.gaussImg);
             if (this->storeImages){
                 std::cout << "at store img" << std::endl;
                 if(!cv::imwrite( this->directoryPath.toStdString() + this->currentSubFolderName.toStdString()  + "/img_" + std::to_string(counter) + ".jpg", img)){
@@ -275,63 +289,105 @@ void SeeingGui::Gaussian(){
 }
 
 void SeeingGui::debugGaussian(cv::Mat image, int label){
-    cv::Mat gaussPlot(image.size(), CV_32S, cv::Scalar(0));
-    datacontainers::gaussianFitParams fitParams = imageprocessing::getGaussianFitParams(image, this->m_seeingParams.pxWindowRadius);
-    //imageprocessing::drawGaussian(gaussPlot, fitParams);
-    //cv::hconcat(image, gaussPlot, image);
 
-    // configure axis rect:
+    datacontainers::gaussianFitParams fitParams = imageprocessing::getGaussianFitParams(image, this->m_seeingParams.pxWindowRadius);
+    std::cout << "fitParams: " << "\n";
+    std::cout << "center x: " << fitParams.center_x << "\n";
+    std::cout << "center y: " << fitParams.center_y << "\n";
+    std::cout << "var x: " << fitParams.var_x << "\n";
+    std::cout << "var y: " << fitParams.var_y << "\n";
+    std::cout << "intensity max: " << fitParams.intensitymax << "\n";
+    std::cout << "saturated pixels: " << fitParams.numSaturatedPixels << "\n";
+
     QCustomPlot *customPlot = new QCustomPlot(this);
+    QCPAxisRect *subRectLeft = new QCPAxisRect(customPlot, false); // false means to not setup default axes
+    QCPAxisRect *subRectRight = new QCPAxisRect(customPlot, false);
+    subRectLeft->setupFullAxesBox(true);
+    subRectRight->setupFullAxesBox(true);
+
+    QCPColorScale *colorScale = new QCPColorScale(customPlot);
+    QCPColorScale *colorScaleIm = new QCPColorScale(customPlot);
+    customPlot->plotLayout()->addElement(0, 1, colorScaleIm); // add it to the left of the main axis rect
+    customPlot->plotLayout()->addElement(0, 3, colorScale); // add it to the right of the main axis rect
+    customPlot->plotLayout()->addElement(0, 0, subRectLeft); // insert axis rect in first row
+    customPlot->plotLayout()->addElement(0, 2, subRectRight);
+
+    QCPColorMap *colorMap = new QCPColorMap(customPlot->axisRect(1)->axis(QCPAxis::atBottom), customPlot->axisRect(1)->axis(QCPAxis::atLeft));
+    QCPColorMap *colorMapImage = new QCPColorMap(customPlot->axisRect(0)->axis(QCPAxis::atBottom), customPlot->axisRect(0)->axis(QCPAxis::atRight));
+    colorScale->setType(QCPAxis::atRight); // scale shall be vertical bar with tick/axis labels right (actually atRight is already the default)
+    colorScaleIm->setType(QCPAxis::atRight);
+    colorMap->setColorScale(colorScale); // associate the color map with the color scale
+    colorMapImage->setColorScale(colorScaleIm); // associate the color map with the color scale
+    colorScale->axis()->setLabel("Gaussian fit");
+    colorScaleIm->axis()->setLabel("Image");
+
+    //customPlot->plotLayout()->setColumnStretchFactor(0, 1);
+   // customPlot->plotLayout()->setColumnStretchFactor(1, 1);
+    std::cout <<"jello" << std::endl;
+
+     std::cout <<"jello" << std::endl;
     customPlot->axisRect()->setupFullAxesBox(true);
     customPlot->xAxis->setLabel("x");
     customPlot->yAxis->setLabel("y");
-
+    std::cout <<"jellohere" << std::endl;
     // set up the QCPColorMap:
-    QCPColorMap *colorMap = new QCPColorMap(customPlot->xAxis, customPlot->yAxis);
-    int nx = image.size().width;
-    int ny = image.size().height;
+
+   std::cout <<"jello1" << std::endl;
+    int nx = image.rows-1;
+    int ny = image.cols-1;
+    std::cout << "image size " << nx << " x " << ny << std::endl;
     colorMap->data()->setSize(nx, ny); // we want the color map to have nx * ny data points
-    colorMap->data()->setRange(QCPRange(-4, 4), QCPRange(-4, 4)); // and span the coordinate range -4..4 in both key (x) and value (y) dimensions
+    colorMap->data()->setRange(QCPRange(0, nx), QCPRange(0, ny)); // and span the coordinate range -4..4 in both key (x) and value (y) dimensions
+    colorMapImage->data()->setSize(nx, ny); // we want the color map to have nx * ny data points
+    colorMapImage->data()->setRange(QCPRange(0, nx), QCPRange(0, ny)); // and span the coordinate range -4..4 in both key (x) and value (y) dimensions
     // now we assign some data, by accessing the QCPColorMapData instance of the color map:
-    double x, y, z;
+    std::cout <<"jello" << std::endl;
+    double x, y, zfit;
     for (int xIndex=0; xIndex<nx; ++xIndex)
     {
       for (int yIndex=0; yIndex<ny; ++yIndex)
       {
         colorMap->data()->cellToCoord(xIndex, yIndex, &x, &y);
-        z = fitParams.intensitymax*(exp(-pow((x-fitParams.center_x),2)/(2*pow(fitParams.var_x,2)) -pow((x-fitParams.center_y),2)/(2*pow(fitParams.var_y,2))));
-        colorMap->data()->setCell(xIndex, yIndex, z);
+        zfit = exp(- (pow((x-fitParams.center_x),2)/(2*fitParams.var_x)) - (pow((y-fitParams.center_y),2)/(2*fitParams.var_y)));
+        colorMap->data()->setCell(xIndex, yIndex, zfit);
+        }
+    }
+    std::cout <<"jellotoo" << std::endl;
+    double xIm, yIm, zImage;
+    for (int xIndex=0; xIndex<nx; ++xIndex)
+    {
+      for (int yIndex=0; yIndex<ny; ++yIndex)
+      {
+       colorMapImage->data()->cellToCoord(xIndex, yIndex, &xIm, &yIm);
+       zImage = image.at<ushort>(cv::Point(xIndex, yIndex))/(fitParams.intensitymax+1);
+       if (zImage > 1){
+           zImage = 0;
+       }
+       colorMapImage->data()->setCell(xIndex, yIndex, zImage);
       }
     }
 
-    // add a color scale:
-    QCPColorScale *colorScale = new QCPColorScale(customPlot);
-    customPlot->plotLayout()->addElement(0, 1, colorScale); // add it to the right of the main axis rect
-    colorScale->setType(QCPAxis::atRight); // scale shall be vertical bar with tick/axis labels right (actually atRight is already the default)
-    colorMap->setColorScale(colorScale); // associate the color map with the color scale
-    colorScale->axis()->setLabel("Magnetic Field Strength");
-
     // set the color gradient of the color map to one of the presets:
     colorMap->setGradient(QCPColorGradient::gpPolar);
-    // we could have also created a QCPColorGradient instance and added own colors to
-    // the gradient, see the documentation of QCPColorGradient for what's possible.
+    colorMapImage->setGradient(QCPColorGradient::gpPolar);
 
     // rescale the data dimension (color) such that all data points lie in the span visualized by the color gradient:
     colorMap->rescaleDataRange();
+    colorMapImage->rescaleDataRange();
+    //colorMap->rescaleAxes();
+    //colorMapImage->rescaleAxes();
 
     // make sure the axis rect and color scale synchronize their bottom and top margins (so they line up):
     QCPMarginGroup *marginGroup = new QCPMarginGroup(customPlot);
-    customPlot->axisRect()->setMarginGroup(QCP::msBottom|QCP::msTop, marginGroup);
+    customPlot->axisRect(0)->setMarginGroup(QCP::msBottom|QCP::msTop, marginGroup);
+    customPlot->axisRect(1)->setMarginGroup(QCP::msBottom|QCP::msTop, marginGroup);
     colorScale->setMarginGroup(QCP::msBottom|QCP::msTop, marginGroup);
-
+    colorScaleIm->setMarginGroup(QCP::msBottom|QCP::msTop, marginGroup);
     // rescale the key (x) and value (y) axes so the whole color map is visible:
     customPlot->rescaleAxes();
-    customPlot->savePdf(this->directoryPath + this->currentSubFolderName + "/debugGaussian.pdf");
-
-
-    //if(!cv::imwrite( this->directoryPath.toStdString() + this->currentSubFolderName.toStdString()  + "/debug_img_" + std::to_string(label) + ".jpg", image)){
-    //    emit newMessage("Failed to save debug image", true);
-    //}
+    //customPlot->axisRect(0)->axis(QCPAxis::)->rescale();
+    customPlot->axisRect(1)->axis(QCPAxis::atBottom)->rescale();
+    customPlot->savePng(this->directoryPath + this->currentSubFolderName + "/debugGaussian.png", 1000, 1000);
 }
 
 
