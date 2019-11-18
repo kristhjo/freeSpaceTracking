@@ -93,6 +93,11 @@ private:
     bool titlePresent = false;
     QString folderName;
     std::fstream stabilizationDataStream;
+
+    int deadTime = 0;
+    int integrationTime = 2;
+    double proportionalGain = 1.0;
+    int maxMotion = 10;
 signals:
     void positionChanged();
     void coSysChanged();

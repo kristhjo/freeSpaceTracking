@@ -18,6 +18,8 @@ TrackingGui::TrackingGui(QWidget *parent) :
     this->isMeasuringSeeing = false;
     this->isHedyLamarrStabilizing = false;
 
+    this->m_configurationSettings = datacontainers::configurationSettings();
+
     this->m_imageContainer = std::make_shared<datacontainers::ImageContainer>();
     this->centroidContainer = std::make_shared<datacontainers::CentroidStabilization>();
     this->centroidContainerHedy = std::make_shared<datacontainers::CentroidStabilization>();
@@ -26,60 +28,62 @@ TrackingGui::TrackingGui(QWidget *parent) :
     this->ui->HS_ExposureCam->setMaximum(1000000);
     this->ui->SB_ExposureCam->setMinimum(15);
     this->ui->SB_ExposureCam->setMaximum(1000000);
-    this->ui->SB_ExposureCam->setValue(50);
-    this->ui->HS_ExposureCam->setValue(50);
+    this->ui->SB_ExposureCam->setValue(m_configurationSettings.ExposureTime);
+    this->ui->HS_ExposureCam->setValue(m_configurationSettings.ExposureTime);
 
     this->ui->SB_GainCam->setMinimum(1);
     this->ui->SB_GainCam->setMaximum(8);
+    this->ui->SB_GainCam->setValue(m_configurationSettings.Gain);
 
     this->ui->SB_FrameRate->setMinimum(1);
     this->ui->SB_FrameRate->setMaximum(50);
-    this->ui->SB_FrameRate->setValue(2);
+    this->ui->SB_FrameRate->setValue(m_configurationSettings.FrameRate);
 
     this->ui->HS_Width->setMinimum(5);
     this->ui->HS_Width->setMaximum(511);
-    this->ui->HS_Width->setValue(33);
+    this->ui->HS_Width->setValue(m_configurationSettings.FrameWidth);
     this->ui->HS_Width->setSingleStep(1);
 
     this->ui->SB_Width->setMinimum(5);
     this->ui->SB_Width->setMaximum(511);
-    this->ui->SB_Width->setValue(33);
+    this->ui->SB_Width->setValue(m_configurationSettings.FrameWidth);
     this->ui->SB_Width->setSingleStep(1);
 
     this->ui->HS_Height->setMinimum(5);
     this->ui->HS_Height->setMaximum(541);
-    this->ui->HS_Height->setValue(65);
+    this->ui->HS_Height->setValue(m_configurationSettings.FrameHeight);
     this->ui->HS_Height->setSingleStep(1);
 
     this->ui->SB_Height->setMinimum(5);
     this->ui->SB_Height->setMaximum(541);
-    this->ui->SB_Height->setValue(60);
+    this->ui->SB_Height->setValue(m_configurationSettings.FrameHeight);
     this->ui->SB_Height->setSingleStep(1);
 
     this->ui->HS_OffsetX->setMinimum(0);
     this->ui->HS_OffsetX->setMaximum(2044/4 - this->ui->HS_Width->value());
     this->ui->HS_OffsetX->setSingleStep(1);
-    this->ui->HS_OffsetX->setValue(393);
+    this->ui->HS_OffsetX->setValue(m_configurationSettings.OffsetX);
     this->ui->SB_OffsetX->setMinimum(0);
     this->ui->SB_OffsetX->setMaximum(2044/4 - this->ui->HS_Width->value());
     this->ui->SB_OffsetX->setSingleStep(1);
-    this->ui->SB_OffsetX->setValue(393);
+    this->ui->SB_OffsetX->setValue(m_configurationSettings.OffsetX);
 
     this->ui->HS_OffsetY->setMinimum(0);
     this->ui->HS_OffsetY->setMaximum(1084/2 - this->ui->HS_Height->value());
     this->ui->HS_OffsetY->setSingleStep(1);
-    this->ui->HS_OffsetY->setValue(397);
+    this->ui->HS_OffsetY->setValue(m_configurationSettings.OffsetY);
     this->ui->SB_OffsetY->setMinimum(0);
     this->ui->SB_OffsetY->setMaximum(1084/2 - this->ui->HS_Height->value());
     this->ui->SB_OffsetY->setSingleStep(1);
-    this->ui->SB_OffsetY->setValue(397);
+    this->ui->SB_OffsetY->setValue(m_configurationSettings.OffsetY);
 
     this->ui->SB_TrackingThresh->setMinimum(1);
     this->ui->SB_TrackingThresh->setMaximum(255);
+    this->ui->SB_TrackingThresh->setValue(m_configurationSettings.trackingThresh);
 
     this->ui->SB_WindowRadius->setMinimum(1);
     this->ui->SB_WindowRadius->setMaximum(50);
-    this->ui->SB_WindowRadius->setValue(10);
+    this->ui->SB_WindowRadius->setValue(m_configurationSettings.windowRadius);
 
     QObject::connect(this->ui->PB_ConnectCam,&QPushButton::clicked,this,&TrackingGui::ConnectToCamera,Qt::UniqueConnection);
     QObject::connect(this->ui->PB_StopCam,&QPushButton::clicked,this,&TrackingGui::StopCamera,Qt::UniqueConnection);
@@ -137,11 +141,39 @@ TrackingGui::TrackingGui(QWidget *parent) :
     QObject::connect(this->ui->PB_StopHedyLamarrStabilization, &QPushButton::clicked, this, &TrackingGui::StopHedyLamarrStabilization, Qt::UniqueConnection);
     QObject::connect(this->ui->PB_DisconnectHedyLamarr, &QPushButton::clicked, this, &TrackingGui::DisconnectHedyLamarr, Qt::UniqueConnection);
 
+    QObject::connect(this->ui->PB_initConfig, &QPushButton::clicked, this, &TrackingGui::configureSettings, Qt::UniqueConnection);
 }
 
 TrackingGui::~TrackingGui()
 {
     delete ui;
+}
+
+void TrackingGui::configureSettings(){
+    if(this->ui->CB_Settings->currentText().toStdString() == "IQOQI"){
+        this->m_configurationSettings = datacontainers::IQOQI_setup();
+    }
+    else if(this->ui->CB_Settings->currentText().toStdString() == "Bisamberg"){
+        this->m_configurationSettings  = datacontainers::BISAM_setup();
+    }
+    else{
+        this->m_configurationSettings = datacontainers::configurationSettings();
+    }
+    this->ui->SB_ExposureCam->setValue(m_configurationSettings.ExposureTime);
+    this->ui->HS_ExposureCam->setValue(m_configurationSettings.ExposureTime);
+    this->ui->SB_GainCam->setValue(m_configurationSettings.Gain);
+    this->ui->SB_FrameRate->setValue(m_configurationSettings.FrameRate);
+    this->ui->HS_Width->setValue(m_configurationSettings.FrameWidth);
+    this->ui->SB_Width->setValue(m_configurationSettings.FrameWidth);
+    this->ui->HS_Height->setValue(m_configurationSettings.FrameHeight);
+    this->ui->SB_Height->setValue(m_configurationSettings.FrameHeight);
+    this->ui->HS_OffsetX->setValue(m_configurationSettings.OffsetX);
+    this->ui->SB_OffsetX->setValue(m_configurationSettings.OffsetX);
+    this->ui->HS_OffsetY->setValue(m_configurationSettings.OffsetY);
+    this->ui->SB_OffsetY->setValue(m_configurationSettings.OffsetY);
+    this->ui->SB_TrackingThresh->setValue(m_configurationSettings.trackingThresh);
+    this->ui->SB_WindowRadius->setValue(m_configurationSettings.windowRadius);
+    this->ui->TE_LogCam->clear();
 }
 
 void TrackingGui::ConfigureSeeing(){
@@ -154,16 +186,14 @@ void TrackingGui::ConfigureSeeing(){
         return;
     }
     if (!this->pm_seeing){
-        std::cout << "here"<< std::endl;
-         this->pm_seeing =std::make_unique<SeeingGui>();
+        this->pm_seeing =std::make_unique<SeeingGui>();
+        this->pm_seeing->m_configurationSettings = this->m_configurationSettings.config_seeingGui;
+        this->pm_seeing->configureSettings();
     }
     if (!this->pm_seeing->isMeasuringSeeing){
-        std::cout << "here2"<< std::endl;
-          this->pm_seeing->isMeasuringSeeing = &this->isMeasuringSeeing;
+        this->pm_seeing->isMeasuringSeeing = &this->isMeasuringSeeing;
     }
     if (!this->pm_seeing->m_imageContainer){
-
-        std::cout << "here3"<< std::endl;
         this->pm_seeing->m_imageContainer = this->m_imageContainer;
     }
 
@@ -172,8 +202,8 @@ void TrackingGui::ConfigureSeeing(){
 
     //Initate the SeeingGui. Connect imageContainer and isMeasuringSeeing to CameraGui.
 
-    this->pm_seeing->m_seeingParams.exposureTime = this->pm_Camera->m_CamInfo.ExposureActual;
-    this->pm_seeing->m_seeingParams.frameRate = this->pm_Camera->m_CamInfo.FrameRate;
+    this->pm_seeing->m_configurationSettings.exposureTime = this->pm_Camera->m_CamInfo.ExposureActual;
+    this->pm_seeing->m_configurationSettings.frameRate = this->pm_Camera->m_CamInfo.FrameRate;
     this->pm_seeing->show();
 }
 
@@ -183,11 +213,9 @@ void TrackingGui::StartSeeingMeasurement(){
         return;
     }
     this->pm_seeing->show();
-    std::cout << "debug line 1 " << std::endl;
     this->pm_seeing->startMeasurement();
     //Disables all but the stopMeasurement button in the main gui, so that camera parameters cannot be altered during a measurement.
     this->disableWidgets(true);
-    this->ui->SeeingFrame->setEnabled(true);
     this->ui->PB_StopSeeingMeasurement->setEnabled(true);
 }
 
@@ -299,8 +327,6 @@ void TrackingGui::StartStabilization(){
     this->ui->TE_LogCam->append("Deactivating keyboard control\n");
     this->pm_Camera->centroidContainer = this->centroidContainer; //Establishes shared connection between the centroidContainer of cameragui and hexpodgui.
     this->pm_hexapod->centroidContainer = this->centroidContainer;
-
-    //this->pm_hexapod->updateRate = this->pm_Camera->m_CamInfo.ExposureActual;
     std::stringstream ss;
     this->pm_hexapod->startStabilization(ss);
     this->pm_hexapod->show();
@@ -513,7 +539,8 @@ void TrackingGui::ConnectToCamera(){
         this->pm_Camera.reset();
     }
     this->pm_Camera=std::make_unique<CameraGui>(); //Initiates the CameraGui.
-    this->pm_Camera->m_CamInfo.BaumerID = this->ui->CB_Baumer->currentText().toStdString();
+    this->pm_Camera->m_CamInfo.BaumerID = this->m_configurationSettings.BaumerID;
+    //this->pm_Camera->m_CamInfo.BaumerID = this->ui->CB_Baumer->currentText().toStdString();
     this->pm_Camera->m_imageContainer = this->m_imageContainer;
     this->pm_Camera->isCameraTracking = &this->isCameraTracking;
     this->pm_Camera->isCameraRunning = &this->isCameraRunning;
@@ -521,10 +548,16 @@ void TrackingGui::ConnectToCamera(){
     this->pm_Camera->isMeasuringSeeing = &this->isMeasuringSeeing;
     this->pm_Camera->isHexapodStabilizing = &this->isHexapodStabilizing;
     this->pm_Camera->isHedyLamarrStabilizing = &this->isHedyLamarrStabilizing;
-    this->pm_Camera->m_TrackingParameters.useWindowing.store(true,std::memory_order_release);
+    this->pm_Camera->m_TrackingParameters.WindowRadius = this->m_configurationSettings.windowRadius;
+    this->pm_Camera->m_TrackingParameters.TrackingThresh = this->m_configurationSettings.trackingThresh;
+    this->pm_Camera->m_TrackingParameters.useWindowing.store(this->m_configurationSettings.useWindowing,std::memory_order_release);
     this->pm_Camera->Connect(ss);
     this->ui->TE_LogCam->append(QString::fromStdString(ss.str()));
-
+    //safest not to change settings after camera is connected
+    if(this->isCameraConnected){
+        this->ui->PB_initConfig->setEnabled(false);
+        this->ui->CB_Settings->setEnabled(false);
+    }
 }
 
 void TrackingGui::StartCamera(){
@@ -573,4 +606,7 @@ void TrackingGui::DisconnectFromCamera(){
         this->StopCamera();
     }
     this->pm_Camera->Disconnect(ss);
+    //make possible to choose different settings
+    this->ui->PB_initConfig->setEnabled(true);
+    this->ui->CB_Settings->setEnabled(true);
 }

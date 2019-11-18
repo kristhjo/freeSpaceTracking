@@ -51,7 +51,8 @@ cv::Point getSpotSeparation(const cv::Mat &img, int windowRadius = 5){
     return dist;
 }
 
-datacontainers::gaussianFitParams getGaussianFitParams(const cv::Mat &img, int windowRadius = 30){
+datacontainers::gaussianFitParams getGaussianFitParams(const cv::Mat &img){
+
     cv::Moments m = moments(img,true);
     datacontainers::gaussianFitParams params;
     cv::Point center(m.m10/m.m00, m.m01/m.m00);
@@ -65,28 +66,29 @@ datacontainers::gaussianFitParams getGaussianFitParams(const cv::Mat &img, int w
     double vary = 0;
     double sumx=0;
     double sumy=0;
+    double meanx = 0;
+    ushort normFactor = img.at<ushort>(cv::Point(center.x, center.y));
     for (int i = 0; i < img.rows; i++){
+        meanx+= i*img.at<ushort>(cv::Point(i, center.y));
         sumx+=img.at<ushort>(cv::Point(i, center.y));
-        varx+= pow( img.at<ushort>(cv::Point(center.x, center.y)) - img.at<ushort>(cv::Point(i, center.y)), 2);
+        varx+= pow( center.x - i, 2)*img.at<ushort>(cv::Point(i, center.y));
     }
+    std::cout << center.x << " center " << meanx/sumx << std::endl;
     for (int j = 0; j < img.cols; j++){
         sumy+=img.at<ushort>(cv::Point(center.x, j));
-        vary+= pow( img.at<ushort>(cv::Point(center.x, center.y)) - img.at<ushort>(cv::Point(center.x, j)), 2);
+        vary+= pow( center.y - j, 2)*img.at<ushort>(cv::Point(center.x, j));
     }
     //std::cout << img << std::endl;
     std::cout << img.at<ushort>(cv::Point(center.x, center.y)) << " " <<  img.at<ushort>(cv::Point(0, center.y))  << " " << img.at<ushort>(cv::Point(center.x, 0))  << std::endl;
 
+    std::cout << m.m20 << " " <<  m.m02  << " " << m.m11 << " moments " << normFactor << " " << max1 << " " << maxLoc << std::endl;
+    params.var_x = varx/sumx;//((img.rows-1));//m.m20/m.m00;//pow(m.m20,0.5)*2.355; //sigma to FWHM conversion
+    params.var_y = vary/sumy;//pow(m.m02, 0.5)*2.355; //sigma to FWHM conversion
     std::cout << sumx << " " <<  varx  << " " << sumy << " " << vary << std::endl;
-    params.var_x = varx/(sumx*(img.rows-1));//m.m20/m.m00;//pow(m.m20,0.5)*2.355; //sigma to FWHM conversion
-    params.var_y = vary/(sumy*(img.cols-1));//pow(m.m02, 0.5)*2.355; //sigma to FWHM conversion
     params.sigma_cov = m.m11;
     params.numSaturatedPixels = cv::countNonZero(img == 255);
 
     return params;
-}
-
-void drawGaussian(cv::Mat &gaussImg, datacontainers::gaussianFitParams fitParams){
-    cv::Mat gauss;
 }
 
 }

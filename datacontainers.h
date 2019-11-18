@@ -12,6 +12,228 @@
 #include <opencv2/opencv.hpp>
 namespace datacontainers {
 
+struct configurationSettings_seeingGui{
+    configurationSettings_seeingGui(){
+        store_images = false;
+        debug = false;
+        use_threshold = false;
+        use_windowing = false;
+        sample_size = 50;
+        threshold = 20;
+        window_radius=1;
+        wavelength = 532; //nanometer
+        storage_location = "/home/domi/Desktop/seeingTests";
+        measurement_type = "Gaussian fit";
+        apertureDiameter = 0.254;
+        DIMM_apertureDiameter = 0.026;
+        DIMM_baseline = 0.16;
+        pixel_size = 5.5e-6;
+        magnification_telescope = 1;
+        focalLength_eyepiece = 1;
+        update_DIMM_coefficients();
+        update_pix_FoV();
+    }
+    int frameRate;
+    int exposureTime;
+    bool store_images;
+    bool debug;
+    bool use_threshold;
+    bool use_windowing;
+    int sample_size;
+    int threshold;
+    int window_radius;
+    double wavelength;
+
+    QString storage_location;
+    QString measurement_type;    
+    QDir baseDirectory;
+
+    double magnification_telescope;
+    double focalLength_eyepiece;
+    double apertureDiameter;
+    double airy_zeros_pix[20];
+    double pixel_size;
+    double DIMM_apertureDiameter;
+    double DIMM_baseline;
+    double DIMM_airy_zeros_pix[20];
+
+    double pixFOV_urad;
+    double pixFOV;
+    double K_l;
+    double K_t;
+    void update_airy_zeros(){
+        double AiryMinRatio = focalLength_eyepiece*magnification_telescope*(wavelength/apertureDiameter)/pixel_size;
+        double DIMM_AiryMinRatio = focalLength_eyepiece*magnification_telescope*(wavelength/DIMM_apertureDiameter)/pixel_size;
+        for (int i = 0; i<20;i++){
+            airy_zeros_pix[i] = (i+1.22)*AiryMinRatio;
+            DIMM_airy_zeros_pix[i] = (i+1.22)*DIMM_AiryMinRatio;
+        }
+    }
+    void update_DIMM_coefficients(){
+        K_t = 0.364*( 1-0.798 * std::pow((DIMM_baseline/DIMM_apertureDiameter), -1/3) - 0.018 * std::pow((DIMM_baseline/DIMM_apertureDiameter),-7./3.));
+        K_l = 0.364*( 1-0.532 * std::pow((DIMM_baseline/DIMM_apertureDiameter), -1/3) - 0.024 * std::pow((DIMM_baseline/DIMM_apertureDiameter),-7./3.));
+    }
+    void update_pix_FoV(){
+        pixFOV = pixel_size/(focalLength_eyepiece*magnification_telescope);
+        pixFOV_urad = pixFOV*1e6;
+    }
+};
+
+
+
+struct configurationSettings{
+    configurationSettings(){
+        FrameRate = 10;
+        ExposureTime = 1000;
+        Gain = 1;
+        FrameHeight = 60;
+        FrameWidth = 30;
+        OffsetX = 390;
+        OffsetY = 400;
+        BaumerID = "devicemodul00_06_be_00_8f_92";
+        trackingThresh = 20;
+        windowRadius = 1;
+        default_storageLoc_seeing = "home/domi/Desktop/seeingTests/ ";
+        Hexapod_ipadr   = "193.170.58.178";
+        config_seeingGui = configurationSettings_seeingGui();
+
+    }
+    //Initial camera settings
+    std::string BaumerID;
+    int FrameRate;
+    int ExposureTime;
+    int Gain;
+    int FrameHeight;
+    int FrameWidth;
+    int OffsetX;
+    int OffsetY;
+
+    //Initial tracking settings
+    int trackingThresh; //brightness threshold 0-255
+    int windowRadius;//pixels from center
+    bool useWindowing = false;
+
+    //Initial seeing seetings
+    configurationSettings_seeingGui config_seeingGui;
+    std::string default_storageLoc_seeing;
+    double DIMM_mask_apertureDiameter = 0; //does not exist at this time
+    double DIMM_mask_baseline = 0; //does not exist at this time
+    int DIMM_airy_zeros_pix[20];
+
+    //Characteristics of the optical setup
+    double pixelFOV = 5.5*1e-6/1.140; //radians
+    double apertureDiameter = 0.5; // ? meters
+    double focalLength_eyepiece = 0.05;
+    double magnification_telescope = 1;
+    int airy_zeros_pix [20]; //location of the 20 first airy minimas at the camera in pixels
+    //Initial hexapod settings
+    const char* Hexapod_ipadr;
+    std::string default_storageLoc_stabilization = "home/domi/Desktop/trackingLogs/ ";
+
+};
+
+
+
+/********************************************//**
+ *  Container for default settings of the IQOQI side setup
+ ***********************************************/
+
+struct IQOQI_seeingConfig : configurationSettings_seeingGui{
+    IQOQI_seeingConfig(){
+        store_images = true;
+        debug = true;
+        use_threshold = true;
+        use_windowing = false;
+        sample_size = 5;
+        threshold = 10;
+        window_radius = 1;
+        wavelength = 532e-9;
+        storage_location = "/home/kristian/Desktop/seeingTests";
+        measurement_type = "Gaussian fit";
+        magnification_telescope = 1;
+        focalLength_eyepiece = 1.140;
+        apertureDiameter = 0.4;
+        update_pix_FoV();
+        update_airy_zeros();
+    }
+};
+struct IQOQI_setup : configurationSettings
+{
+    IQOQI_setup(){
+        BaumerID = "devicemodul00_06_be_00_8f_92";
+        FrameRate = 5;
+        ExposureTime = 50;
+        Gain = 1;
+        FrameHeight = 45;
+        FrameWidth = 22;
+        OffsetX = 234;
+        OffsetY = 307;
+        pixelFOV = 5.5*1e-6/1.140; //radians
+        Hexapod_ipadr   = "193.170.58.178";
+        default_storageLoc_seeing = "home/kristian/Desktop/seeingTests/ ";
+        config_seeingGui = IQOQI_seeingConfig();        
+    }
+};
+
+
+/********************************************//**
+ *  Container for default settings of the Bisamberg side setup
+ ***********************************************/
+
+struct BISAM_seeingConfig : configurationSettings_seeingGui{
+    BISAM_seeingConfig(){
+        store_images = true;
+        debug = true;
+        use_threshold = true;
+        use_windowing = false;
+        sample_size = 50;
+        threshold = 10;
+        window_radius = 3;
+        wavelength = 532e-9;
+        storage_location = "/home/bisamlinux/Desktop/seeingTests";
+        measurement_type = "Gaussian fit";
+        magnification_telescope = 2.032/0.05;
+        focalLength_eyepiece = 0.05;
+        DIMM_baseline = 0.16;
+        DIMM_apertureDiameter = 0.026;
+
+        update_DIMM_coefficients();
+        update_airy_zeros();
+        update_pix_FoV();
+    }
+};
+
+struct BISAM_setup  : configurationSettings
+{
+    BISAM_setup(){
+        BaumerID  = "devicemodul00_06_be_00_9d_56";
+        FrameRate = 10;
+        ExposureTime = 5000;
+        Gain = 1;
+        FrameHeight = 60;
+        FrameWidth = 30;
+        OffsetX = 390;
+        OffsetY = 400;
+
+        trackingThresh = 20; //brightness threshold 0-255
+        windowRadius = 1; //airy min from center
+
+        pixelFOV = 5.5*1e-6/(0.05*2.032/0.05); //radians
+
+        Hexapod_ipadr   = "193.170.58.178";
+        default_storageLoc_seeing = "home/bisamLinux/Desktop/seeing/ ";
+
+        DIMM_mask_apertureDiameter = 0.026;
+        DIMM_mask_baseline = 0.16;
+
+        Hexapod_ipadr   = "193.170.58.184";
+        config_seeingGui = BISAM_seeingConfig();
+    }
+};
+
+
+
+
 
 /********************************************//**
  *  Container for relevant parameters of the Hedy Lamarr Telescope
@@ -166,8 +388,8 @@ struct CamInfo
     int OffsetY;
     double frameRate;
     std::string BaumerID;
-    std::string BaumerIQOQI = "devicemodul00_06_be_00_8f_92";
-    std::string BaumerBisamberg = "devicemodul00_06_be_00_9d_56";
+    //std::string BaumerIQOQI = "devicemodul00_06_be_00_8f_92";
+    //std::string BaumerBisamberg = "devicemodul00_06_be_00_9d_56";
 };
 
 /********************************************//**
@@ -175,7 +397,7 @@ struct CamInfo
  ***********************************************/
 struct TrackingParameters
 {
-    int TrackingThresh = 100; //brightness threshold 0-255
+    int TrackingThresh = 10; //brightness threshold 0-255
     int WindowRadius = 1; //pixels from center
     std::atomic<bool> useWindowing;
 };
@@ -223,8 +445,8 @@ struct ImageContainer
     std::mutex lockQueue;
     std::queue<cv::Mat> imgQueue;
 
-    unsigned int sampleSize = 1;
-    unsigned int imgCounter = 1;
+    int sampleSize = 1;
+    int imgCounter = 1;
 
     time_t startTime;
     time_t endTime;
@@ -235,6 +457,11 @@ struct ImageContainer
     void removeFirstImg(){
         std::lock_guard<std::mutex> guard(lockQueue);
         imgQueue.pop();
+    }
+
+    void clearQueue(){
+        std::lock_guard<std::mutex> guard(lockQueue);
+        imgQueue = {};
     }
 };
 
@@ -291,7 +518,6 @@ struct gaussianFitParams{
 struct GaussSample{
     gaussianFitParams fitParams;
     cv::Mat gaussImg;
-    int cropSize = 30;
     inline double FWHM_x(){
         return pow(fitParams.var_x,0.5)*2.355;
     }

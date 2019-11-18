@@ -137,6 +137,12 @@ void CameraGui::Connect(std::stringstream &ss)
             } catch (...) {
                 continue;
             }
+            if(temp_sDeviceID == this->m_CamInfo.BaumerID){
+                std::cout << "connecting to Baumer" << std::endl;
+                m_sDeviceID = dev->first;
+                goto end_loop;
+            }
+            /*
             if (this->m_CamInfo.BaumerID == "Baumer Bisamberg"){
                     if (temp_sDeviceID == this->m_CamInfo.BaumerBisamberg){
                         std::cout << "connecting to Baumer Bisamberg" << std::endl;
@@ -153,6 +159,7 @@ void CameraGui::Connect(std::stringstream &ss)
                         //break;
                     }
                 }
+                */
         }
         //---------------------        End       --------------------------------------
         //---------------------  Load Devices  --------------------------------------
@@ -338,6 +345,10 @@ void CameraGui::Run()
                         this->m_imageContainer->endTime = time(nullptr);
                     }
                     if (this->m_imageContainer->imgCounter < this->m_imageContainer->sampleSize ){
+                        ///temporary for testing
+                       // cv::Point centroid = imageprocessing::findCentroid(cvimg);
+                       // cv::circle(cvimg,centroid,5,cv::Scalar(128,0,0),-1);
+                        ///
                         this->m_imageContainer->addImg(cvimg.clone());
                         this->m_imageContainer->imgCounter++;
                     }

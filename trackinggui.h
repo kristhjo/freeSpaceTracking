@@ -17,6 +17,7 @@ class TrackingGui;
  * Within this class, the camera parameters can be modified, and the interface with the cameragui, seeinggui and hexapodgui is established.
  * Communication between these GUIs must be arranged through this class.
  ***********************************************/
+
 class TrackingGui : public QMainWindow
 {
     Q_OBJECT
@@ -26,6 +27,9 @@ public:
     ~TrackingGui(); ///< Destructor for TrackingGui.
 
 protected slots:
+
+    void configureSettings();
+
     void ConnectToCamera(); ///< Sets the chosen camera ID, and calls the connect() function of the cameragui.
     void StartCamera(); ///< Calls the Start() function of the cameragui.
     void StopCamera(); ///< Calls the Stop() function of the cameragui.
@@ -66,6 +70,9 @@ protected slots:
     void DisconnectHedyLamarr();
 private:
     Ui::TrackingGui *ui;
+
+    datacontainers::configurationSettings m_configurationSettings;
+
     std::atomic<bool> isCameraConnected; ///< Flags that connection with the Baumer camera has been established.
     std::atomic<bool> isHexapodConnected; ///< Flags that connection with the hexapod has been established.
     std::atomic<bool> isCameraRunning; ///< Flags that the image acquisition loop of the Baumer cam has started. Is shared with cameragui.

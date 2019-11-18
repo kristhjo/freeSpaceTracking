@@ -6,615 +6,510 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1227</width>
-    <height>635</height>
+    <width>1497</width>
+    <height>958</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QFrame" name="displayFrame">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>270</y>
-      <width>441</width>
-      <height>191</height>
-     </rect>
-    </property>
-    <property name="frameShape">
-     <enum>QFrame::StyledPanel</enum>
-    </property>
-    <property name="frameShadow">
-     <enum>QFrame::Raised</enum>
-    </property>
-    <widget class="QLabel" name="Label_Min">
-     <property name="geometry">
-      <rect>
-       <x>150</x>
-       <y>30</y>
-       <width>31</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Min</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="Label_Max">
-     <property name="geometry">
-      <rect>
-       <x>190</x>
-       <y>30</y>
-       <width>31</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Max</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="Label_Mean">
-     <property name="geometry">
-      <rect>
-       <x>250</x>
-       <y>30</y>
-       <width>54</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Mean</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="Label_Now">
-     <property name="geometry">
-      <rect>
-       <x>80</x>
-       <y>30</y>
-       <width>31</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Now</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="Label_seeing">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>50</y>
-       <width>54</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Seeing</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="Label_Fried">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>80</y>
-       <width>54</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Fried</string>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="LE_FriedMean">
-     <property name="geometry">
-      <rect>
-       <x>250</x>
-       <y>80</y>
-       <width>71</width>
-       <height>25</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="LE_SeeingMin">
-     <property name="geometry">
-      <rect>
-       <x>140</x>
-       <y>50</y>
-       <width>41</width>
-       <height>25</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="LE_FriedNow">
-     <property name="geometry">
-      <rect>
-       <x>70</x>
-       <y>80</y>
-       <width>61</width>
-       <height>25</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="LE_SeeingNow">
-     <property name="geometry">
-      <rect>
-       <x>70</x>
-       <y>50</y>
-       <width>61</width>
-       <height>25</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="LE_SeeingMax">
-     <property name="geometry">
-      <rect>
-       <x>190</x>
-       <y>50</y>
-       <width>41</width>
-       <height>25</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="LE_FriedMax">
-     <property name="geometry">
-      <rect>
-       <x>190</x>
-       <y>80</y>
-       <width>41</width>
-       <height>25</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="LE_SeeingMean">
-     <property name="geometry">
-      <rect>
-       <x>250</x>
-       <y>50</y>
-       <width>71</width>
-       <height>25</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="LE_FriedMin">
-     <property name="geometry">
-      <rect>
-       <x>140</x>
-       <y>80</y>
-       <width>41</width>
-       <height>25</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="LE_FriedMean_x">
-     <property name="geometry">
-      <rect>
-       <x>250</x>
-       <y>110</y>
-       <width>71</width>
-       <height>25</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="LE_FriedMean_y">
-     <property name="geometry">
-      <rect>
-       <x>250</x>
-       <y>140</y>
-       <width>71</width>
-       <height>25</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="LE_FriedNow_x">
-     <property name="geometry">
-      <rect>
-       <x>70</x>
-       <y>110</y>
-       <width>61</width>
-       <height>25</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="LE_FriedNow_y">
-     <property name="geometry">
-      <rect>
-       <x>70</x>
-       <y>140</y>
-       <width>61</width>
-       <height>25</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLabel" name="Label_Fried_2">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>110</y>
-       <width>54</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Fried x</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="Label_Fried_3">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>140</y>
-       <width>54</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Fried y</string>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="LE_FriedMin_x">
-     <property name="geometry">
-      <rect>
-       <x>140</x>
-       <y>110</y>
-       <width>41</width>
-       <height>25</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="LE_FriedMin_y">
-     <property name="geometry">
-      <rect>
-       <x>140</x>
-       <y>140</y>
-       <width>41</width>
-       <height>25</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="LE_FriedMax_x">
-     <property name="geometry">
-      <rect>
-       <x>190</x>
-       <y>110</y>
-       <width>41</width>
-       <height>25</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="LE_FriedMax_y">
-     <property name="geometry">
-      <rect>
-       <x>190</x>
-       <y>140</y>
-       <width>41</width>
-       <height>25</height>
-      </rect>
-     </property>
-    </widget>
-   </widget>
-   <widget class="QCustomPlot" name="SeeingPlot" native="true">
-    <property name="geometry">
-     <rect>
-      <x>490</x>
-      <y>0</y>
-      <width>721</width>
-      <height>271</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QCustomPlot" name="FriedPlot" native="true">
-    <property name="geometry">
-     <rect>
-      <x>490</x>
-      <y>290</y>
-      <width>721</width>
-      <height>281</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QTextEdit" name="TE_logSeeing">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>460</y>
-      <width>441</width>
-      <height>111</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QFrame" name="configurationFrame">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>0</y>
-      <width>441</width>
-      <height>261</height>
-     </rect>
-    </property>
-    <property name="frameShape">
-     <enum>QFrame::StyledPanel</enum>
-    </property>
-    <property name="frameShadow">
-     <enum>QFrame::Raised</enum>
-    </property>
-    <widget class="QLabel" name="Label_WindowingRadius">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>150</y>
-       <width>181</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Windowing Radius (# airy min.)</string>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="LE_SecPerDataPoint">
-     <property name="geometry">
-      <rect>
-       <x>240</x>
-       <y>50</y>
-       <width>51</width>
-       <height>25</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QComboBox" name="ComboB_MeasurementType">
-     <property name="geometry">
-      <rect>
-       <x>180</x>
-       <y>10</y>
-       <width>141</width>
-       <height>25</height>
-      </rect>
-     </property>
-     <item>
-      <property name="text">
-       <string>Gaussian fit</string>
+   <layout class="QGridLayout" name="gridLayout" rowstretch="0,0" columnstretch="0,0,0,0">
+    <item row="0" column="0">
+     <layout class="QGridLayout" name="gridLayout_config">
+      <property name="sizeConstraint">
+       <enum>QLayout::SetMinimumSize</enum>
       </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>DIMM</string>
+      <item row="4" column="2">
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QSpinBox" name="SB_WindowingRadius"/>
+        </item>
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>px</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="SB_airyMin"/>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_airymin">
+          <property name="text">
+           <string># airy min.</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="2" column="2">
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QLabel" name="Label_Debug">
+          <property name="text">
+           <string>Debug</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="CheckB_Debug">
+          <property name="text">
+           <string>Yes</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="3" column="2">
+       <widget class="QLineEdit" name="LE_DirectoryPath">
+        <property name="text">
+         <string>/home/domi/Desktop/seeingTests</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <layout class="QHBoxLayout" name="horizontalLayout_6">
+        <item>
+         <widget class="QSpinBox" name="SB_SampleSize"/>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="LE_SecPerDataPoint"/>
+        </item>
+        <item>
+         <widget class="QLabel" name="Label_SecPerDataPoint">
+          <property name="text">
+           <string>s per data point</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="2" column="0">
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QLabel" name="Label_StoreImages">
+          <property name="text">
+           <string>Store images</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="CheckB_StoreImages">
+          <property name="text">
+           <string>Yes</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="0" column="2">
+       <widget class="QComboBox" name="ComboB_MeasurementType">
+        <item>
+         <property name="text">
+          <string>Gaussian fit</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>DIMM</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="6" column="2">
+       <layout class="QHBoxLayout" name="horizontalLayout_7">
+        <item>
+         <widget class="QSpinBox" name="SB_wavelength"/>
+        </item>
+        <item>
+         <widget class="QLabel" name="Label_nanometer">
+          <property name="text">
+           <string>nm</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="Label_SampleSize">
+        <property name="text">
+         <string>Sample size per data point</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="Label_SeeingMeasurementType">
+        <property name="text">
+         <string>Seeing measurement type</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="label_wavelength">
+        <property name="text">
+         <string>Wavelength</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="Label_StorageLocation">
+        <property name="text">
+         <string>Storage location</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="2">
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <item>
+         <widget class="QSpinBox" name="SB_Threshold"/>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_grayscale">
+          <property name="text">
+           <string>0-255 greyscale</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="4" column="0">
+       <layout class="QHBoxLayout" name="horizontalLayout_11">
+        <item>
+         <widget class="QLabel" name="Label_WindowingRadius">
+          <property name="text">
+           <string>Windowing Radius</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="checkB_useWindow">
+          <property name="text">
+           <string>use</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="5" column="0">
+       <layout class="QHBoxLayout" name="horizontalLayout_12">
+        <item>
+         <widget class="QLabel" name="Label_WindowingRadius_2">
+          <property name="text">
+           <string>Thresholding intensity</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="checkB_useThreshold">
+          <property name="text">
+           <string>use</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+    <item row="0" column="2">
+     <layout class="QGridLayout" name="gridLayout_display">
+      <property name="leftMargin">
+       <number>1</number>
       </property>
-     </item>
-    </widget>
-    <widget class="QLineEdit" name="LE_SampleSize">
-     <property name="geometry">
-      <rect>
-       <x>180</x>
-       <y>50</y>
-       <width>51</width>
-       <height>25</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>20</string>
-     </property>
-    </widget>
-    <widget class="QSpinBox" name="SB_WindowingRadius">
-     <property name="geometry">
-      <rect>
-       <x>230</x>
-       <y>150</y>
-       <width>45</width>
-       <height>26</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLabel" name="Label_SampleSize">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>50</y>
-       <width>151</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Sample size per data point</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="Label_StorageLocation">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>120</y>
-       <width>101</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Storage location</string>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="LE_DirectoryPath">
-     <property name="geometry">
-      <rect>
-       <x>180</x>
-       <y>120</y>
-       <width>251</width>
-       <height>25</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>/home/domi/Desktop/seeingTests</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="Label_StoreImages">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>90</y>
-       <width>91</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Store images</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="Label_SeeingMeasurementType">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>10</y>
-       <width>151</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Seeing measurement type</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="Label_SecPerDataPoint">
-     <property name="geometry">
-      <rect>
-       <x>300</x>
-       <y>56</y>
-       <width>131</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>(s) per data point</string>
-     </property>
-    </widget>
-    <widget class="QCheckBox" name="CheckB_Yes">
-     <property name="geometry">
-      <rect>
-       <x>180</x>
-       <y>90</y>
-       <width>41</width>
-       <height>23</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Yes</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="Label_Debug">
-     <property name="geometry">
-      <rect>
-       <x>300</x>
-       <y>90</y>
-       <width>51</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Debug</string>
-     </property>
-    </widget>
-    <widget class="QCheckBox" name="CheckB_Debug">
-     <property name="geometry">
-      <rect>
-       <x>370</x>
-       <y>90</y>
-       <width>41</width>
-       <height>23</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Yes</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="Label_WindowingRadius_2">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>190</y>
-       <width>181</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Thresholding intensity</string>
-     </property>
-    </widget>
-    <widget class="QSpinBox" name="SB_Threshold">
-     <property name="geometry">
-      <rect>
-       <x>230</x>
-       <y>190</y>
-       <width>45</width>
-       <height>26</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLabel" name="Label_setup">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>230</y>
-       <width>181</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Setup</string>
-     </property>
-    </widget>
-    <widget class="QComboBox" name="ComboB_Setup">
-     <property name="geometry">
-      <rect>
-       <x>180</x>
-       <y>220</y>
-       <width>141</width>
-       <height>25</height>
-      </rect>
-     </property>
-     <item>
-      <property name="text">
-       <string>IQOQI</string>
+      <property name="topMargin">
+       <number>1</number>
       </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Bisam</string>
+      <property name="rightMargin">
+       <number>1</number>
       </property>
-     </item>
-    </widget>
-    <widget class="QCheckBox" name="checkB_useWindow">
-     <property name="geometry">
-      <rect>
-       <x>330</x>
-       <y>150</y>
-       <width>51</width>
-       <height>23</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>use</string>
-     </property>
-    </widget>
-    <widget class="QCheckBox" name="checkB_useThreshold">
-     <property name="geometry">
-      <rect>
-       <x>330</x>
-       <y>190</y>
-       <width>51</width>
-       <height>23</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>use</string>
-     </property>
-    </widget>
-   </widget>
+      <property name="bottomMargin">
+       <number>1</number>
+      </property>
+      <item row="4" column="4">
+       <widget class="QLineEdit" name="LE_FriedMean_x"/>
+      </item>
+      <item row="1" column="4">
+       <widget class="QLabel" name="Label_Mean">
+        <property name="text">
+         <string>Mean</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="LE_SeeingNow"/>
+      </item>
+      <item row="1" column="3">
+       <widget class="QLabel" name="Label_Max">
+        <property name="text">
+         <string>Max</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2">
+       <widget class="QLineEdit" name="LE_FriedMin"/>
+      </item>
+      <item row="5" column="4">
+       <widget class="QLineEdit" name="LE_FriedMean_y"/>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="Label_Fried">
+        <property name="text">
+         <string>Fried</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="4">
+       <widget class="QLineEdit" name="LE_SeeingMean"/>
+      </item>
+      <item row="5" column="2">
+       <widget class="QLineEdit" name="LE_FriedMin_y"/>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="Label_Fried_2">
+        <property name="text">
+         <string>Fried x</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QLineEdit" name="LE_FriedNow_y"/>
+      </item>
+      <item row="4" column="3">
+       <widget class="QLineEdit" name="LE_FriedMax_x"/>
+      </item>
+      <item row="5" column="3">
+       <widget class="QLineEdit" name="LE_FriedMax_y"/>
+      </item>
+      <item row="3" column="4">
+       <widget class="QLineEdit" name="LE_FriedMean"/>
+      </item>
+      <item row="2" column="2">
+       <widget class="QLineEdit" name="LE_SeeingMin"/>
+      </item>
+      <item row="4" column="2">
+       <widget class="QLineEdit" name="LE_FriedMin_x"/>
+      </item>
+      <item row="1" column="2">
+       <widget class="QLabel" name="Label_Min">
+        <property name="text">
+         <string>Min</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="3">
+       <widget class="QLineEdit" name="LE_SeeingMax"/>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLineEdit" name="LE_FriedNow"/>
+      </item>
+      <item row="3" column="3">
+       <widget class="QLineEdit" name="LE_FriedMax"/>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLabel" name="Label_Now">
+        <property name="text">
+         <string>Current</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="Label_seeing">
+        <property name="text">
+         <string>Seeing</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="Label_Fried_3">
+        <property name="text">
+         <string>Fried y</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QLineEdit" name="LE_FriedNow_x"/>
+      </item>
+      <item row="6" column="0" colspan="5">
+       <widget class="QTextEdit" name="TE_logSeeing">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="1" column="0">
+     <layout class="QGridLayout" name="gridLayout_seeingPlots">
+      <property name="leftMargin">
+       <number>1</number>
+      </property>
+      <property name="topMargin">
+       <number>1</number>
+      </property>
+      <property name="rightMargin">
+       <number>1</number>
+      </property>
+      <property name="bottomMargin">
+       <number>1</number>
+      </property>
+      <item row="3" column="0">
+       <layout class="QGridLayout" name="gridLayout_5"/>
+      </item>
+      <item row="2" column="0">
+       <widget class="QCustomPlot" name="FriedPlot" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>600</width>
+          <height>200</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QCustomPlot" name="SeeingPlot" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>600</width>
+          <height>200</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="1" column="2">
+     <layout class="QGridLayout" name="gridLayout_debugPlots">
+      <property name="leftMargin">
+       <number>1</number>
+      </property>
+      <property name="topMargin">
+       <number>1</number>
+      </property>
+      <property name="rightMargin">
+       <number>1</number>
+      </property>
+      <property name="bottomMargin">
+       <number>1</number>
+      </property>
+      <item row="0" column="2">
+       <widget class="QCustomPlot" name="debugPlot_residue" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>200</width>
+          <height>200</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QCustomPlot" name="debugPlot_image" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>200</width>
+          <height>200</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QCustomPlot" name="debugPlot_fit" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>200</width>
+          <height>200</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QCustomPlot" name="saturatedPixelsPlot" native="true">
+        <property name="minimumSize">
+         <size>
+          <width>200</width>
+          <height>200</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QCustomPlot" name="accumImgPlot" native="true">
+        <property name="minimumSize">
+         <size>
+          <width>200</width>
+          <height>200</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QCustomPlot" name="centroidPlot" native="true">
+        <property name="minimumSize">
+         <size>
+          <width>200</width>
+          <height>200</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1227</width>
-     <height>22</height>
+     <width>1497</width>
+     <height>39</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuSeeingGui">
+    <property name="title">
+     <string>SeeingGui</string>
+    </property>
+   </widget>
+   <addaction name="menuSeeingGui"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
