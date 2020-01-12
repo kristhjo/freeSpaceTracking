@@ -34,7 +34,9 @@ SOURCES += \
     seeinggui.cpp \
     qcustomplot.cpp \
     hexapodgui.cpp \
-    hedylamarrgui.cpp
+    hedylamarrgui.cpp \
+    plotdisplay.cpp \
+    livedisplay.cpp
 
 HEADERS += \
         trackinggui.h \
@@ -44,13 +46,18 @@ HEADERS += \
     seeinggui.h \
     qcustomplot.h \
     hexapodgui.h \
-    hedylamarrgui.h
+    hedylamarrgui.h \
+    plotdisplay.h \
+    livedisplay.h
 
 FORMS += \
         trackinggui.ui \
-    seeinggui.ui \
     hexapodgui.ui \
-    hedylamarrgui.ui
+    hedylamarrgui.ui \
+    seeinggui.ui \
+    plotdisplay.ui \
+    livedisplay.ui
+
 
 INCLUDEPATH += $$PWD/inc/hexapod
 DEPENDPATH += $$PWD/inc/hexapod
@@ -76,3 +83,7 @@ unix:!macx: LIBS += -L$$PWD/lib/ -lpi_pi_gcs2
 
 INCLUDEPATH += $$PWD/inc
 DEPENDPATH += $$PWD/inc
+
+DISTFILES += \
+    config_IQOQI.ini \
+    config_BISAM.ini

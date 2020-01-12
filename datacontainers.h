@@ -21,8 +21,10 @@ struct configurationSettings_seeingGui{
         sample_size = 50;
         threshold = 20;
         window_radius=1;
+        pixel_saturation_cutOff = 100;
+        strehl_cutOff = 0;
         wavelength = 532; //nanometer
-        storage_location = "/home/domi/Desktop/seeingTests";
+        storage_location = "/home/kristian/Desktop/seeingTests";
         measurement_type = "Gaussian fit";
         apertureDiameter = 0.254;
         DIMM_apertureDiameter = 0.026;
@@ -44,6 +46,8 @@ struct configurationSettings_seeingGui{
     int window_radius;
     double wavelength;
 
+    int pixel_saturation_cutOff;
+    double strehl_cutOff;
     QString storage_location;
     QString measurement_type;    
     QDir baseDirectory;
@@ -80,6 +84,58 @@ struct configurationSettings_seeingGui{
 };
 
 
+//struct configurationSettings{}
+//struct config_seeingGui{};
+//struct config_trackingGui{};
+struct config_camera{
+    int FrameRate;
+    int ExposureTime;
+    int Gain;
+    int FrameHeight;
+    int FrameWidth;
+    int OffsetX;
+    int OffsetY;
+    std::string BaumerID;
+};
+
+struct config_seeingGui{
+    int frameRate;
+    int exposureTime;
+    bool store_images;
+    bool debug;
+    bool use_threshold;
+    bool use_windowing;
+    int sample_size;
+    int threshold;
+    int window_radius;
+    double wavelength;
+
+    int pixel_saturation_cutOff;
+    double strehl_cutOff;
+    QString storage_location;
+    QString measurement_type;
+    QDir baseDirectory;
+
+    double magnification_telescope;
+    double focalLength_eyepiece;
+    double apertureDiameter;
+    double airy_zeros_pix[20];
+    double pixel_size;
+    double DIMM_apertureDiameter;
+    double DIMM_baseline;
+    double DIMM_airy_zeros_pix[20];
+
+    double pixFOV_urad;
+    double pixFOV;
+    double K_l;
+    double K_t;
+};
+
+//struct config_hexapodGui{
+//const char* ipadr   = "193.170.58.184"; //Hexapod Bisamberg
+//};
+//struct config_hedyLamarrGui{};
+//struct config_optics{};
 
 struct configurationSettings{
     configurationSettings(){
@@ -91,9 +147,10 @@ struct configurationSettings{
         OffsetX = 390;
         OffsetY = 400;
         BaumerID = "devicemodul00_06_be_00_8f_92";
+
         trackingThresh = 20;
         windowRadius = 1;
-        default_storageLoc_seeing = "home/domi/Desktop/seeingTests/ ";
+        default_storageLoc_seeing = "home/kristian/Desktop/seeingTests/ ";
         Hexapod_ipadr   = "193.170.58.178";
         config_seeingGui = configurationSettings_seeingGui();
 
@@ -114,6 +171,7 @@ struct configurationSettings{
     bool useWindowing = false;
 
     //Initial seeing seetings
+
     configurationSettings_seeingGui config_seeingGui;
     std::string default_storageLoc_seeing;
     double DIMM_mask_apertureDiameter = 0; //does not exist at this time
@@ -162,12 +220,12 @@ struct IQOQI_setup : configurationSettings
     IQOQI_setup(){
         BaumerID = "devicemodul00_06_be_00_8f_92";
         FrameRate = 5;
-        ExposureTime = 50;
+        ExposureTime = 100;
         Gain = 1;
         FrameHeight = 45;
         FrameWidth = 22;
         OffsetX = 234;
-        OffsetY = 307;
+        OffsetY = 291;
         pixelFOV = 5.5*1e-6/1.140; //radians
         Hexapod_ipadr   = "193.170.58.178";
         default_storageLoc_seeing = "home/kristian/Desktop/seeingTests/ ";
@@ -403,41 +461,6 @@ struct TrackingParameters
 };
 
 /********************************************//**
- *  Container for relevant parameters of the seeing measurement module
- ***********************************************/
-struct seeingParameters
-{
-    seeingParameters(){
-        double AiryMinRatio = receiverOptics.f3*receiverOptics.magnification*(wavelength/maskApertureDiameter)/receiverOptics.pixSize;
-        for (int i = 0; i<20;i++){
-            pxAiryZeros[i] = int( (i+1.22)*AiryMinRatio +0.5 );
-         }
-    }
-    int intensityThreshold = 1;
-    double exposureTime;
-    double frameRate;
-    double pixFov;
-    receiverOpticsInfo receiverOptics;
-    double iqoqiPixFov = receiverOptics.pixSize/1.140;
-    double bisamPixFov = receiverOptics.pixFoVrad;
-    //meters
-    double maskApertureDiameter = 0.026; //DIMM mask
-    double maskApertureSeparation = 0.16; //DIMM mask
-    double wavelength = 532e-9; //Green LEDs
-    //double focalLength = receiverOptics.f3;// final focusing lens
-    double pxWidth = receiverOptics.pixSize; //Baumer cam
-    double pxHeight = receiverOptics.pixSize; //Baumer cam
-    //double magnification = receiverOptics.magnification;
-    int pxAiryZeros [20];//location of airy minimas in the image plane in pixels.
-    int pxWindowRadius = 10;
-    //int pxWindowRadius = 10; //radius of crop window used in windowing algorithm. Is set through the seeinggui.
-    //parameters for DIMM calculations
-    double K_l = 0.364*( 1-0.532 * std::pow((maskApertureSeparation/maskApertureDiameter), -1/3) - 0.024 * std::pow((maskApertureSeparation/maskApertureDiameter),-7./3.));
-    double K_t = 0.364*( 1-0.798 * std::pow((maskApertureSeparation/maskApertureDiameter), -1/3) - 0.018 * std::pow((maskApertureSeparation/maskApertureDiameter),-7./3.));
-};
-
-
-/********************************************//**
  *  Container for thread-safe image sharing between cameragui and seeinggui
  ***********************************************/
 struct ImageContainer
@@ -513,6 +536,7 @@ struct gaussianFitParams{
     double center_y;
     double sigma_cov;
     double numSaturatedPixels;
+    bool valid;
 };
 
 struct GaussSample{
@@ -523,65 +547,6 @@ struct GaussSample{
     }
     inline double FWHM_y(){
         return pow(fitParams.var_y,0.5)*2.355;
-    }
-};
-
-/********************************************//**
- *  Container for seeing data collected continuously through the measurement
- ***********************************************/
-
-struct seeingValues
-{
-    QVector<double> seeing;
-    QVector<double> seeing_x;
-    QVector<double> seeing_y;
-    QVector<double> fried;
-    QVector<double> fried_x;
-    QVector<double> fried_y;
-    QVector<time_t> timestamps;
-    QVector<QCPGraphData> friedData;
-    QVector<QCPGraphData> friedData_x;
-    QVector<QCPGraphData> friedData_y;
-    QVector<QCPGraphData> seeingData;
-    QVector<double> plotTimes;
-    QVector<QCPGraphData> avgFriedPlot;
-    QVector<QCPGraphData> avgSeeingPlot;
-    double minFried(){
-        return *std::min_element(fried.constBegin(), fried.constEnd());
-    }
-    double maxFried(){
-        return *std::max_element(fried.constBegin(), fried.constEnd());
-    }
-    double minSeeing(){
-        return *std::min_element(seeing.constBegin(), seeing.constEnd());
-    }
-    double maxSeeing(){
-        return *std::max_element(seeing.constBegin(), seeing.constEnd());
-    }
-    double meanFried(){
-        return std::accumulate(fried.begin(), fried.end(), .0) / fried.size();;
-    }
-    double meanFried_x(){
-        return std::accumulate(fried_x.begin(), fried_x.end(), .0) / fried_x.size();;
-    }
-    double meanFried_y(){
-        return std::accumulate(fried_y.begin(), fried_y.end(), .0) / fried_y.size();;
-    }
-    double maxFried_x(){
-        return *std::max_element(fried_x.constBegin(), fried_x.constEnd());
-    }
-    double maxFried_y(){
-        return *std::max_element(fried_y.constBegin(), fried_y.constEnd());
-    }
-    double minFried_x(){
-        return *std::min_element(fried_x.constBegin(), fried_x.constEnd());
-    }
-    double minFried_y(){
-        return *std::min_element(fried_y.constBegin(), fried_y.constEnd());
-    }
-
-    double meanSeeing(){
-        return std::accumulate(seeing.begin(), seeing.end(), .0) / seeing.size();;
     }
 };
 

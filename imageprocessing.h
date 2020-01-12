@@ -15,7 +15,8 @@ void cropThreshold(const cv::Mat &img, cv::Mat &croppedImg, int trackingThresh);
 cv::Point findCentroid(const cv::Mat &img); ///< Returns the coordinates of the brightest pixel in the image.
 cv::Point getSpotSeparation(const cv::Mat &img, int windowRadius); ///< Returns the coordinate distance (x,y) between the brightest spot in each half (split left-right) of the image.
 datacontainers::gaussianFitParams getGaussianFitParams(const cv::Mat &img);
-void drawGaussian(cv::Mat &gaussImg, datacontainers::gaussianFitParams fitParams);
-double Strehl_ratio(cv::Mat &img);
+double getStrehlRatio(const cv::Mat &img, double pixel_size, double wavelength, double aperture_diameter);
+void computeHistogram(const cv::Mat &img, cv::Mat &histogram);
+
 }
 #endif // IMAGEPROCESSING_H

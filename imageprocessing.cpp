@@ -1,7 +1,7 @@
 //#include <math>
 #include "imageprocessing.h"
 #include "datacontainers.h"
-
+#include <math.h>
 namespace imageprocessing {
 
 
@@ -18,6 +18,7 @@ void cropWindow(const cv::Mat &img, cv::Mat &croppedImg, int windowRadius = 5){
 
 
 void cropThreshold(const cv::Mat &img, cv::Mat &croppedImg, int trackingThresh){
+    ///defined for 8UC1 only
     cv::Mat mask;
     cv::threshold(img,mask,trackingThresh,1,cv::THRESH_BINARY); //Initiates mask with 1 where img is above trackingThresh and 0 elsewhere.
     img.copyTo(croppedImg, mask); //Copies img to croppedImg, where mask is applied so that croppedImg is 0 where mask is 0.
@@ -38,13 +39,13 @@ cv::Point getSpotSeparation(const cv::Mat &img, int windowRadius = 5){
     cv::Point c1, c2;
     c1 = findCentroid(croppedImg1);
     c2 = findCentroid(croppedImg2);
-    double min, max1, max2;
+    /*double min, max1, max2;
     cv::Point minLoc, maxLoc;
     cv::minMaxLoc(img, &min, &max1, &minLoc, &maxLoc);
     cv::minMaxLoc(img, &min, &max2, &minLoc, &maxLoc);
     if (max1 <10 || max2 <10){
         return cv::Point(10000,10000);
-    }
+    }*/
     cv::Point dist;
     dist.x = c2.x + img.cols/2 - c1.x;
     dist.y = c2.y - c1.y;
@@ -53,9 +54,26 @@ cv::Point getSpotSeparation(const cv::Mat &img, int windowRadius = 5){
 
 datacontainers::gaussianFitParams getGaussianFitParams(const cv::Mat &img){
 
-    cv::Moments m = moments(img,true);
+    cv::Moments m = moments(img);
+    cv::Moments binary = moments(img, true);
     datacontainers::gaussianFitParams params;
     cv::Point center(m.m10/m.m00, m.m01/m.m00);
+    if ( (abs(center.y) > img.rows )|| (abs(center.x) > img.cols )){
+        std::cout << "unvalid image" << std::endl;
+        params.valid = false;
+        return params;
+    }
+    else if( std::isnan(m.m10/m.m00) || std::isnan(m.m01/m.m00)){
+        std::cout << "unvalid image" << std::endl;
+        params.valid = false;
+        return params;
+    }
+    else {
+        params.valid = true;
+    }
+    std::cout << abs(center.x) << " " << img.rows << " test of centroid " << center.y << std::endl;
+
+    std::cout << m.m10/m.m00 << " test of centroid " << binary.m10/binary.m00 << std::endl;
     double min, max1;
     cv::Point minLoc, maxLoc;
     cv::minMaxLoc(img, &min, &max1, &minLoc, &maxLoc);
@@ -67,6 +85,7 @@ datacontainers::gaussianFitParams getGaussianFitParams(const cv::Mat &img){
     double sumx=0;
     double sumy=0;
     double meanx = 0;
+
     ushort normFactor = img.at<ushort>(cv::Point(center.x, center.y));
     for (int i = 0; i < img.rows; i++){
         meanx+= i*img.at<ushort>(cv::Point(i, center.y));
@@ -78,7 +97,6 @@ datacontainers::gaussianFitParams getGaussianFitParams(const cv::Mat &img){
         sumy+=img.at<ushort>(cv::Point(center.x, j));
         vary+= pow( center.y - j, 2)*img.at<ushort>(cv::Point(center.x, j));
     }
-    //std::cout << img << std::endl;
     std::cout << img.at<ushort>(cv::Point(center.x, center.y)) << " " <<  img.at<ushort>(cv::Point(0, center.y))  << " " << img.at<ushort>(cv::Point(center.x, 0))  << std::endl;
 
     std::cout << m.m20 << " " <<  m.m02  << " " << m.m11 << " moments " << normFactor << " " << max1 << " " << maxLoc << std::endl;
@@ -89,6 +107,36 @@ datacontainers::gaussianFitParams getGaussianFitParams(const cv::Mat &img){
     params.numSaturatedPixels = cv::countNonZero(img == 255);
 
     return params;
+}
+
+double getStrehlRatio(const cv::Mat &img, double pixel_size, double wavelength, double aperture_diameter){
+    //pixel size in radians
+    cv::Mat croppedImg;
+    cv::Mat mask;
+    cv::Mat tempImg;
+    img.copyTo(tempImg);
+    tempImg.convertTo(tempImg, CV_8UC1);
+    //cv::convertScaleAbs(img,scaledImg);
+    cv::threshold(tempImg,mask,10,1,cv::THRESH_BINARY); //Initiates mask with 1 where img is above trackingThresh and 0 elsewhere.
+    img.copyTo(croppedImg, mask);
+
+    double min, max;
+    cv::Point minLoc, maxLoc;
+    cv::minMaxLoc(croppedImg, &min, &max, &minLoc, &maxLoc);
+    double total_intensity = cv::sum(croppedImg)[0];
+    return (max/total_intensity)*(4/M_PI)*pow(wavelength/(pixel_size*aperture_diameter), 2);
+}
+
+
+void computeHistogram(const cv::Mat &img, cv::Mat &histogram) {
+    int channels =  0;
+    int histSize =  256;
+    float range[] = { 1, 256 };
+    const float* histRange = { range };
+    bool unifrom_bins = true;
+    bool accumulate = false;
+    cv::calcHist(&img, 1, &channels, cv::Mat(), histogram, 1, &histSize, &histRange, unifrom_bins, accumulate);
+    //cv::normalize(histogram, histogram, 0, 1, cv::NORM_MINMAX, -1, cv::Mat());//img.rows*img.cols
 }
 
 }

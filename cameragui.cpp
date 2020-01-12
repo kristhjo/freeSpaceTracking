@@ -322,11 +322,13 @@ void CameraGui::Run()
                     if (this->isHexapodStabilizing->load(std::memory_order_acquire)){ //if hexapodstabilization is activated, share the centroids with hexapodgui.
                         this->centroidContainer->currentCentroid = centroid;
                         this->centroidContainer->addCentroid(centroid);
+                        ///add method to remove centroid so container doesnt grow too big
                         //this->centroidContainer->newCentroid.store(true, std::memory_order_release);
                     }
                     if (this->isHedyLamarrStabilizing->load(std::memory_order_acquire)){ //if hexapodstabilization is activated, share the centroids with hexapodgui.
                         this->centroidContainerHedy->currentCentroid = centroid;
                         this->centroidContainerHedy->addCentroid(centroid);
+                        ///add method to remove centroid so container doesnt grow too big
                         //this->centroidContainer->newCentroid.store(true, std::memory_order_release);
                     }
                     cv::circle(cvimg,centroid,5,cv::Scalar(128,0,0),-1); //creates circle on img following the centroid.
@@ -334,7 +336,7 @@ void CameraGui::Run()
                     cv::Point pText(20,20);
                     std::string centroidText = "x: " + std::to_string(centroid.x) + "   " + "y: " + std::to_string(centroid.y);
                     cv::putText(croppedImg, centroidText, pText,cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar(128,128,256));
-                    cv::imshow("tracking", croppedImg);
+                    cv::imshow("BaumerCam", croppedImg);
 
                 }
                 else if (this->isMeasuringSeeing->load(std::memory_order_acquire) == true){ //if a seeing measurement is activated, share image with seeinggui.
@@ -346,8 +348,10 @@ void CameraGui::Run()
                     }
                     if (this->m_imageContainer->imgCounter < this->m_imageContainer->sampleSize ){
                         ///temporary for testing
-                       // cv::Point centroid = imageprocessing::findCentroid(cvimg);
-                       // cv::circle(cvimg,centroid,5,cv::Scalar(128,0,0),-1);
+                         //cv::Point centroid = imageprocessing::findCentroid(cvimg);
+                         int siye = rand() % 25;
+                         int intensity = (rand() % 200) + 10;    //250/(10 % (this->m_imageContainer->imgCounter+1));
+                         cv::circle(cvimg,cv::Point(cvimg.rows/2, cvimg.cols/2),siye,cv::Scalar(intensity,0,0),-1);
                         ///
                         this->m_imageContainer->addImg(cvimg.clone());
                         this->m_imageContainer->imgCounter++;
@@ -359,10 +363,10 @@ void CameraGui::Run()
                         this->m_imageContainer->imgCounter = 1;
 
                     }
-                    cv::imshow("Seeing measurement", cvimg);
+                    cv::imshow("BaumerCam", cvimg);
                 }
                 else{ //if no tracking, of seeing measurements are active, simply display the image.
-                    cv::imshow("no tracking", cvimg);
+                    cv::imshow("BaumerCam", cvimg);
                 }
                 cvimg.release();
                 pBufferFilled->QueueBuffer();

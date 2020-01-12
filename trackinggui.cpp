@@ -141,17 +141,62 @@ TrackingGui::TrackingGui(QWidget *parent) :
     QObject::connect(this->ui->PB_StopHedyLamarrStabilization, &QPushButton::clicked, this, &TrackingGui::StopHedyLamarrStabilization, Qt::UniqueConnection);
     QObject::connect(this->ui->PB_DisconnectHedyLamarr, &QPushButton::clicked, this, &TrackingGui::DisconnectHedyLamarr, Qt::UniqueConnection);
 
-    QObject::connect(this->ui->PB_initConfig, &QPushButton::clicked, this, &TrackingGui::configureSettings, Qt::UniqueConnection);
+    //QObject::connect(this->ui->PB_initConfig, &QPushButton::clicked, this, &TrackingGui::configureSettings);
+    QObject::connect(this->ui->PB_initConfig, &QPushButton::clicked, this, &TrackingGui::loadConfiguration, Qt::UniqueConnection);
 }
 
 TrackingGui::~TrackingGui()
 {
+    std::cout << "trackingGui destructor called"<< std::endl;
     delete ui;
 }
+void TrackingGui::loadConfiguration(){
+    if(this->ui->CB_Settings->currentText().toStdString() == "IQOQI"){
+        this->m_configurationFile = QDir::currentPath() + "/config_IQOQI.ini";
+    }
+    else if(this->ui->CB_Settings->currentText().toStdString() == "Bisamberg"){
+        this->m_configurationFile = QDir::currentPath() + "/config_BISAM.ini";
+    }
+    std::cout<< QDir::currentPath().toStdString() <<std::endl;
+    QSettings settings(this->m_configurationFile, QSettings::IniFormat);
+    settings.beginGroup("cameraSettings");
+    this->m_configurationSettings.ExposureTime = settings.value("ExposureTime", 15).toInt();
+    this->m_configurationSettings.Gain = settings.value("Gain", 1).toInt();
+    this->m_configurationSettings.FrameRate = settings.value("FrameRate", 5).toInt();
+    this->m_configurationSettings.FrameWidth = settings.value("FrameWidth", 400).toInt();
+    this->m_configurationSettings.FrameHeight = settings.value("FrameHeigth", 200).toInt();
+    this->m_configurationSettings.OffsetX = settings.value("OffsetX", 0).toInt();
+    this->m_configurationSettings.OffsetY = settings.value("OffsetY", 0).toInt();
+    settings.beginGroup("seeingGuiSettings");
+
+    /*
+    store_images = true;
+    debug = true;
+    use_threshold = true;
+    use_windowing = false;
+    sample_size = 5;
+    threshold = 10;
+    window_radius = 1;
+    wavelength = 532e-9;
+    storage_location = "/home/kristian/Desktop/seeingTests";
+    measurement_type = "Gaussian fit";
+    magnification_telescope = 1;
+    focalLength_eyepiece = 1.140;
+    apertureDiameter = 0.4;
+
+    */
+
+    this->ui->SB_TrackingThresh->setValue(m_configurationSettings.trackingThresh);
+    this->ui->SB_WindowRadius->setValue(m_configurationSettings.windowRadius);
+
+    this->ui->TE_LogCam->clear();
+}
+
 
 void TrackingGui::configureSettings(){
     if(this->ui->CB_Settings->currentText().toStdString() == "IQOQI"){
         this->m_configurationSettings = datacontainers::IQOQI_setup();
+
     }
     else if(this->ui->CB_Settings->currentText().toStdString() == "Bisamberg"){
         this->m_configurationSettings  = datacontainers::BISAM_setup();

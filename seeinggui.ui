@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1497</width>
-    <height>958</height>
+    <width>460</width>
+    <height>429</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -20,12 +20,107 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout" rowstretch="0,0" columnstretch="0,0,0,0">
+   <layout class="QGridLayout" name="gridLayout" rowstretch="0,0" columnstretch="0,0">
     <item row="0" column="0">
      <layout class="QGridLayout" name="gridLayout_config">
       <property name="sizeConstraint">
        <enum>QLayout::SetMinimumSize</enum>
       </property>
+      <item row="6" column="2">
+       <layout class="QHBoxLayout" name="horizontalLayout_7">
+        <item>
+         <widget class="QSpinBox" name="SB_wavelength"/>
+        </item>
+        <item>
+         <widget class="QLabel" name="Label_nanometer">
+          <property name="text">
+           <string>nm</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="0" column="2">
+       <widget class="QComboBox" name="ComboB_MeasurementType">
+        <item>
+         <property name="text">
+          <string>Gaussian fit</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>DIMM</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <layout class="QHBoxLayout" name="horizontalLayout_11">
+        <item>
+         <widget class="QLabel" name="Label_WindowingRadius">
+          <property name="text">
+           <string>Windowing Radius</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="checkB_useWindow">
+          <property name="text">
+           <string>use</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="2" column="2">
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QLabel" name="Label_Debug">
+          <property name="text">
+           <string>Debug</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="CheckB_Debug">
+          <property name="text">
+           <string>Yes</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="5" column="2">
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <item>
+         <widget class="QSpinBox" name="SB_Threshold"/>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_grayscale">
+          <property name="text">
+           <string>0-255 greyscale</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="1" column="2">
+       <layout class="QHBoxLayout" name="horizontalLayout_6">
+        <item>
+         <widget class="QSpinBox" name="SB_SampleSize"/>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="LE_SecPerDataPoint"/>
+        </item>
+        <item>
+         <widget class="QLabel" name="Label_SecPerDataPoint">
+          <property name="text">
+           <string>s per data point</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
       <item row="4" column="2">
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
@@ -50,47 +145,26 @@
         </item>
        </layout>
       </item>
-      <item row="2" column="2">
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <item>
-         <widget class="QLabel" name="Label_Debug">
-          <property name="text">
-           <string>Debug</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QCheckBox" name="CheckB_Debug">
-          <property name="text">
-           <string>Yes</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="3" column="2">
-       <widget class="QLineEdit" name="LE_DirectoryPath">
+      <item row="8" column="0">
+       <widget class="QLabel" name="label_3">
         <property name="text">
-         <string>/home/domi/Desktop/seeingTests</string>
+         <string>Strehl ratio cut-off</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="2">
-       <layout class="QHBoxLayout" name="horizontalLayout_6">
-        <item>
-         <widget class="QSpinBox" name="SB_SampleSize"/>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="LE_SecPerDataPoint"/>
-        </item>
-        <item>
-         <widget class="QLabel" name="Label_SecPerDataPoint">
-          <property name="text">
-           <string>s per data point</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
+      <item row="0" column="0">
+       <widget class="QLabel" name="Label_SeeingMeasurementType">
+        <property name="text">
+         <string>Seeing measurement type</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="label_wavelength">
+        <property name="text">
+         <string>Wavelength</string>
+        </property>
+       </widget>
       </item>
       <item row="2" column="0">
        <layout class="QHBoxLayout" name="horizontalLayout">
@@ -110,52 +184,10 @@
         </item>
        </layout>
       </item>
-      <item row="0" column="2">
-       <widget class="QComboBox" name="ComboB_MeasurementType">
-        <item>
-         <property name="text">
-          <string>Gaussian fit</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>DIMM</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="6" column="2">
-       <layout class="QHBoxLayout" name="horizontalLayout_7">
-        <item>
-         <widget class="QSpinBox" name="SB_wavelength"/>
-        </item>
-        <item>
-         <widget class="QLabel" name="Label_nanometer">
-          <property name="text">
-           <string>nm</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="Label_SampleSize">
+      <item row="7" column="0">
+       <widget class="QLabel" name="label_2">
         <property name="text">
-         <string>Sample size per data point</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="Label_SeeingMeasurementType">
-        <property name="text">
-         <string>Seeing measurement type</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="0">
-       <widget class="QLabel" name="label_wavelength">
-        <property name="text">
-         <string>Wavelength</string>
+         <string># Saturated pixels cut-off</string>
         </property>
        </widget>
       </item>
@@ -166,37 +198,22 @@
         </property>
        </widget>
       </item>
-      <item row="5" column="2">
-       <layout class="QHBoxLayout" name="horizontalLayout_4">
-        <item>
-         <widget class="QSpinBox" name="SB_Threshold"/>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_grayscale">
-          <property name="text">
-           <string>0-255 greyscale</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
+      <item row="1" column="0">
+       <widget class="QLabel" name="Label_SampleSize">
+        <property name="text">
+         <string>Sample size per data point</string>
+        </property>
+       </widget>
       </item>
-      <item row="4" column="0">
-       <layout class="QHBoxLayout" name="horizontalLayout_11">
-        <item>
-         <widget class="QLabel" name="Label_WindowingRadius">
-          <property name="text">
-           <string>Windowing Radius</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QCheckBox" name="checkB_useWindow">
-          <property name="text">
-           <string>use</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
+      <item row="3" column="2">
+       <widget class="QLineEdit" name="LE_DirectoryPath">
+        <property name="text">
+         <string>/home/domi/Desktop/seeingTests</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="2">
+       <widget class="QSpinBox" name="spinBox"/>
       </item>
       <item row="5" column="0">
        <layout class="QHBoxLayout" name="horizontalLayout_12">
@@ -216,282 +233,31 @@
         </item>
        </layout>
       </item>
-     </layout>
-    </item>
-    <item row="0" column="2">
-     <layout class="QGridLayout" name="gridLayout_display">
-      <property name="leftMargin">
-       <number>1</number>
-      </property>
-      <property name="topMargin">
-       <number>1</number>
-      </property>
-      <property name="rightMargin">
-       <number>1</number>
-      </property>
-      <property name="bottomMargin">
-       <number>1</number>
-      </property>
-      <item row="4" column="4">
-       <widget class="QLineEdit" name="LE_FriedMean_x"/>
-      </item>
-      <item row="1" column="4">
-       <widget class="QLabel" name="Label_Mean">
-        <property name="text">
-         <string>Mean</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QLineEdit" name="LE_SeeingNow"/>
-      </item>
-      <item row="1" column="3">
-       <widget class="QLabel" name="Label_Max">
-        <property name="text">
-         <string>Max</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="2">
-       <widget class="QLineEdit" name="LE_FriedMin"/>
-      </item>
-      <item row="5" column="4">
-       <widget class="QLineEdit" name="LE_FriedMean_y"/>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="Label_Fried">
-        <property name="text">
-         <string>Fried</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="4">
-       <widget class="QLineEdit" name="LE_SeeingMean"/>
-      </item>
-      <item row="5" column="2">
-       <widget class="QLineEdit" name="LE_FriedMin_y"/>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="Label_Fried_2">
-        <property name="text">
-         <string>Fried x</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="1">
-       <widget class="QLineEdit" name="LE_FriedNow_y"/>
-      </item>
-      <item row="4" column="3">
-       <widget class="QLineEdit" name="LE_FriedMax_x"/>
-      </item>
-      <item row="5" column="3">
-       <widget class="QLineEdit" name="LE_FriedMax_y"/>
-      </item>
-      <item row="3" column="4">
-       <widget class="QLineEdit" name="LE_FriedMean"/>
-      </item>
-      <item row="2" column="2">
-       <widget class="QLineEdit" name="LE_SeeingMin"/>
-      </item>
-      <item row="4" column="2">
-       <widget class="QLineEdit" name="LE_FriedMin_x"/>
-      </item>
-      <item row="1" column="2">
-       <widget class="QLabel" name="Label_Min">
-        <property name="text">
-         <string>Min</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="3">
-       <widget class="QLineEdit" name="LE_SeeingMax"/>
-      </item>
-      <item row="3" column="1">
-       <widget class="QLineEdit" name="LE_FriedNow"/>
-      </item>
-      <item row="3" column="3">
-       <widget class="QLineEdit" name="LE_FriedMax"/>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLabel" name="Label_Now">
-        <property name="text">
-         <string>Current</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="Label_seeing">
-        <property name="text">
-         <string>Seeing</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="Label_Fried_3">
-        <property name="text">
-         <string>Fried y</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="1">
-       <widget class="QLineEdit" name="LE_FriedNow_x"/>
-      </item>
-      <item row="6" column="0" colspan="5">
-       <widget class="QTextEdit" name="TE_logSeeing">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-       </widget>
+      <item row="8" column="2">
+       <layout class="QHBoxLayout" name="horizontalLayout_5">
+        <item>
+         <widget class="QDoubleSpinBox" name="doubleSpinBox"/>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_4">
+          <property name="text">
+           <string>(for DIMM only)</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </item>
     <item row="1" column="0">
-     <layout class="QGridLayout" name="gridLayout_seeingPlots">
-      <property name="leftMargin">
-       <number>1</number>
+     <widget class="QTextEdit" name="TE_logSeeing">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
       </property>
-      <property name="topMargin">
-       <number>1</number>
-      </property>
-      <property name="rightMargin">
-       <number>1</number>
-      </property>
-      <property name="bottomMargin">
-       <number>1</number>
-      </property>
-      <item row="3" column="0">
-       <layout class="QGridLayout" name="gridLayout_5"/>
-      </item>
-      <item row="2" column="0">
-       <widget class="QCustomPlot" name="FriedPlot" native="true">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>600</width>
-          <height>200</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
-       <widget class="QCustomPlot" name="SeeingPlot" native="true">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>600</width>
-          <height>200</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item row="1" column="2">
-     <layout class="QGridLayout" name="gridLayout_debugPlots">
-      <property name="leftMargin">
-       <number>1</number>
-      </property>
-      <property name="topMargin">
-       <number>1</number>
-      </property>
-      <property name="rightMargin">
-       <number>1</number>
-      </property>
-      <property name="bottomMargin">
-       <number>1</number>
-      </property>
-      <item row="0" column="2">
-       <widget class="QCustomPlot" name="debugPlot_residue" native="true">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>200</width>
-          <height>200</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QCustomPlot" name="debugPlot_image" native="true">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>200</width>
-          <height>200</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QCustomPlot" name="debugPlot_fit" native="true">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>200</width>
-          <height>200</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QCustomPlot" name="saturatedPixelsPlot" native="true">
-        <property name="minimumSize">
-         <size>
-          <width>200</width>
-          <height>200</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QCustomPlot" name="accumImgPlot" native="true">
-        <property name="minimumSize">
-         <size>
-          <width>200</width>
-          <height>200</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
-       <widget class="QCustomPlot" name="centroidPlot" native="true">
-        <property name="minimumSize">
-         <size>
-          <width>200</width>
-          <height>200</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-     </layout>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -500,8 +266,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1497</width>
-     <height>39</height>
+     <width>460</width>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuSeeingGui">
@@ -513,14 +279,6 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>QCustomPlot</class>
-   <extends>QWidget</extends>
-   <header>qcustomplot.h</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>
