@@ -7,4 +7,4 @@ get latest qt5 distro from qhttps://www.qt.io/download <br>
 opencv2: <br>
 sudo apt-get install libopencv-dev <br>
 
-
+![Main window](/docs/trackingGui.png)
