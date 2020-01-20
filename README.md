@@ -30,16 +30,31 @@ Additionally, software libraries from Baumer and PI Systems must be included in 
 * Within the configuration file, the ip adress of the hexapod is stored. 
 2. Press "Connect hexapod". If succesfull, this initates an internal reference procedure in the hexapod to find the correct origin position. 
 3. The hexapod can be controlled manually with the keyboard, or by setting the position of the X, Y, Z, U, V and W axes in the hexapodgui window. 
-* Manual control is activated by pressing the button "Manually control hexapod". When the mouse is activated in the specified window, this activates keyboard control of the 6 axes. The step size of the motion can be set by dragging the corresponding slider. 
-4. 
-### Hexapod coordinate systems 
+* Manual control is activated by pressing the button "Manually control hexapod". When the mouse is activated in the specified window, this activates keyboard control of the 6 axes. The step size of the motion can be set by dragging the corresponding slider
+* Position coordinates is set in under the header "move to pos", followed by a "move to position" button. These coordinates are defined relative to the active coordinate system, and are therefore not necessarily absolute coordinates. 
 
-### Setting up Hexapod tracking <br> 
+### Hexapod coordinate systems 
+The hexapod can be operated with two different coordinate systems. The ZERO system is always defined as the origin of the hexapod, i.e. absolute coordinates, while the USERDEFINED system can be set at any current coordinate. Activating a USERDEFINED coordinate system defines new axis directions along the current rotations. 
+
+### Setting up Hexapod stabilization <br> 
+1. Hexapod tracking requires the camera and hexapodgui to work simultaneously. First, find a suitable beam spot to track on. For reliable tracking, there must be a considerable contrast in brightness between other objects in the image. 
+2. The beam spot centroid is then calculated and showed real-time on the image by pressing the "Start tracking" button. This centroid can be calculated either by a windowing algorithm, which defines a circular region of interest around the brightest region on the image (a gaussian blur is applied to limit single pixels to dominate the centroid), or by a thresholding algorithm, that filters out pixels below a certain brightness value (on a 0-255 scale). The corresponding radius and brightness threshold can be set and changed while tracking is activated to achieve the best setup. 
+* For night-time measurements where the contrast between the beam spot and the background is considerable, the thresholding method has proved to be slightly more reliable. 
+3. When the hexapod is moved to the position that is to be stabilized, set the active coordinate system to USERDEFINED at the current position. The hexapod then moves along the axes defined by the current rotation. To start stabilization, press "start stabilization" in the main gui. 
+* When stabilization is activated, the program first uses 3 seconds to measure a reference beam spot position used as "home". Make sure not to disturb the setup during this procedure.
+4. During stabilization, the measured beam spot position is averaged over the integration time, and a corrective tilt is applied to keep the beam spot at the "home" position. The integration time can be changed during stabilization, as well as a dead-time between each beam spot measurement, a gain factor to each corrective tilt and a maximal motion barrier (set in degrees). 
+
+###### NB! 
+* Hexapod stabilization is setup to move around two rotation axes, corresponding to horizontal and vertical movement of the beam spot in the image plane. These axes may vary with the setup of the hexapod, and must therefore be defined in the configuration file, examplary as horizontalAxis="W". Also, a sign must be assigned to the axis in the configuration file to ensure a positive rotation corresponds to the correct centroid movement. 
 
 ## Performing a seeing measurement <br> 
+1. To set up a seeing measurement, first begin image capture.
+2. The measurement configuration is set by pressing "configure seeing measurement", and must be defined before the measurement can start.
+* To accurately perform a measurement, the parameters of the optical setup must be defined in the ini files. The optical setup is assumed to consist of a final focusing lens onto the baumer camera, with an optional magnification stage in front. The final focus length and the magnification must be defined, as well as the limiting aperture size of the setup. 
 
 ### Gaussian fit <br>
 
-### Differential Image Motion Monitoring <br>
 
+### Differential Image Motion Monitoring <br>
+The DIMM measurement is calculated from the variance in the relative distance of two beam spots corresponding to the wavefront imaged over two spatially separated apertured.  
 
