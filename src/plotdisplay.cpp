@@ -103,10 +103,12 @@ void scatterplot::add_plottable(scatterPlotConfig config){
        config.scatterPlot->setData(config.data);
        config.scatterPlot->setLineStyle(config.linestyle);
        config.scatterPlot->setScatterStyle(config.scatterStyle);
-       config.dateTicker = QSharedPointer<QCPAxisTickerDateTime>(new QCPAxisTickerDateTime);
-       config.dateTicker->setDateTimeFormat("hh:mm:ss");
-       this->customPlot->axisRect()->axis(config.xaxes)->setTicker(config.dateTicker);
-       this->customPlot->xAxis->setTicker(config.dateTicker);
+       if(config.useDateTicker){
+           config.dateTicker = QSharedPointer<QCPAxisTickerDateTime>(new QCPAxisTickerDateTime);
+           config.dateTicker->setDateTimeFormat("hh:mm:ss");
+           this->customPlot->axisRect()->axis(config.xaxes)->setTicker(config.dateTicker);
+           this->customPlot->xAxis->setTicker(config.dateTicker);
+       }
        if (config.legendText!=""){
            config.scatterPlot->setName(config.legendText);
            customPlot->legend->setVisible(true);
@@ -122,7 +124,10 @@ void scatterplot::replot(){
         for(auto it = this->plottables.begin(); it!= this->plottables.end(); it++){
             QCPRange yRange = it->data->valueRange(sensibleRange);
             QCPRange plotRange = this->customPlot->axisRect()->axis(it->yaxes)->range();
-            if(sensibleRange){
+            if(plotRange == QCPRange(0,5)){//dirty workaround, 0,5 usually default scatterplot range when initialized
+                plotRange = yRange;
+            }
+             if(sensibleRange){
                 if(yRange.upper*it->yAxisHighRangeFactor > plotRange.upper){
                     plotRange.upper = yRange.upper*it->yAxisHighRangeFactor;
                 }
@@ -159,10 +164,3 @@ void colorMap::add_plottable(colormapConfig config){
     this->customPlot->replot();
 }
 
-
-/*
-            if(config->save_settings.save_plot){
-                if(config->save_settings.type_name == "png"){
-                    plot->savePng(config->save_settings.file_name, config->save_settings.x_dim, config->save_settings.y_dim);
-
-}*/

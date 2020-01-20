@@ -27,9 +27,7 @@ class   SeeingGui;
 struct seeingData{
     seeingData(){
         fried = QSharedPointer<QCPGraphDataContainer>::create();
-        avgFried = QSharedPointer<QCPGraphDataContainer>::create();
         seeing = QSharedPointer<QCPGraphDataContainer>::create();
-        avgSeeing = QSharedPointer<QCPGraphDataContainer>::create();
     }
     seeingData(QString measurement_type, bool debug = true){
         fried = QSharedPointer<QCPGraphDataContainer>::create();
@@ -43,6 +41,12 @@ struct seeingData{
                 (saturation.data()->begin()+i)->key = i;
             }
             strehlData_Gauss = QSharedPointer<QCPGraphDataContainer>::create();
+            crossSectionX = QSharedPointer<QCPGraphDataContainer>::create();
+            crossSectionY = QSharedPointer<QCPGraphDataContainer>::create();
+            crossSectionImageX = QSharedPointer<QCPGraphDataContainer>::create();
+            crossSectionImageY = QSharedPointer<QCPGraphDataContainer>::create();
+
+
             if (measurement_type == "DIMM"){
                 std::cout << "init dimm" << std::endl;
                 centroid_x2 = QSharedPointer<QCPGraphDataContainer>::create();
@@ -66,8 +70,11 @@ struct seeingData{
     QSharedPointer<QCPGraphDataContainer> strehlData_Gauss = nullptr;
     QSharedPointer<QCPBarsDataContainer> horizontalVarData = nullptr;
     QSharedPointer<QCPBarsDataContainer> verticalVarData = nullptr;
-    QSharedPointer<QCPGraphDataContainer> avgFried = nullptr;
-    QSharedPointer<QCPGraphDataContainer> avgSeeing = nullptr;
+    QSharedPointer<QCPGraphDataContainer> crossSectionX = nullptr;
+    QSharedPointer<QCPGraphDataContainer> crossSectionY = nullptr;
+    QSharedPointer<QCPGraphDataContainer> crossSectionImageX = nullptr;
+    QSharedPointer<QCPGraphDataContainer> crossSectionImageY = nullptr;
+
 };
 
 struct seeingPlots{
@@ -79,6 +86,8 @@ struct seeingPlots{
          cm_image(plot(layoutPosition(0,2,1,1), "imageColormap", labelContainer("x", "y", "image"))),
          cm_fit(plot(layoutPosition(1,2,1,1), "fitColormap", labelContainer("x", "y", "fit"))),
          cm_residue(plot(layoutPosition(2,2,1,1), "residueColormap", labelContainer("x", "y", "residue"))),
+         gaussOverlap_x(plot(layoutPosition(0,3,1,1), "gaussOverlapX", labelContainer("x", "intensity", "cross-section x"))),
+         gaussOverlap_y(plot(layoutPosition(1,3,1,1), "gaussOverlapY", labelContainer("x", "intensity", "cross-section y"))),
          strehl(plot(layoutPosition(0,2,1,1), "strehl ratio", labelContainer("strehl", "images", "Strehl"))),
          vVar(plot(layoutPosition(1,2,1,1), "vVar", labelContainer("distance", "count", "longitudinal variance"))),
          hVar(plot(layoutPosition(2,2,1,1), "hVar", labelContainer("distance", "count", "horizontal variance")))
@@ -91,6 +100,8 @@ struct seeingPlots{
      colorMap cm_image;
      colorMap cm_fit;
      colorMap cm_residue;
+     scatterplot gaussOverlap_x;
+     scatterplot gaussOverlap_y;
      //DIMM specific
      histogram strehl;
      histogram vVar;

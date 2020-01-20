@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>683</width>
-    <height>544</height>
+    <width>1268</width>
+    <height>885</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,6 +15,296 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout_3">
+    <item row="1" column="1">
+     <layout class="QGridLayout" name="gridLayout_Hexapod">
+      <item row="2" column="1">
+       <widget class="QPushButton" name="PB_StopStabilization">
+        <property name="text">
+         <string>Stop stabilization</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QPushButton" name="PB_ConnectHexapod">
+        <property name="text">
+         <string>Connect hexapod</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QPushButton" name="PB_StartStabilization">
+        <property name="text">
+         <string>Start stabilization</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QPushButton" name="PB_ControlHexapod">
+        <property name="text">
+         <string>Manually control hexapod</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="2" column="1">
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="0">
+       <layout class="QVBoxLayout" name="verticalLayout_Seeing">
+        <item>
+         <widget class="QPushButton" name="PB_ConfigureSeeing">
+          <property name="text">
+           <string>Configure seeing measurement</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="PB_StartSeeingMeasurement">
+          <property name="text">
+           <string>Start seeing measurement</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="PB_StopSeeingMeasurement">
+          <property name="text">
+           <string>Stop seeing measurement</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+    <item row="0" column="0" rowspan="2">
+     <layout class="QGridLayout" name="gridLayout_Cam">
+      <item row="1" column="0">
+       <widget class="QPushButton" name="PB_initConfig">
+        <property name="text">
+         <string>Initialize configuration</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QComboBox" name="CB_Settings">
+        <item>
+         <property name="text">
+          <string>IQOQI</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Bisamberg</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QPushButton" name="PB_StartCam">
+        <property name="text">
+         <string>Start</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QPushButton" name="PB_Disconnect">
+        <property name="text">
+         <string>Disconnect Baumer</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QPushButton" name="PB_ConnectCam">
+        <property name="text">
+         <string>Connect Baumer</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QPushButton" name="PB_StopCam">
+        <property name="text">
+         <string>Stop</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0" colspan="2">
+       <layout class="QGridLayout" name="gridLayout_CamSettings">
+        <item row="1" column="1" colspan="2">
+         <widget class="QSlider" name="HS_ExposureCam">
+          <property name="minimum">
+           <number>15</number>
+          </property>
+          <property name="maximum">
+           <number>1000000</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0">
+         <widget class="QLabel" name="Label_Height">
+          <property name="text">
+           <string>Height</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="0">
+         <widget class="QLabel" name="Label_OffsetX">
+          <property name="text">
+           <string>Offset X</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="1" colspan="2">
+         <widget class="QSlider" name="HS_OffsetY">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="3">
+         <widget class="QSpinBox" name="SB_Width">
+          <property name="minimum">
+           <number>5</number>
+          </property>
+          <property name="maximum">
+           <number>511</number>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="1" colspan="2">
+         <widget class="QSlider" name="HS_OffsetX">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="3">
+         <widget class="QSpinBox" name="SB_Height">
+          <property name="minimum">
+           <number>5</number>
+          </property>
+          <property name="maximum">
+           <number>541</number>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1" colspan="2">
+         <widget class="QSlider" name="HS_Width">
+          <property name="minimum">
+           <number>5</number>
+          </property>
+          <property name="maximum">
+           <number>511</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="0">
+         <widget class="QLabel" name="Label_OffsetY">
+          <property name="text">
+           <string>Offset Y</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="Label_ExposureCam">
+          <property name="text">
+           <string>Exposure time (us)</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="2">
+         <widget class="QLabel" name="Label_FrameRate">
+          <property name="text">
+           <string>Frame rate</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="3">
+         <widget class="QSpinBox" name="SB_FrameRate">
+          <property name="maximum">
+           <number>50</number>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="Label_FrameSize">
+          <property name="text">
+           <string>Width</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1" colspan="2">
+         <widget class="QSlider" name="HS_Height">
+          <property name="minimum">
+           <number>5</number>
+          </property>
+          <property name="maximum">
+           <number>541</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="3">
+         <widget class="QSpinBox" name="SB_OffsetX"/>
+        </item>
+        <item row="1" column="3">
+         <widget class="QSpinBox" name="SB_ExposureCam">
+          <property name="minimum">
+           <number>15</number>
+          </property>
+          <property name="maximum">
+           <number>1000000</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <widget class="QLabel" name="Label_Gain">
+            <property name="text">
+             <string>Gain</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="SB_GainCam">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>8</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="6" column="3">
+         <widget class="QSpinBox" name="SB_OffsetY"/>
+        </item>
+        <item row="0" column="1">
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>0</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
     <item row="2" column="0">
      <layout class="QGridLayout" name="gridLayout_Tracking">
       <item row="0" column="0">
@@ -85,356 +375,8 @@
       </item>
      </layout>
     </item>
-    <item row="2" column="1">
-     <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="0">
-       <layout class="QVBoxLayout" name="verticalLayout_Seeing">
-        <item>
-         <widget class="QPushButton" name="PB_ConfigureSeeing">
-          <property name="text">
-           <string>Configure seeing measurement</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="PB_StartSeeingMeasurement">
-          <property name="text">
-           <string>Start seeing measurement</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="PB_StopSeeingMeasurement">
-          <property name="text">
-           <string>Stop seeing measurement</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-     </layout>
-    </item>
     <item row="0" column="1">
      <widget class="QTextEdit" name="TE_LogCam"/>
-    </item>
-    <item row="4" column="1">
-     <layout class="QGridLayout" name="gridLayout_Hedy">
-      <item row="0" column="0">
-       <widget class="QPushButton" name="PB_ConnectHedyLamarr">
-        <property name="text">
-         <string>Connect Hedy Lamarr</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QPushButton" name="PB_DisconnectHedyLamarr">
-        <property name="text">
-         <string>Disconnect Hedy Lamarr</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QPushButton" name="PB_StopHedyLamarrStabilization">
-        <property name="text">
-         <string>Stop stabilization</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QPushButton" name="PB_StartHedyLamarrStabilization">
-        <property name="text">
-         <string>Start stabilization</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item row="4" column="0">
-     <layout class="QGridLayout" name="gridLayout_Hexapod">
-      <item row="2" column="0">
-       <widget class="QPushButton" name="PB_StartStabilization">
-        <property name="text">
-         <string>Start stabilization</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QPushButton" name="PB_ConnectHexapod">
-        <property name="text">
-         <string>Connect hexapod</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QPushButton" name="PB_StopStabilization">
-        <property name="text">
-         <string>Stop stabilization</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QPushButton" name="PB_ControlHexapod">
-        <property name="text">
-         <string>Manually control hexapod</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item row="0" column="0">
-     <layout class="QGridLayout" name="gridLayout_Cam">
-      <item row="4" column="0">
-       <widget class="QPushButton" name="PB_StartCam">
-        <property name="text">
-         <string>Start</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QPushButton" name="PB_Disconnect">
-        <property name="text">
-         <string>Disconnect Baumer</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QPushButton" name="PB_ConnectCam">
-        <property name="text">
-         <string>Connect Baumer</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="1">
-       <widget class="QPushButton" name="PB_StopCam">
-        <property name="text">
-         <string>Stop</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="0" colspan="2">
-       <layout class="QGridLayout" name="gridLayout_CamSettings">
-        <item row="3" column="1" colspan="2">
-         <widget class="QSlider" name="HS_Height">
-          <property name="minimum">
-           <number>5</number>
-          </property>
-          <property name="maximum">
-           <number>541</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="1" colspan="2">
-         <widget class="QSlider" name="HS_OffsetY">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="3">
-         <widget class="QSpinBox" name="SB_ExposureCam">
-          <property name="minimum">
-           <number>15</number>
-          </property>
-          <property name="maximum">
-           <number>1000000</number>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="0">
-         <widget class="QLabel" name="Label_Height">
-          <property name="text">
-           <string>Height</string>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="1" colspan="2">
-         <widget class="QSlider" name="HS_OffsetX">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="1" colspan="2">
-         <widget class="QSlider" name="HS_Width">
-          <property name="minimum">
-           <number>5</number>
-          </property>
-          <property name="maximum">
-           <number>511</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="0">
-         <widget class="QLabel" name="Label_ExposureCam">
-          <property name="text">
-           <string>Exposure time (us)</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="3">
-         <widget class="QSpinBox" name="SB_Width">
-          <property name="minimum">
-           <number>5</number>
-          </property>
-          <property name="maximum">
-           <number>511</number>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="3">
-         <widget class="QSpinBox" name="SB_OffsetY"/>
-        </item>
-        <item row="0" column="1" colspan="2">
-         <widget class="QSlider" name="HS_ExposureCam">
-          <property name="minimum">
-           <number>15</number>
-          </property>
-          <property name="maximum">
-           <number>1000000</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="3">
-         <widget class="QSpinBox" name="SB_OffsetX"/>
-        </item>
-        <item row="5" column="0">
-         <widget class="QLabel" name="Label_OffsetY">
-          <property name="text">
-           <string>Offset Y</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="3">
-         <widget class="QSpinBox" name="SB_Height">
-          <property name="minimum">
-           <number>5</number>
-          </property>
-          <property name="maximum">
-           <number>541</number>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="Label_FrameSize">
-          <property name="text">
-           <string>Width</string>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="0">
-         <widget class="QLabel" name="Label_OffsetX">
-          <property name="text">
-           <string>Offset X</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <layout class="QHBoxLayout" name="horizontalLayout">
-          <item>
-           <widget class="QLabel" name="Label_Gain">
-            <property name="text">
-             <string>Gain</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QSpinBox" name="SB_GainCam">
-            <property name="minimum">
-             <number>1</number>
-            </property>
-            <property name="maximum">
-             <number>8</number>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item row="1" column="3">
-         <widget class="QSpinBox" name="SB_FrameRate">
-          <property name="maximum">
-           <number>50</number>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="2">
-         <widget class="QLabel" name="Label_FrameRate">
-          <property name="text">
-           <string>Frame rate</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="1" column="1">
-       <widget class="QComboBox" name="CB_Settings">
-        <item>
-         <property name="text">
-          <string>IQOQI</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Bisamberg</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QPushButton" name="PB_initConfig">
-        <property name="text">
-         <string>Initialize configuration</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0" colspan="2">
-       <spacer name="verticalSpacer_2">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>40</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </item>
-    <item row="3" column="0" colspan="2">
-     <spacer name="verticalSpacer_3">
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>20</width>
-        <height>40</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
-    <item row="1" column="0" colspan="2">
-     <spacer name="verticalSpacer">
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>20</width>
-        <height>40</height>
-       </size>
-      </property>
-     </spacer>
     </item>
    </layout>
   </widget>
@@ -443,8 +385,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>683</width>
-     <height>22</height>
+     <width>1268</width>
+     <height>39</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuTracking_GUI">

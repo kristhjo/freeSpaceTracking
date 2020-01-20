@@ -323,10 +323,6 @@ void CameraGui::Run()
                         this->centroidContainer->currentCentroid = centroid;
                         this->centroidContainer->addCentroid(centroid);
                     }
-                    if (this->isHedyLamarrStabilizing->load(std::memory_order_acquire)){ //if hexapodstabilization is activated, share the centroids with hexapodgui.
-                        this->centroidContainerHedy->currentCentroid = centroid;
-                        this->centroidContainerHedy->addCentroid(centroid);
-                    }
                     cv::circle(cvimg,centroid,5,cv::Scalar(128,0,0),-1); //creates circle on img following the centroid.
                     cv::hconcat(cvimg, croppedImg, croppedImg);
                     cv::Point pText(20,20);
@@ -344,9 +340,9 @@ void CameraGui::Run()
                     }
                     if (this->m_imageContainer->imgCounter < this->m_imageContainer->sampleSize ){
                         ///temporary for gaussfit testing
-                         //int size = rand() % 25;
-                         //int intensity = (rand() % 200) + 10;    //250/(10 % (this->m_imageContainer->imgCounter+1));
-                         //cv::circle(cvimg,cv::Point(cvimg.rows/2, cvimg.cols/2),size,cv::Scalar(intensity,0,0),-1);
+                         int size = rand() % 25;
+                         int intensity = (rand() % 150) + 10;    //250/(10 % (this->m_imageContainer->imgCounter+1));
+                         cv::circle(cvimg,cv::Point(cvimg.rows/2, cvimg.cols/2),size,cv::Scalar(intensity,0,0),-1);
                         ///
                         ///temporary for DIMM testing
                         /*int size = rand() % 10;

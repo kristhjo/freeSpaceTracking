@@ -2,7 +2,6 @@
 #include "ui_trackinggui.h"
 #include "cameragui.h"
 #include "seeinggui.h"
-#include "hedylamarrgui.h"
 
 TrackingGui::TrackingGui(QWidget *parent) :
     QMainWindow(parent),
@@ -16,11 +15,9 @@ TrackingGui::TrackingGui(QWidget *parent) :
     this->isHexapodConnected = false;
     this->isHexapodStabilizing = false;
     this->isMeasuringSeeing = false;
-    this->isHedyLamarrStabilizing = false;
 
     this->m_imageContainer = std::make_shared<datacontainers::ImageContainer>();
     this->centroidContainer = std::make_shared<datacontainers::CentroidStabilization>();
-    this->centroidContainerHedy = std::make_shared<datacontainers::CentroidStabilization>();
 
     this->ui->HS_OffsetX->setMaximum(2044/4 - this->ui->HS_Width->value());
     this->ui->SB_OffsetX->setMaximum(2044/4 - this->ui->HS_Width->value());
@@ -83,11 +80,6 @@ TrackingGui::TrackingGui(QWidget *parent) :
     QObject::connect(this->ui->PB_StartStabilization, &QPushButton::clicked, this, &TrackingGui::StartStabilization, Qt::UniqueConnection);
     QObject::connect(this->ui->PB_StopStabilization, &QPushButton::clicked, this, &TrackingGui::StopStabilization, Qt::UniqueConnection);
     QObject::connect(this->ui->PB_ControlHexapod, &QPushButton::clicked, this, &TrackingGui::ManuallyControlHexapod, Qt::UniqueConnection);
-
-    QObject::connect(this->ui->PB_ConnectHedyLamarr, &QPushButton::clicked, this, &TrackingGui::ConnectHedyLamarr, Qt::UniqueConnection);
-    QObject::connect(this->ui->PB_StartHedyLamarrStabilization, &QPushButton::clicked, this, &TrackingGui::StartHedyLamarrStabilization, Qt::UniqueConnection);
-    QObject::connect(this->ui->PB_StopHedyLamarrStabilization, &QPushButton::clicked, this, &TrackingGui::StopHedyLamarrStabilization, Qt::UniqueConnection);
-    QObject::connect(this->ui->PB_DisconnectHedyLamarr, &QPushButton::clicked, this, &TrackingGui::DisconnectHedyLamarr, Qt::UniqueConnection);
 
     QObject::connect(this->ui->PB_initConfig, &QPushButton::clicked, this, &TrackingGui::loadConfiguration, Qt::UniqueConnection);
     this->disableWidgets(true);
@@ -199,66 +191,6 @@ void TrackingGui::disableWidgets(bool freeze){ //Loops through all "child" widge
     foreach (auto obj, widgetList){
         obj->setEnabled(!freeze);
     }
-}
-
-void TrackingGui::ConnectHedyLamarr(){
-    std::stringstream ss;
-    if (this->isHedyLamarrConnected.load(std::memory_order_acquire)){
-        this->ui->TE_LogCam->append("Hedy lamarr is already connected \n");
-        return;
-    }
-    this->pm_hedylamarr = std::make_unique<HedyLamarrGui>(); //Initate the HedyLamarrGui.
-
-    this->pm_hedylamarr->isHedyLamarrConnected = &this->isHedyLamarrConnected;
-    this->pm_hedylamarr->isHedyLamarrStabilizing = &this->isHedyLamarrStabilizing;
-    this->pm_hedylamarr->connectToHedyLamarr(ss);
-    this->ui->TE_LogCam->append(QString::fromStdString(ss.str()));
-    this->pm_hedylamarr->show();
-}
-
-void TrackingGui::DisconnectHedyLamarr(){
-    std::stringstream ss;
-    if (!this->isHedyLamarrConnected.load(std::memory_order_acquire)){
-        this->ui->TE_LogCam->append("Hedy lamarr is already disconnected \n");
-        return;
-    }
-
-    if (this->isHedyLamarrStabilizing.load(std::memory_order_acquire)){
-        this->ui->TE_LogCam->append("Can't disconnect during stabilization \n");
-        return;
-    }
-    this->pm_hedylamarr->disconnectFromHedyLamarr(ss);
-    this->ui->TE_LogCam->append(QString::fromStdString(ss.str()));
-}
-
-void TrackingGui::StopHedyLamarrStabilization(){
-    if (!this->isHedyLamarrStabilizing.load(std::memory_order_acquire)){ //if there exists an initiation of hexapodGui.
-        this->ui->TE_LogCam->append("Hedy Lamarr is not stabilizing");
-        return;
-    }
-    std::stringstream ss;
-    this->pm_hedylamarr->stopStabilization(ss);
-}
-
-void TrackingGui::StartHedyLamarrStabilization(){
-    if(!this->isHedyLamarrConnected){
-        this->ui->TE_LogCam->append("Hedy Lamarr is not connected \n");
-        return;
-    }
-    if (!this->isCameraTracking.load(std::memory_order_acquire)){
-        this->ui->TE_LogCam->append("Camera is not tracking \n");
-        return;
-    }
-    if(this->isHedyLamarrStabilizing){
-        this->ui->TE_LogCam->append("Hedy Lamarr is already stabilizing \n");
-        return;
-    }
-     this->pm_Camera->centroidContainerHedy = this->centroidContainerHedy; //Establishes shared connection between the centroidContainer of cameragui and hedylamarrgui.
-    this->pm_hedylamarr->centroidContainer = this->centroidContainerHedy;
-
-    std::stringstream ss;
-    this->pm_hedylamarr->startStabilization(ss);
-    this->pm_hedylamarr->show();
 }
 
 void TrackingGui::ConnectHexapod(){
@@ -513,7 +445,6 @@ void TrackingGui::ConnectToCamera(){
     this->pm_Camera->isCameraConnected = &this->isCameraConnected;
     this->pm_Camera->isMeasuringSeeing = &this->isMeasuringSeeing;
     this->pm_Camera->isHexapodStabilizing = &this->isHexapodStabilizing;
-    this->pm_Camera->isHedyLamarrStabilizing = &this->isHedyLamarrStabilizing;
     this->pm_Camera->m_TrackingParameters.WindowRadius = this->m_configurationSettings.windowRadius;
     this->pm_Camera->m_TrackingParameters.TrackingThresh = this->m_configurationSettings.trackingThresh;
     this->pm_Camera->m_TrackingParameters.useWindowing.store(this->m_configurationSettings.useWindowing,std::memory_order_release);

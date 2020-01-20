@@ -5,14 +5,18 @@
 namespace imageprocessing {
 
 
-void cropWindow(const cv::Mat &img, cv::Mat &croppedImg, int windowRadius = 5){
-    cv::Mat temp, mask;
-    cv::GaussianBlur(img, temp, cv::Size(3,3),0,0); //applies a gaussian blur to the image. Noise peaks are smeared out, thus finding the peak more reliably.
+void cropWindow(const cv::Mat &img, cv::Mat &croppedImg, int windowRadius){
+    ///defined for grayscale only
+    cv::Mat smoothedImg(img.rows, img.cols,img.type(),cv::Scalar(0));
+    croppedImg = cv::Mat(img.rows, img.cols, img.type(), cv::Scalar(0));
+    cv::Mat mask(img.rows, img.cols, CV_8UC1, cv::Scalar(0));
+
+    cv::GaussianBlur(img, smoothedImg, cv::Size(3,3),0,0); //applies a gaussian blur to the image. Noise peaks are smeared out, thus finding the peak more reliably.
+
     double min, max;
     cv::Point minLoc, maxLoc;
-    cv::minMaxLoc(temp, &min, &max, &minLoc, &maxLoc);
-    mask = cv::Mat (img.rows, img.cols, CV_8UC1, cv::Scalar(0,0,0));
-    cv::circle(mask, maxLoc, windowRadius, cv::Scalar(128,0,0), -1); //Creates a circle around the maxLoc position in mask, with radius windowRadius.
+    cv::minMaxLoc(smoothedImg, &min, &max, &minLoc, &maxLoc);
+    cv::circle(mask, maxLoc, windowRadius, cv::Scalar(128), -1); //Creates a circle around the maxLoc position in mask, with radius windowRadius.
     img.copyTo(croppedImg, mask); //Initiates croppedImg with  matrix resulting from img filtered with mask.
 }
 
@@ -34,8 +38,8 @@ void getDIMMcentroids(const cv::Mat &img, cv::Point& centroid1, cv::Point& centr
     cv::Mat img1, img2, croppedImg1, croppedImg2;
     img1 = img(cv::Rect(0, 0, img.cols/2, img.rows)); //splits the original image in left and right halves. This assumes the spots are distributed this way, and not for example top-bottom.
     img2 = img(cv::Rect(img.cols/2, 0, img.cols/2, img.rows));
-    cropWindow(img1, croppedImg1);
-    cropWindow(img2, croppedImg2);
+    cropWindow(img1, croppedImg1, 10);
+    cropWindow(img2, croppedImg2, 10);
     centroid1 = findCentroid(croppedImg1);
     centroid2 = findCentroid(croppedImg2);
 }
@@ -44,8 +48,8 @@ void getSpotSeparation(const cv::Mat &img, int windowRadius, double& x_separatio
     cv::Mat img1, img2, croppedImg1, croppedImg2;
     img1 = img(cv::Rect(0, 0, img.cols/2, img.rows)); //splits the original image in left and right halves. This assumes the spots are distributed this way, and not for example top-bottom.
     img2 = img(cv::Rect(img.cols/2, 0, img.cols/2, img.rows));
-    cropWindow(img1, croppedImg1, windowRadius = windowRadius);
-    cropWindow(img2, croppedImg2, windowRadius = windowRadius);
+    cropWindow(img1, croppedImg1, windowRadius);
+    cropWindow(img2, croppedImg2, windowRadius);
     centroid1 = findCentroid(croppedImg1);
     centroid2 = findCentroid(croppedImg2);
     x_separation = centroid2.x + img.cols -centroid1.x;
@@ -74,18 +78,17 @@ void getDIMM_strehlRatio(const cv::Mat &img, double& strehl1, double& strehl2, d
     std::cout << "strehl1: " << strehl1 << " strehl2: " << strehl2 << std::endl;
 }
 
-datacontainers::gaussianFitParams getGaussianFitParams(const cv::Mat &img){
+datacontainers::gaussianFitParams getGaussianFitParams(const cv::Mat img){
     cv::Moments m = moments(img);
-    cv::Moments binary = moments(img, true);
     datacontainers::gaussianFitParams params;
-    cv::Point center(m.m10/m.m00, m.m01/m.m00);
+    cv::Point center(static_cast<int>(m.m10/m.m00), static_cast<int>(m.m01/m.m00));
     if ( (abs(center.y) > img.rows )|| (abs(center.x) > img.cols )){
-        std::cout << "unvalid image" << std::endl;
+        std::cout << "invalid image" << std::endl;
         params.valid = false;
         return params;
     }
     else if( std::isnan(m.m10/m.m00) || std::isnan(m.m01/m.m00)){
-        std::cout << "unvalid image" << std::endl;
+        std::cout << "invalid image" << std::endl;
         params.valid = false;
         return params;
     }
@@ -99,15 +102,10 @@ datacontainers::gaussianFitParams getGaussianFitParams(const cv::Mat &img){
     params.center_y = m.m01/m.m00; //center.y;
     params.intensitymax = img.at<ushort>(cv::Point(center.x, center.y));//max1;
 
-    double varx = 0;
-    double vary = 0;
-    double sumx=0;
-    double sumy=0;
-    double meanx = 0;
+    double varx=0.0, vary=0.0, sumx = 0.0, sumy = 0.0;
 
-    ushort normFactor = img.at<ushort>(cv::Point(center.x, center.y));
+    //ushort normFactor = img.at<ushort>(cv::Point(center.x, center.y));
     for (int i = 0; i < img.rows; i++){
-        meanx+= i*img.at<ushort>(cv::Point(i, center.y));
         sumx+=img.at<ushort>(cv::Point(i, center.y));
         varx+= pow( center.x - i, 2)*img.at<ushort>(cv::Point(i, center.y));
     }
@@ -115,10 +113,16 @@ datacontainers::gaussianFitParams getGaussianFitParams(const cv::Mat &img){
         sumy+=img.at<ushort>(cv::Point(center.x, j));
         vary+= pow( center.y - j, 2)*img.at<ushort>(cv::Point(center.x, j));
     }
+
+
     params.var_x = varx/sumx;
     params.var_y = vary/sumy;
-    params.sigma_cov = m.m11;
 
+    std::cout << vary << " " << sumy << std::endl;
+    std::cout << varx << " " << sumx << std::endl;
+    std::cout << m.m10 << " " << m.m01 << " " << m.m00 << std::endl;
+    //params.sigma_cov = m.m11;
+    std::cout << " variations " << params.var_x << " " << params.var_y << " " << params.sigma_cov << std::endl;
     return params;
 }
 

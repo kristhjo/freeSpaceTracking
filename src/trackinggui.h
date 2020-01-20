@@ -6,7 +6,6 @@
 #include "seeinggui.h"
 #include "hexapodgui.h"
 #include "datacontainers.h"
-#include "hedylamarrgui.h"
 
 namespace Ui {
 class TrackingGui;
@@ -80,10 +79,6 @@ protected slots:
     void StopStabilization(); ///< Flags that hexapod stabilization shall stop.
     void ManuallyControlHexapod(); ///< Initializes manual control of the hexapod through the keyboard.
 
-    void StartHedyLamarrStabilization();
-    void StopHedyLamarrStabilization();
-    void ConnectHedyLamarr();
-    void DisconnectHedyLamarr();
 private:
     Ui::TrackingGui *ui;
     config_TrackingGui m_configurationSettings;
@@ -98,17 +93,13 @@ private:
     std::atomic<bool> isCameraTracking; ///< Flags that centroid tracking is activated. Is shared with cameragui.
     std::atomic<bool> isMeasuringSeeing; ///< Flags that a seeing measurement is in progress. Is shared with cameragui.
     std::atomic<bool> isHexapodStabilizing; ///< Flags that the hexapod is actively stabilizing.
-    std::atomic<bool> isHedyLamarrConnected;
-    std::atomic<bool> isHedyLamarrStabilizing; ///< Flags that the hedy lamarr telescope is actively stabilizing.
 
     std::unique_ptr<HexapodGui> pm_hexapod = nullptr; ///< is assigned an instance of HexapodGui.
     std::unique_ptr<CameraGui> pm_Camera = nullptr; ///< is assigned an instance of CameraGui.
     std::unique_ptr<SeeingGui> pm_seeing = nullptr; ///< is assigned an instance of SeeingGui.
-    std::unique_ptr<HedyLamarrGui> pm_hedylamarr = nullptr; ///< is assigned an instance of HedyLamarrGui.
 
     std::shared_ptr<datacontainers::ImageContainer> m_imageContainer = nullptr; ///< Contains images shared between cameragui and seeinggui
     std::shared_ptr<datacontainers::CentroidStabilization> centroidContainer = nullptr; ///< Contains centroids shared between cameragui and hexapodgui
-    std::shared_ptr<datacontainers::CentroidStabilization> centroidContainerHedy = nullptr; ///< Contains centroids shared between cameragui and hedylamarrgui
 };
 
 #endif // TRACKINGGUI_H

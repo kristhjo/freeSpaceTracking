@@ -55,8 +55,8 @@ struct labelContainer{
 
 struct scatterPlotConfig{
     scatterPlotConfig(QSharedPointer<QCPGraphDataContainer> data_ptr, QString legend = "", QCPGraph::LineStyle ls = QCPGraph::lsNone,
-                      QCPScatterStyle scstyle = QCPScatterStyle(QCPScatterStyle::ssSquare, QPen(Qt::black, 1.5), QBrush(QColor(255,140,0)), 5), QPen pen = QPen(Qt::red, 2 , Qt::DotLine), QCPAxis::AxisType yAxis = QCPAxis::atLeft)
-        : data(data_ptr), penstyle(pen), legendText(legend), linestyle(ls), scatterStyle(scstyle), yaxes(yAxis){}
+                      QCPScatterStyle scstyle = QCPScatterStyle(QCPScatterStyle::ssSquare, QPen(Qt::black, 1.5), QBrush(QColor(255,140,0)), 10), QPen pen = QPen(Qt::red, 2 , Qt::DotLine), QCPAxis::AxisType yAxis = QCPAxis::atLeft, bool useDateTicker = true)
+        : data(data_ptr), penstyle(pen), legendText(legend), linestyle(ls), scatterStyle(scstyle), yaxes(yAxis), useDateTicker(useDateTicker){}
     QSharedPointer<QCPGraphDataContainer> data;
     QCPGraph* scatterPlot;
     double yAxisHighRangeFactor = 1.2;
@@ -69,6 +69,7 @@ struct scatterPlotConfig{
     QSharedPointer<QCPAxisTickerDateTime> dateTicker;
     QCPAxis::AxisType xaxes =QCPAxis::atBottom;
     QCPAxis::AxisType yaxes =QCPAxis::atLeft;
+    bool useDateTicker;
     //legend
 };
 
@@ -119,11 +120,11 @@ class plot{
     }
     inline void savePlot(){
         if(this->save_settings.type_name == "png"){
-            this->customPlot->savePng(this->save_settings.folder_path + this->plotName, this->save_settings.x_dim, this->save_settings.y_dim);
+            this->customPlot->savePng(this->save_settings.folder_path + this->plotName);
         }
 
         if(this->save_settings.type_name == "pdf"){
-            this->customPlot->savePdf(this->save_settings.folder_path + this->plotName, this->save_settings.x_dim, this->save_settings.y_dim);
+            this->customPlot->savePdf(this->save_settings.folder_path + this->plotName);
         }
     }
 
@@ -169,6 +170,7 @@ public:
     void add_plottable(colormapConfig config);
     inline void replot(){
         this->plottable.colormap->rescaleDataRange();
+        //this->plottable.colorscale->rescaleDataRange();
         this->customPlot->rescaleAxes();
         this->customPlot->replot();
         if(this->save_settings.save_plot){

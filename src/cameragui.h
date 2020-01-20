@@ -108,7 +108,6 @@ public:
     std::atomic<bool> *isCameraRunning = nullptr; ///< flags if the camera is acquiring images.
     std::atomic<bool> *isHexapodStabilizing = nullptr; ///< Flags that the hexapod stabilization has started, so that the centroidContainer (which is shared with hexapodgui) is continuously fed with the current centroid.
     std::atomic<bool> *isMeasuringSeeing = nullptr; ///< Flags that a seeing measurement has started, such that images is fed to m_imageContainer (which is shared with seeinggui).
-    std::atomic<bool> *isHedyLamarrStabilizing = nullptr; ///< Flags that the hedylamarr stabilization has started, so that the centroidContainer (which is shared with hedylamarrgui) is continuously fed with the current centroid.
     ///
     std::shared_ptr<datacontainers::ImageContainer> m_imageContainer = nullptr; ///< Image container shared between cameragui and seeinggui.
     std::shared_ptr<datacontainers::CentroidStabilization> centroidContainer = nullptr; ///< Centroid container shared between cameragui and hexapodgui.

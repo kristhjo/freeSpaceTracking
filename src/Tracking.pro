@@ -34,7 +34,6 @@ SOURCES += \
     seeinggui.cpp \
     qcustomplot.cpp \
     hexapodgui.cpp \
-    hedylamarrgui.cpp \
     plotdisplay.cpp
 
 HEADERS += \
@@ -45,13 +44,11 @@ HEADERS += \
     seeinggui.h \
     qcustomplot.h \
     hexapodgui.h \
-    hedylamarrgui.h \
     plotdisplay.h
 
 FORMS += \
         trackinggui.ui \
     hexapodgui.ui \
-    hedylamarrgui.ui \
     seeinggui.ui \
     plotdisplay.ui
 

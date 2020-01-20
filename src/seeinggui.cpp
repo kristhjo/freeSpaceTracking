@@ -167,6 +167,12 @@ void SeeingGui::setup_plots_window(){
             this->plots.cm_image.add_plottable(colormapConfig());
             this->plots.cm_fit.add_plottable(colormapConfig());
             this->plots.cm_residue.add_plottable(colormapConfig());
+            this->plotsWindow->add_plot(this->plots.gaussOverlap_x);
+            this->plots.gaussOverlap_x.add_plottable(scatterPlotConfig(this->m_seeingData.crossSectionX, "fit", QCPGraph::lsLine, QCPScatterStyle(QCPScatterStyle::ssSquare, QPen(Qt::black, 1.5), QBrush(QColor(255,140,0)), 5), QPen(QColor(255,140,0)), QCPAxis::atLeft, false));
+            this->plots.gaussOverlap_x.add_plottable(scatterPlotConfig(this->m_seeingData.crossSectionImageX, "image", QCPGraph::lsLine,QCPScatterStyle(QCPScatterStyle::ssSquare, QPen(Qt::black, 1.5), QBrush(QColor(10, 140, 70)), 5), QPen(QColor(10, 140, 70)), QCPAxis::atLeft, false));
+            this->plotsWindow->add_plot(this->plots.gaussOverlap_y);
+            this->plots.gaussOverlap_y.add_plottable(scatterPlotConfig(this->m_seeingData.crossSectionY, "fit", QCPGraph::lsLine, QCPScatterStyle(QCPScatterStyle::ssSquare, QPen(Qt::black, 1.5), QBrush(QColor(255,140,0)), 5), QPen(QColor(255,140,0)), QCPAxis::atLeft, false));
+            this->plots.gaussOverlap_y.add_plottable(scatterPlotConfig(this->m_seeingData.crossSectionImageY, "image", QCPGraph::lsLine,QCPScatterStyle(QCPScatterStyle::ssSquare, QPen(Qt::black, 1.5), QBrush(QColor(10, 140, 70)), 5), QPen(QColor(10, 140, 70)), QCPAxis::atLeft, false));
         }
         if(this->m_configurationSettings.measurement_type == "DIMM"){
             this->plots.centroid.add_plottable(scatterPlotConfig(this->m_seeingData.centroid_x2, "X2", QCPGraph::lsNone, QCPScatterStyle(QCPScatterStyle::ssCircle, QPen(Qt::black, 1.5), QBrush(QColor(255,140,0)), 5)));
@@ -184,6 +190,7 @@ void SeeingGui::setup_plots_window(){
             this->plots.hVar.add_plottable(histogramConfig(this->m_seeingData.horizontalVarData));
         }
     }
+
     this->plotsWindow->show();
 }
 
@@ -204,6 +211,10 @@ void SeeingGui::setMeasurementSettings(){
     this->m_configurationSettings.sample_size = this->ui->SB_SampleSize->value();
     this->m_imageContainer->sampleSize = this->ui->SB_SampleSize->value();
     this->m_configurationSettings.pixel_saturation_cutOff = this->ui->SB_saturationCutOff->value();
+    this->m_configurationSettings.use_threshold = this->ui->checkB_useThreshold->isChecked();
+    this->m_configurationSettings.use_windowing = this->ui->checkB_useWindow->isChecked();
+    this->m_configurationSettings.threshold = this->ui->SB_Threshold->value();
+    this->m_configurationSettings.window_radius = this->ui->SB_WindowingRadius->value();
 }
 
 
@@ -419,6 +430,10 @@ void SeeingGui::Gaussian(){
             std::this_thread::sleep_for(std::chrono::seconds(3));
         }
         if (counter == this->m_configurationSettings.sample_size){//When counter reaches the sample size, calculate and plot the seeing/fried values
+            if (this->m_configurationSettings.use_windowing){
+                cv::Mat temp = this->m_GaussSample.gaussImg;
+                imageprocessing::cropWindow(temp, this->m_GaussSample.gaussImg, this->m_configurationSettings.window_radius);
+            }
             if (this->m_configurationSettings.debug){
                 emit debugGaussian(this->m_GaussSample.gaussImg.clone());
                 cv::Point centroid = imageprocessing::findCentroid(this->m_GaussSample.gaussImg.clone());
@@ -475,9 +490,6 @@ void SeeingGui::Gaussian(){
             if (this->m_configurationSettings.use_threshold){
                 imageprocessing::cropThreshold(img, croppedImg, this->m_configurationSettings.threshold);
             }
-            else if (this->m_configurationSettings.use_windowing){
-                imageprocessing::cropWindow(img, croppedImg, this->m_configurationSettings.window_radius);
-            }
             else {
                 croppedImg = img;
             }
@@ -524,8 +536,16 @@ void SeeingGui::Gaussian(){
 }
 
 void SeeingGui::debugGaussian(const cv::Mat image){
-    std::cout << "debugging gaussian fit" << std::endl;
-    datacontainers::gaussianFitParams fitParams = imageprocessing::getGaussianFitParams(image);
+    cv::Mat croppedImage;
+
+    imageprocessing::cropWindow(image, croppedImage, this->m_configurationSettings.window_radius);
+    datacontainers::gaussianFitParams fitParams = imageprocessing::getGaussianFitParams(croppedImage);
+
+   /* if(true){
+        for (int j = 0; j < image.cols; j++){
+            std::cout << j << ": " << image.at<ushort>(cv::Point(fitParams.center_x, j)) << " ; " <<  croppedImage.at<ushort>(cv::Point(fitParams.center_x, j)) << " ; " <<  static_cast<int>(mask.at<uchar>(cv::Point(fitParams.center_x, j))) << " ; " <<  cropp2.at<ushort>(cv::Point(fitParams.center_x, j))<< std::endl;
+        }
+    }*/
     if (!fitParams.valid){
         emit newMessage("image not valid for gaussian fit", true);
         return;
@@ -534,38 +554,55 @@ void SeeingGui::debugGaussian(const cv::Mat image){
     int ny = image.rows;
     this->plots.cm_image.plottable.colormap->data()->setSize(nx, ny);
     this->plots.cm_image.plottable.colormap->data()->setRange(QCPRange(0, nx), QCPRange(0, ny));
-    this->plots.cm_image.plottable.colormap->data()->fill(0.0);
 
     this->plots.cm_fit.plottable.colormap->data()->setSize(nx, ny);
     this->plots.cm_fit.plottable.colormap->data()->setRange(QCPRange(0, nx), QCPRange(0, ny));
-    this->plots.cm_fit.plottable.colormap->data()->fill(0.0);
+
     this->plots.cm_residue.plottable.colormap->data()->setSize(nx, ny);
     this->plots.cm_residue.plottable.colormap->data()->setRange(QCPRange(0, nx), QCPRange(0, ny));
-    this->plots.cm_residue.plottable.colormap->data()->fill(0.0);
+
+    this->plots.cm_fit.plottable.colormap->setColorScale(this->plots.cm_image.plottable.colorscale);
+    this->plots.cm_residue.plottable.colormap->setColorScale(this->plots.cm_image.plottable.colorscale);
 
     double x, y, zfit, xIm, yIm, zImage, xRes, yRes, zRes;
     for (int xIndex=0; xIndex<nx; ++xIndex)
     {
+
       for (int yIndex=0; yIndex<ny; ++yIndex)
       {
         this->plots.cm_image.plottable.colormap->data()->cellToCoord(xIndex, yIndex, &xIm, &yIm);
-        this->plots.cm_fit.plottable.colormap->data()->cellToCoord(xIndex, ny-1-yIndex, &x, &y);
+        this->plots.cm_fit.plottable.colormap->data()->cellToCoord(xIndex, yIndex, &x, &y);
         this->plots.cm_residue.plottable.colormap->data()->cellToCoord(xIndex, yIndex, &xRes, &yRes);
-
-        zfit = exp(- (pow((x-fitParams.center_x),2)/(2*fitParams.var_x)) - (pow((y-fitParams.center_y),2)/(2*fitParams.var_y)));
-        zImage = image.at<ushort>(cv::Point(xIndex, ny-1-yIndex))/(fitParams.intensitymax);
-        zRes = abs(zImage-zfit);
+        //std::cout << xIndex << " "<<  x <<" " <<  yIndex << " " << y << std::endl;
+        zfit = exp(- (pow((xIndex-fitParams.center_x),2)/(2*fitParams.var_x)) - (pow((yIndex-fitParams.center_y),2)/(2*fitParams.var_y)));
+        zImage = croppedImage.at<ushort>(cv::Point(xIndex, yIndex))/fitParams.intensitymax;
+        //zRes = abs(zImage-zfit);
+        zRes= abs((zfit-zImage)/zImage);
         if (zImage > 0.00001){
-            std::cout << "zfit: " << zfit << "\t" << "zimg: " << zImage << "\t"<< "res: " << zRes << std::endl;
+           // std::cout << "zfit: " << zfit << "\t" << "zimg: " << zImage << "\t"<< "res: " << zRes << std::endl;
         }
         this->plots.cm_image.plottable.colormap->data()->setCell(xIndex, yIndex, zImage);
         this->plots.cm_fit.plottable.colormap->data()->setCell(xIndex, yIndex, zfit);
-        this->plots.cm_residue.plottable.colormap->data()->setCell(xIndex, yIndex, zRes);
-        }
+        this->plots.cm_residue.plottable.colormap->data()->setCell(xIndex, yIndex, zRes);  
+      }
     }
     this->plots.cm_image.replot();
     this->plots.cm_fit.replot();
     this->plots.cm_residue.replot();
+    this->m_seeingData.crossSectionX.data()->set(QCPGraphDataContainer());
+    this->m_seeingData.crossSectionY.data()->set(QCPGraphDataContainer());
+    this->m_seeingData.crossSectionImageX.data()->set(QCPGraphDataContainer());
+    this->m_seeingData.crossSectionImageY.data()->set(QCPGraphDataContainer());
+    for(int i = 0; i<nx;i++){
+        this->m_seeingData.crossSectionX->add(QCPGraphData(i, this->plots.cm_fit.plottable.colormap->data()->cell(i,static_cast<int>(fitParams.center_y))));
+        this->m_seeingData.crossSectionImageX->add(QCPGraphData(i, this->plots.cm_image.plottable.colormap->data()->cell(i,static_cast<int>(fitParams.center_y))));
+    }
+    for(int i = 0; i<ny;i++){
+        this->m_seeingData.crossSectionY->add(QCPGraphData(i, this->plots.cm_fit.plottable.colormap->data()->cell(static_cast<int>(fitParams.center_x),i)));
+        this->m_seeingData.crossSectionImageY->add(QCPGraphData(i, this->plots.cm_image.plottable.colormap->data()->cell(static_cast<int>(fitParams.center_x),i)));
+    }
+    this->plots.gaussOverlap_x.replot();
+    this->plots.gaussOverlap_y.replot();
 }
 
 void SeeingGui::updateGaussPlots(){
