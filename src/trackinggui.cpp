@@ -94,11 +94,13 @@ TrackingGui::~TrackingGui()
     delete ui;
 }
 void TrackingGui::loadConfiguration(){
+    QDir dir;
+    dir.cdUp();
     if(this->ui->CB_Settings->currentText().toStdString() == "IQOQI"){
-        this->m_configurationFilePath = QDir::currentPath() + "/config_IQOQI.ini";
+        this->m_configurationFilePath = dir.path() + "/src/config_IQOQI.ini";
     }
     else if(this->ui->CB_Settings->currentText().toStdString() == "Bisamberg"){
-        this->m_configurationFilePath = QDir::currentPath() + "/config_BISAM.ini";
+        this->m_configurationFilePath = dir.path() + "/src/config_BISAM.ini";
     }
     QSettings settings(this->m_configurationFilePath, QSettings::IniFormat);
     settings.beginGroup("TrackingGui");

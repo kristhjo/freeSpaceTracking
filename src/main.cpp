@@ -2,6 +2,7 @@
 #include <QApplication>
 #include <QString>
 #include <iostream>
+#include "qcustomplot.h"
 int main(int argc, char *argv[])
 {
     //QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);

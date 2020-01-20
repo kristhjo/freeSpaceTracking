@@ -35,7 +35,7 @@ HexapodGui::HexapodGui(QWidget *parent) :
     QObject::connect(this, SIGNAL(newPositionMessage(QString)), this, SLOT(displayPosition(QString)));
 
     QObject::connect(this->ui->SB_deadTime,QOverload<int>::of(&QSpinBox::valueChanged),this,&HexapodGui::setDeadTime,Qt::UniqueConnection);
-    QObject::connect(this->ui->SB_maxMotion,QOverload<int>::of(&QSpinBox::valueChanged),this,&HexapodGui::setMaxMotion,Qt::UniqueConnection);
+    QObject::connect(this->ui->SB_maxMotion,QOverload<double>::of(&QDoubleSpinBox::valueChanged),this,&HexapodGui::setMaxMotion,Qt::UniqueConnection);
     QObject::connect(this->ui->SB_proportionalGain,QOverload<double>::of(&QDoubleSpinBox::valueChanged),this,&HexapodGui::setProportionalGain,Qt::UniqueConnection);
     QObject::connect(this->ui->SB_integrationTime,QOverload<int>::of(&QSpinBox::valueChanged),this,&HexapodGui::setIntegrationTime,Qt::UniqueConnection);
 }
@@ -75,12 +75,11 @@ void HexapodGui::loadConfiguration(QString configurationFilePath){
     this->m_configurationSettings.integrationTime = settings.value("integrationTime",1.0).toDouble();
     this->m_configurationSettings.deadTime = settings.value("deadTime",1.0).toDouble();
     this->m_configurationSettings.proportionalGain = settings.value("proportionalGain",0.5).toDouble();
-    this->m_configurationSettings.maxMotion = settings.value("maxMotion",10).toDouble();
+    this->m_configurationSettings.maxMotion = settings.value("maxMotion",0.1).toDouble();
     this->m_configurationSettings.horizontalAxis = settings.value("horizontalAxis","W").toString();
     this->m_configurationSettings.verticalAxis = settings.value("verticalAxis","V").toString();
     this->m_configurationSettings.horizontalSign = settings.value("horizontalSign").toInt();
     this->m_configurationSettings.verticalSign = settings.value("verticalSign").toInt();
-    std::cout << this->m_configurationSettings.verticalSign << " " << this->m_configurationSettings.horizontalSign << std::endl;
     this->m_configurationSettings.storage_location = settings.value("storage_location", this->projectFolderPath + "/results/stabilization/").toString();
 
     this->m_configurationSettings.horizontalAxisIndex = this->hexapodParams.coAxisMap[this->m_configurationSettings.horizontalAxis];
@@ -109,12 +108,12 @@ void HexapodGui::configureSettings(){
 
 void HexapodGui::setup_plots_window(){
     this->plotsWindow = std::make_unique<plotDisplay>();
-    this->m_stabilizationPlots.stabilization.save_settings = savingSettings("", this->currentFolderPath, true, "pdf", 1000, 600);
+    this->m_stabilizationPlots.stabilization.save_settings = savingSettings("", this->currentFolderPath, true, "pdf");
     this->plotsWindow->add_plot(this->m_stabilizationPlots.stabilization);
-    this->m_stabilizationPlots.stabilization.add_plottable(scatterPlotConfig(this->m_stabilizationData.hexapod_vertical,"vertical motion", QCPGraph::lsLine, QCPScatterStyle(QCPScatterStyle::ssSquare, QPen(Qt::black, 1.5), QBrush(QColor(255,140,0)), 5),QPen(Qt::DashLine)));
-    this->m_stabilizationPlots.stabilization.add_plottable(scatterPlotConfig(this->m_stabilizationData.hexapod_horizontal,"horizontal motion", QCPGraph::lsLine, QCPScatterStyle(QCPScatterStyle::ssSquare, QPen(Qt::black, 1.5), QBrush(QColor(10, 140, 70)), 5),QPen(Qt::DashLine)));
-    this->m_stabilizationPlots.stabilization.add_plottable(scatterPlotConfig(this->m_stabilizationData.centroid_vertical,"vertical centroid dev.", QCPGraph::lsLine, QCPScatterStyle(QCPScatterStyle::ssCircle, QPen(Qt::black, 1.5), QBrush(QColor(255,140,0)), 5),QPen(Qt::SolidLine),QCPAxis::atRight));
-    this->m_stabilizationPlots.stabilization.add_plottable(scatterPlotConfig(this->m_stabilizationData.centroid_horizontal,"horizontal centroid dev.", QCPGraph::lsLine, QCPScatterStyle(QCPScatterStyle::ssCircle, QPen(Qt::black, 1.5), QBrush(QColor(10, 140, 70)), 5),QPen(Qt::SolidLine),QCPAxis::atRight));
+    this->m_stabilizationPlots.stabilization.add_plottable(scatterPlotConfig(this->m_stabilizationData.hexapod_vertical,"vertical motion", QCPGraph::lsLine, QCPScatterStyle(QCPScatterStyle::ssSquare, QPen(Qt::black, 1.5), QBrush(QColor(255,140,0)), 15),QPen(QColor(255,140,0))));
+    this->m_stabilizationPlots.stabilization.add_plottable(scatterPlotConfig(this->m_stabilizationData.hexapod_horizontal,"horizontal motion", QCPGraph::lsLine, QCPScatterStyle(QCPScatterStyle::ssSquare, QPen(Qt::black, 1.5), QBrush(QColor(10, 140, 70)), 15),QPen(QColor(10, 140, 70))));
+    this->m_stabilizationPlots.stabilization.add_plottable(scatterPlotConfig(this->m_stabilizationData.centroid_vertical,"vertical centroid dev.", QCPGraph::lsLine, QCPScatterStyle(QCPScatterStyle::ssCircle, QPen(Qt::black, 1.5), QBrush(QColor(255,140,0)), 15),QPen(QColor(255,140,0)),QCPAxis::atRight));
+    this->m_stabilizationPlots.stabilization.add_plottable(scatterPlotConfig(this->m_stabilizationData.centroid_horizontal,"horizontal centroid dev.", QCPGraph::lsLine, QCPScatterStyle(QCPScatterStyle::ssCircle, QPen(Qt::black, 1.5), QBrush(QColor(10, 140, 70)), 15),QPen(QColor(10, 140, 70)),QCPAxis::atRight));
     this->plotsWindow->show();
 }
 
@@ -155,17 +154,13 @@ void HexapodGui::startStabilization(std::stringstream &ss){
     ss << "Hexapod stabilization activated";
     //create directory q
     QDir basedir;
-    this->folderName = QDateTime::fromTime_t(static_cast<uint>(time(nullptr))).toString(Qt::TextDate);
+    this->folderName = QDateTime::fromTime_t(static_cast<uint>(time(nullptr))).toString(Qt::TextDate) + "/";
     this->currentFolderPath = this->m_configurationSettings.storage_location + this->folderName;
     if(!basedir.mkpath(this->m_configurationSettings.storage_location + this->folderName) ){
 
-        emit newMessage("Couldn't create testfolder " + this->m_configurationSettings.storage_location + this->folderName, true);
+        emit newMessage("Couldn't create folder " + this->m_configurationSettings.storage_location + this->folderName, true);
     }
-    if(!basedir.mkdir(folderName)){
-        emit newMessage("Couldn't create folder for plots", true);
-    }
-    this->stabilizationDataStream.open(this->folderName.toStdString() + "/stabilizationData.dat",std::fstream::out|std::fstream::app);
-    this->stabilizationDataStreamtest.open(this->m_configurationSettings.storage_location.toStdString() + this->folderName.toStdString() + "/stabilizationData.dat",std::fstream::out|std::fstream::app);
+    this->stabilizationDataStream.open(this->m_configurationSettings.storage_location.toStdString() + this->folderName.toStdString() + "/stabilizationData.dat",std::fstream::out|std::fstream::app);
     if(!stabilizationDataStream.is_open())
     {
         std::cout <<this->folderName.toStdString() + "/stabilizationData.dat" <<"\t File could not be created " << std::endl;
@@ -244,8 +239,9 @@ void HexapodGui::Stabilize(){
 
 void HexapodGui::update_plotsWindow(){
     this->m_stabilizationPlots.stabilization.replot();
-    this->stabilizationDataStreamtest << this->m_stabilizationData.hexapod_vertical->end()->key << "\t" << this->m_stabilizationData.hexapod_vertical->end()->value << "\t" << this->m_stabilizationData.hexapod_horizontal->end()->value << "\t" << this->m_stabilizationData.centroid_vertical->end()->value << "\t" << this->m_stabilizationData.centroid_horizontal->end()->value << "\n";
-    this->stabilizationDataStreamtest.flush();
+
+    this->stabilizationDataStream << (this->m_stabilizationData.hexapod_vertical->constEnd()-1)->key << "\t" << (this->m_stabilizationData.hexapod_vertical->constEnd()-1)->value << "\t" << (this->m_stabilizationData.hexapod_horizontal->constEnd()-1)->value << "\t" << (this->m_stabilizationData.centroid_vertical->constEnd()-1)->value << "\t" << (this->m_stabilizationData.centroid_horizontal->constEnd()-1)->value << "\n";
+    this->stabilizationDataStream.flush();
     //only plot points from the last 5 min.
     this->m_stabilizationData.hexapod_vertical->removeBefore(time(nullptr) - 300);
     this->m_stabilizationData.hexapod_horizontal->removeBefore(time(nullptr) - 300);

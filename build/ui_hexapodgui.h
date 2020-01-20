@@ -104,7 +104,6 @@ public:
     QLabel *integrationTimeLabel;
     QLabel *deadTimeLabel;
     QLabel *proportionalGainLabel;
-    QSpinBox *SB_maxMotion;
     QLabel *label_10;
     QSpinBox *SB_integrationTime;
     QLabel *label_11;
@@ -114,6 +113,7 @@ public:
     QSpinBox *SB_deadTime;
     QLabel *label_8;
     QDoubleSpinBox *SB_proportionalGain;
+    QDoubleSpinBox *SB_maxMotion;
     QGridLayout *gridLayout_6;
     QLineEdit *LE_uAbsCo;
     QLabel *label_Y_2;
@@ -508,12 +508,6 @@ public:
 
         gridLayout_8->addWidget(proportionalGainLabel, 4, 0, 1, 1);
 
-        SB_maxMotion = new QSpinBox(centralwidget);
-        SB_maxMotion->setObjectName(QString::fromUtf8("SB_maxMotion"));
-        SB_maxMotion->setMaximum(10);
-
-        gridLayout_8->addWidget(SB_maxMotion, 5, 1, 1, 1);
-
         label_10 = new QLabel(centralwidget);
         label_10->setObjectName(QString::fromUtf8("label_10"));
         label_10->setMinimumSize(QSize(0, 0));
@@ -566,6 +560,12 @@ public:
         SB_proportionalGain->setSingleStep(0.100000000000000);
 
         gridLayout_8->addWidget(SB_proportionalGain, 4, 1, 1, 1);
+
+        SB_maxMotion = new QDoubleSpinBox(centralwidget);
+        SB_maxMotion->setObjectName(QString::fromUtf8("SB_maxMotion"));
+        SB_maxMotion->setDecimals(4);
+
+        gridLayout_8->addWidget(SB_maxMotion, 5, 1, 1, 1);
 
         gridLayout_8->setColumnStretch(0, 4);
         gridLayout_8->setColumnStretch(1, 2);
@@ -743,7 +743,7 @@ public:
         SB_StepSize = new QSpinBox(centralwidget);
         SB_StepSize->setObjectName(QString::fromUtf8("SB_StepSize"));
         SB_StepSize->setMinimum(1);
-        SB_StepSize->setMaximum(100);
+        SB_StepSize->setMaximum(1000);
 
         horizontalLayout_4->addWidget(SB_StepSize);
 
@@ -825,7 +825,7 @@ public:
         deadTimeLabel->setText(QApplication::translate("HexapodGui", "Dead Time ", nullptr));
         proportionalGainLabel->setText(QApplication::translate("HexapodGui", "Proportional Gain", nullptr));
         label_10->setText(QApplication::translate("HexapodGui", "s", nullptr));
-        label_11->setText(QApplication::translate("HexapodGui", "px", nullptr));
+        label_11->setText(QApplication::translate("HexapodGui", "deg", nullptr));
         label_9->setText(QApplication::translate("HexapodGui", "s", nullptr));
         maxMotionLabel->setText(QApplication::translate("HexapodGui", "Max motion", nullptr));
         TE_LogHexapod->setHtml(QApplication::translate("HexapodGui", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"

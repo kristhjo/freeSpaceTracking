@@ -416,13 +416,6 @@
           </property>
          </widget>
         </item>
-        <item row="5" column="1">
-         <widget class="QSpinBox" name="SB_maxMotion">
-          <property name="maximum">
-           <number>10</number>
-          </property>
-         </widget>
-        </item>
         <item row="2" column="2">
          <widget class="QLabel" name="label_10">
           <property name="minimumSize">
@@ -452,7 +445,7 @@
            </size>
           </property>
           <property name="text">
-           <string>px</string>
+           <string>deg</string>
           </property>
          </widget>
         </item>
@@ -511,6 +504,13 @@ p, li { white-space: pre-wrap; }
           </property>
           <property name="singleStep">
            <double>0.100000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="1">
+         <widget class="QDoubleSpinBox" name="SB_maxMotion">
+          <property name="decimals">
+           <number>4</number>
           </property>
          </widget>
         </item>
@@ -738,7 +738,7 @@ p, li { white-space: pre-wrap; }
            <number>1</number>
           </property>
           <property name="maximum">
-           <number>100</number>
+           <number>1000</number>
           </property>
          </widget>
         </item>

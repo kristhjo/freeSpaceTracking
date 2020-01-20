@@ -189,7 +189,7 @@ private:
 
     QString folderName;
     std::fstream stabilizationDataStream;
-    std::fstream stabilizationDataStreamtest;
+    //std::fstream stabilizationDataStreamtest;
 
 signals:
     void positionChanged();

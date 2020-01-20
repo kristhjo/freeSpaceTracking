@@ -100,8 +100,10 @@ void scatterplot::add_plottable(scatterPlotConfig config){
     if(this->customPlot != nullptr){
 
        config.scatterPlot = this->customPlot->addGraph(this->customPlot->axisRect()->axis(config.xaxes), this->customPlot->axisRect()->axis(config.yaxes));
+
        config.scatterPlot->setData(config.data);
        config.scatterPlot->setLineStyle(config.linestyle);
+       config.scatterPlot->setPen(config.penstyle);
        config.scatterPlot->setScatterStyle(config.scatterStyle);
        if(config.useDateTicker){
            config.dateTicker = QSharedPointer<QCPAxisTickerDateTime>(new QCPAxisTickerDateTime);
@@ -113,6 +115,7 @@ void scatterplot::add_plottable(scatterPlotConfig config){
            config.scatterPlot->setName(config.legendText);
            customPlot->legend->setVisible(true);
        }
+       this->customPlot->axisRect()->axis(config.yaxes)->setVisible(true);
        //this->customPlot->yAxis->setRange(QCPRange(0.9,1.1));
        this->customPlot->replot();
        this->plottables.push_back(config);

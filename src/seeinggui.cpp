@@ -36,7 +36,7 @@ void SeeingGui::loadConfiguration(QString configurationFilePath){
     this->m_configurationSettings.debug = settings.value("debug", false).toBool();
     this->m_configurationSettings.use_threshold = settings.value("use_threshold", false).toBool();
     this->m_configurationSettings.use_windowing = settings.value("use_windowing", false).toBool();
-    this->m_configurationSettings.window_radius = settings.value("window_radius", 1).toInt();
+    this->m_configurationSettings.window_radius = settings.value("window_radius", 30).toInt();
     this->m_configurationSettings.threshold = settings.value("threshold", 1).toInt();
     this->m_configurationSettings.storage_location = settings.value("storage_location", this->projectFolderPath+"/results/seeing/").toString();
     this->m_configurationSettings.measurement_type = settings.value("measurement_type", "Gaussian fit").toString();
@@ -76,12 +76,12 @@ void SeeingGui::configureSettings(){
     this->ui->LE_SecPerDataPoint->setReadOnly(true);
     this->ui->SB_SampleSize->setValue(this->m_configurationSettings.sample_size);
     this->ui->SB_SampleSize->setMaximum(2000);
-    this->ui->SB_WindowingRadius->setMinimum(1);
-    this->ui->SB_WindowingRadius->setMaximum(500);
-    this->ui->SB_WindowingRadius->setValue(this->m_configurationSettings.window_radius);
     this->ui->SB_airyMin->setMaximum(20);
     this->ui->SB_airyMin->setMinimum(0);
     this->ui->SB_airyMin->setValue(1);
+    this->ui->SB_WindowingRadius->setMinimum(1);
+    this->ui->SB_WindowingRadius->setMaximum(500);
+    this->ui->SB_WindowingRadius->setValue(this->m_configurationSettings.window_radius);
     this->ui->SB_Threshold->setMinimum(1);
     this->ui->SB_Threshold->setMaximum(255);
     this->ui->SB_Threshold->setValue(this->m_configurationSettings.threshold);
@@ -129,7 +129,6 @@ void SeeingGui::startMeasurement(){
         return;
     }
     else if (this->m_configurationSettings.measurement_type == "Gaussian fit"){
-        this->displayMessage("No support for Gaussian seeing measurements at this time.");
         this->measurement_thread = std::make_unique<std::thread>(&SeeingGui::Gaussian,this);
         return;
     }
@@ -536,22 +535,23 @@ void SeeingGui::Gaussian(){
 }
 
 void SeeingGui::debugGaussian(const cv::Mat image){
+    //cv::Mat croppedImage = image;
     cv::Mat croppedImage;
-
-    imageprocessing::cropWindow(image, croppedImage, this->m_configurationSettings.window_radius);
+    imageprocessing::get_centroid_ROI(image, croppedImage, this->m_configurationSettings.window_radius);
+    //imageprocessing::cropWindow(image, croppedImage, this->m_configurationSettings.window_radius);
     datacontainers::gaussianFitParams fitParams = imageprocessing::getGaussianFitParams(croppedImage);
 
-   /* if(true){
+    if(true){
         for (int j = 0; j < image.cols; j++){
-            std::cout << j << ": " << image.at<ushort>(cv::Point(fitParams.center_x, j)) << " ; " <<  croppedImage.at<ushort>(cv::Point(fitParams.center_x, j)) << " ; " <<  static_cast<int>(mask.at<uchar>(cv::Point(fitParams.center_x, j))) << " ; " <<  cropp2.at<ushort>(cv::Point(fitParams.center_x, j))<< std::endl;
+            std::cout << j << ": " << image.at<ushort>(cv::Point(fitParams.center_x, j)) << " ; " <<  croppedImage.at<ushort>(cv::Point(fitParams.center_x, j)) << std::endl;
         }
-    }*/
+    }
     if (!fitParams.valid){
         emit newMessage("image not valid for gaussian fit", true);
         return;
     }
-    int nx = image.cols;
-    int ny = image.rows;
+    int nx = croppedImage.cols;
+    int ny = croppedImage.rows;
     this->plots.cm_image.plottable.colormap->data()->setSize(nx, ny);
     this->plots.cm_image.plottable.colormap->data()->setRange(QCPRange(0, nx), QCPRange(0, ny));
 

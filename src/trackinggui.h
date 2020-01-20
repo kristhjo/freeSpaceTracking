@@ -82,8 +82,6 @@ protected slots:
 private:
     Ui::TrackingGui *ui;
     config_TrackingGui m_configurationSettings;
-    //datacontainers::configurationSettings m_configurationSettings;
-    //datacontainers::configurationSettings m_configurationSettings_main;
     QString m_configurationFilePath;
     QString m_projectFolderPath;
 

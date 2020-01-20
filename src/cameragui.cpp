@@ -340,9 +340,9 @@ void CameraGui::Run()
                     }
                     if (this->m_imageContainer->imgCounter < this->m_imageContainer->sampleSize ){
                         ///temporary for gaussfit testing
-                         int size = rand() % 25;
-                         int intensity = (rand() % 150) + 10;    //250/(10 % (this->m_imageContainer->imgCounter+1));
-                         cv::circle(cvimg,cv::Point(cvimg.rows/2, cvimg.cols/2),size,cv::Scalar(intensity,0,0),-1);
+                        // int size = rand() % 25;
+                        // int intensity = (rand() % 150) + 10;    //250/(10 % (this->m_imageContainer->imgCounter+1));
+                        // cv::circle(cvimg,cv::Point(cvimg.rows/2, cvimg.cols/2),size,cv::Scalar(intensity,0,0),-1);
                         ///
                         ///temporary for DIMM testing
                         /*int size = rand() % 10;

@@ -19,6 +19,6 @@ void getDIMM_strehlRatio(const cv::Mat &img, double& strehl1, double& strehl2, d
 void computeHistogram(const cv::Mat &img, cv::Mat &histogram);
 void getDIMMcentroids(const cv::Mat &img, cv::Point& centroid1, cv::Point& centroid2);
 void getSpotSeparation(const cv::Mat &img, int windowRadius, double& x_separation, double& y_separation, cv::Point& centroid1, cv::Point& centroid2); ///< Returns the coordinate distance (x,y) between the brightest spot in each half (split left-right) of the image.
-
+void get_centroid_ROI(const cv::Mat img, cv::Mat& ROI, int radius);
 }
 #endif // IMAGEPROCESSING_H

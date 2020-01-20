@@ -10,14 +10,17 @@ void cropWindow(const cv::Mat &img, cv::Mat &croppedImg, int windowRadius){
     cv::Mat smoothedImg(img.rows, img.cols,img.type(),cv::Scalar(0));
     croppedImg = cv::Mat(img.rows, img.cols, img.type(), cv::Scalar(0));
     cv::Mat mask(img.rows, img.cols, CV_8UC1, cv::Scalar(0));
-
     cv::GaussianBlur(img, smoothedImg, cv::Size(3,3),0,0); //applies a gaussian blur to the image. Noise peaks are smeared out, thus finding the peak more reliably.
 
     double min, max;
     cv::Point minLoc, maxLoc;
     cv::minMaxLoc(smoothedImg, &min, &max, &minLoc, &maxLoc);
     cv::circle(mask, maxLoc, windowRadius, cv::Scalar(128), -1); //Creates a circle around the maxLoc position in mask, with radius windowRadius.
+
     img.copyTo(croppedImg, mask); //Initiates croppedImg with  matrix resulting from img filtered with mask.
+
+
+
 }
 
 
@@ -76,6 +79,15 @@ void getDIMM_strehlRatio(const cv::Mat &img, double& strehl1, double& strehl2, d
     strehl1 =  (max1/total_intensity1)*(4/M_PI)*pow(wavelength/(pixel_size_radians*aperture_diameter), 2);
     strehl2 =  (max2/total_intensity2)*(4/M_PI)*pow(wavelength/(pixel_size_radians*aperture_diameter), 2);
     std::cout << "strehl1: " << strehl1 << " strehl2: " << strehl2 << std::endl;
+}
+
+void get_centroid_ROI(const cv::Mat img, cv::Mat& ROI, int radius){
+    cv::Moments m = moments(img);
+    cv::Point center(static_cast<int>(m.m10/m.m00), static_cast<int>(m.m01/m.m00));
+    //get the Rect containing the circle:
+    cv::Rect r(center.x-radius, center.y-radius, radius*2,radius*2);
+    // obtain the image ROI:
+    ROI = img(r);
 }
 
 datacontainers::gaussianFitParams getGaussianFitParams(const cv::Mat img){
