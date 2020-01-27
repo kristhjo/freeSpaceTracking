@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SeeingGui</class>
+ <widget class="QMainWindow" name="SeeingGui">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>859</width>
+    <height>763</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout" rowstretch="0,0" columnstretch="0">
+    <item row="0" column="0">
+     <layout class="QGridLayout" name="gridLayout_config">
+      <property name="sizeConstraint">
+       <enum>QLayout::SetMinimumSize</enum>
+      </property>
+      <item row="6" column="2">
+       <layout class="QHBoxLayout" name="horizontalLayout_7"/>
+      </item>
+      <item row="0" column="2">
+       <widget class="QComboBox" name="ComboB_MeasurementType">
+        <item>
+         <property name="text">
+          <string>Gaussian fit</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>DIMM</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <layout class="QHBoxLayout" name="horizontalLayout_11">
+        <item>
+         <widget class="QLabel" name="Label_WindowingRadius">
+          <property name="text">
+           <string>Windowing Radius</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="checkB_useWindow">
+          <property name="text">
+           <string>use</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="2" column="2">
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QLabel" name="Label_Debug">
+          <property name="text">
+           <string>Debug</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="CheckB_Debug">
+          <property name="text">
+           <string>Yes</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="5" column="2">
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <item>
+         <widget class="QSpinBox" name="SB_Threshold"/>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_grayscale">
+          <property name="text">
+           <string>0-255 greyscale</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="1" column="2">
+       <layout class="QHBoxLayout" name="horizontalLayout_6">
+        <item>
+         <widget class="QSpinBox" name="SB_SampleSize"/>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="LE_SecPerDataPoint"/>
+        </item>
+        <item>
+         <widget class="QLabel" name="Label_SecPerDataPoint">
+          <property name="text">
+           <string>s per data point</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="4" column="2">
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QSpinBox" name="SB_WindowingRadius"/>
+        </item>
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>px</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="SB_airyMin"/>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_airymin">
+          <property name="text">
+           <string># airy min.</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="8" column="0">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Strehl ratio cut-off</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="Label_SeeingMeasurementType">
+        <property name="text">
+         <string>Seeing measurement type</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QLabel" name="Label_StoreImages">
+          <property name="text">
+           <string>Store images</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="CheckB_StoreImages">
+          <property name="text">
+           <string>Yes</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="7" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string># Saturated pixels cut-off</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="Label_StorageLocation">
+        <property name="text">
+         <string>Storage location</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="Label_SampleSize">
+        <property name="text">
+         <string>Sample size per data point</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2">
+       <widget class="QLineEdit" name="LE_DirectoryPath">
+        <property name="text">
+         <string>/home/domi/Desktop/seeingTests</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="2">
+       <widget class="QSpinBox" name="SB_saturationCutOff"/>
+      </item>
+      <item row="5" column="0">
+       <layout class="QHBoxLayout" name="horizontalLayout_12">
+        <item>
+         <widget class="QLabel" name="Label_WindowingRadius_2">
+          <property name="text">
+           <string>Thresholding intensity</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="checkB_useThreshold">
+          <property name="text">
+           <string>use</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="8" column="2">
+       <layout class="QHBoxLayout" name="horizontalLayout_5">
+        <item>
+         <widget class="QDoubleSpinBox" name="doubleSpinBox"/>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_4">
+          <property name="text">
+           <string>(for DIMM only)</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+    <item row="1" column="0">
+     <widget class="QTextEdit" name="TE_logSeeing">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>859</width>
+     <height>39</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuSeeingGui">
+    <property name="title">
+     <string>SeeingGui</string>
+    </property>
+   </widget>
+   <addaction name="menuSeeingGui"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

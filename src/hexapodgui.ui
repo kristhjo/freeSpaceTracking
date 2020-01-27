@@ -1,0 +1,778 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>HexapodGui</class>
+ <widget class="QMainWindow" name="HexapodGui">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>2119</width>
+    <height>816</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout_5">
+    <item row="1" column="3" colspan="2">
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="3" column="1">
+       <widget class="QLineEdit" name="LE_zMove"/>
+      </item>
+      <item row="1" column="3">
+       <widget class="QLabel" name="label_U">
+        <property name="text">
+         <string>U</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="5">
+       <widget class="QLabel" name="label_deg_3">
+        <property name="text">
+         <string>deg</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="3">
+       <widget class="QLabel" name="label_V">
+        <property name="text">
+         <string>V</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2">
+       <widget class="QLabel" name="label_mm_3">
+        <property name="text">
+         <string>mm</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="4">
+       <widget class="QLineEdit" name="LE_uMove"/>
+      </item>
+      <item row="3" column="3">
+       <widget class="QLabel" name="label_W">
+        <property name="text">
+         <string>W</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QLabel" name="label_mm_2">
+        <property name="text">
+         <string>mm</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="LE_yMove"/>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_Z">
+        <property name="text">
+         <string>Z</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="LE_xMove"/>
+      </item>
+      <item row="1" column="2">
+       <widget class="QLabel" name="label_mm">
+        <property name="text">
+         <string>mm</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="4">
+       <widget class="QLineEdit" name="LE_vMove"/>
+      </item>
+      <item row="1" column="5">
+       <widget class="QLabel" name="label_deg">
+        <property name="text">
+         <string>deg</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0" colspan="6" alignment="Qt::AlignHCenter">
+       <widget class="QLabel" name="label_MoveToPos">
+        <property name="text">
+         <string>Move to pos (rel. active coord. syst.)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="5">
+       <widget class="QLabel" name="label_deg_2">
+        <property name="text">
+         <string>deg</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_Y">
+        <property name="text">
+         <string>Y</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="4">
+       <widget class="QLineEdit" name="LE_wMove"/>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_X">
+        <property name="text">
+         <string>X</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0" colspan="6">
+       <widget class="QPushButton" name="PB_MoveToPosition">
+        <property name="text">
+         <string>Move to position</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="1" column="2">
+     <layout class="QGridLayout" name="gridLayout_3">
+      <item row="2" column="2">
+       <widget class="QLabel" name="label_mm_9">
+        <property name="text">
+         <string>mm</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2">
+       <widget class="QLabel" name="label_mm_8">
+        <property name="text">
+         <string>mm</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="3">
+       <widget class="QLabel" name="label_V_3">
+        <property name="text">
+         <string>V</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0" colspan="6" alignment="Qt::AlignHCenter">
+       <widget class="QLabel" name="label_ToolCo">
+        <property name="text">
+         <string>Tool Coordinates (rel. active coord. syst)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="LE_yToolCo"/>
+      </item>
+      <item row="2" column="4">
+       <widget class="QLineEdit" name="LE_vToolCo"/>
+      </item>
+      <item row="3" column="3">
+       <widget class="QLabel" name="label_W_3">
+        <property name="text">
+         <string>W</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="4">
+       <widget class="QLineEdit" name="LE_uToolCo"/>
+      </item>
+      <item row="3" column="4">
+       <widget class="QLineEdit" name="LE_wToolCo"/>
+      </item>
+      <item row="1" column="5">
+       <widget class="QLabel" name="label_deg_9">
+        <property name="text">
+         <string>deg</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_Z_3">
+        <property name="text">
+         <string>Z</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLineEdit" name="LE_zToolCo"/>
+      </item>
+      <item row="1" column="2">
+       <widget class="QLabel" name="label_mm_7">
+        <property name="text">
+         <string>mm</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_X_2">
+        <property name="text">
+         <string>X</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="3">
+       <widget class="QLabel" name="label_U_3">
+        <property name="text">
+         <string>U</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="LE_xToolCo"/>
+      </item>
+      <item row="2" column="5">
+       <widget class="QLabel" name="label_deg_8">
+        <property name="text">
+         <string>deg</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_Y_3">
+        <property name="text">
+         <string>Y</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="5">
+       <widget class="QLabel" name="label_deg_7">
+        <property name="text">
+         <string>deg</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0" colspan="6">
+       <widget class="QPushButton" name="PB_setZeroCoSys">
+        <property name="text">
+         <string>Activate ZERO coordinate system</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="4" column="2" colspan="3">
+     <layout class="QGridLayout" name="gridLayout_9">
+      <item row="0" column="0">
+       <widget class="QTextEdit" name="TE_LivePosition"/>
+      </item>
+     </layout>
+    </item>
+    <item row="1" column="0">
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="2" column="5">
+       <widget class="QLineEdit" name="LE_vActiveCo"/>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_20">
+        <property name="text">
+         <string>X</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="5">
+       <widget class="QLineEdit" name="LE_uActiveCo"/>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="LE_yActiveCo"/>
+      </item>
+      <item row="3" column="4">
+       <widget class="QLabel" name="label_22">
+        <property name="text">
+         <string>W</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="LE_xActiveCo"/>
+      </item>
+      <item row="2" column="4">
+       <widget class="QLabel" name="label_18">
+        <property name="text">
+         <string>V</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="6">
+       <widget class="QLabel" name="label_38">
+        <property name="text">
+         <string>deg</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="3">
+       <widget class="QLabel" name="label_36">
+        <property name="text">
+         <string>mm</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_21">
+        <property name="text">
+         <string>Y</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="3">
+       <widget class="QLabel" name="label_35">
+        <property name="text">
+         <string>mm</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_19">
+        <property name="text">
+         <string>Z</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLineEdit" name="LE_zActiveCo"/>
+      </item>
+      <item row="1" column="4">
+       <widget class="QLabel" name="label_17">
+        <property name="text">
+         <string>U</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="6">
+       <widget class="QLabel" name="label_40">
+        <property name="text">
+         <string>deg</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="3">
+       <widget class="QLabel" name="label_37">
+        <property name="text">
+         <string>mm</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="6">
+       <widget class="QLabel" name="label_39">
+        <property name="text">
+         <string>deg</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="5">
+       <widget class="QLineEdit" name="LE_wActiveCo"/>
+      </item>
+      <item row="4" column="0" colspan="7">
+       <widget class="QPushButton" name="PB_ZeroOnActiveCoSys">
+        <property name="text">
+         <string>Zero on active coordinate system</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0" colspan="7" alignment="Qt::AlignHCenter">
+       <widget class="QLabel" name="label_23">
+        <property name="text">
+         <string>Active Coordinate System (rel. ZERO)</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="4" column="1">
+     <layout class="QGridLayout" name="gridLayout_StabilizationSettings">
+      <item row="0" column="2">
+       <layout class="QGridLayout" name="gridLayout_8" columnstretch="4,2,1" columnminimumwidth="0,0,0">
+        <item row="2" column="0">
+         <widget class="QLabel" name="integrationTimeLabel">
+          <property name="text">
+           <string>IntegrationTime</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="deadTimeLabel">
+          <property name="text">
+           <string>Dead Time </string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0">
+         <widget class="QLabel" name="proportionalGainLabel">
+          <property name="text">
+           <string>Proportional Gain</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="2">
+         <widget class="QLabel" name="label_10">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>s</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QSpinBox" name="SB_integrationTime">
+          <property name="maximum">
+           <number>10</number>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="2">
+         <widget class="QLabel" name="label_11">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>deg</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="2">
+         <widget class="QLabel" name="label_9">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>s</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="0">
+         <widget class="QLabel" name="maxMotionLabel">
+          <property name="text">
+           <string>Max motion</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0" colspan="3">
+         <widget class="QTextEdit" name="TE_LogHexapod">
+          <property name="html">
+           <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Click here when moving manually with keyboard&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QSpinBox" name="SB_deadTime">
+          <property name="maximum">
+           <number>10</number>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0" colspan="3" alignment="Qt::AlignHCenter">
+         <widget class="QLabel" name="label_8">
+          <property name="text">
+           <string>Stabilization parameters</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1">
+         <widget class="QDoubleSpinBox" name="SB_proportionalGain">
+          <property name="maximum">
+           <double>1.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.100000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="1">
+         <widget class="QDoubleSpinBox" name="SB_maxMotion">
+          <property name="decimals">
+           <number>4</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+    <item row="1" column="1">
+     <layout class="QGridLayout" name="gridLayout_6">
+      <item row="1" column="4">
+       <widget class="QLineEdit" name="LE_uAbsCo"/>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_Y_2">
+        <property name="text">
+         <string>Y</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0" colspan="6" alignment="Qt::AlignHCenter|Qt::AlignVCenter">
+       <widget class="QLabel" name="label_AbsCoord">
+        <property name="text">
+         <string>Absolute Coordinates (rel. ZERO)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_X_3">
+        <property name="text">
+         <string>X</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="4">
+       <widget class="QLineEdit" name="LE_wAbsCo"/>
+      </item>
+      <item row="3" column="2">
+       <widget class="QLabel" name="label_mm_5">
+        <property name="text">
+         <string>mm</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QLabel" name="label_mm_4">
+        <property name="text">
+         <string>mm</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QLabel" name="label_mm_6">
+        <property name="text">
+         <string>mm</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLineEdit" name="LE_zAbsCo"/>
+      </item>
+      <item row="3" column="3">
+       <widget class="QLabel" name="label_W_2">
+        <property name="text">
+         <string>W</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="3">
+       <widget class="QLabel" name="label_U_2">
+        <property name="text">
+         <string>U</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="LE_yAbsCo"/>
+      </item>
+      <item row="2" column="4">
+       <widget class="QLineEdit" name="LE_vAbsCo"/>
+      </item>
+      <item row="2" column="5">
+       <widget class="QLabel" name="label_deg_4">
+        <property name="text">
+         <string>deg</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="LE_xAbsCo"/>
+      </item>
+      <item row="3" column="5">
+       <widget class="QLabel" name="label_deg_6">
+        <property name="text">
+         <string>deg</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="3">
+       <widget class="QLabel" name="label_V_2">
+        <property name="text">
+         <string>V</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_Z_2">
+        <property name="text">
+         <string>Z</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="5">
+       <widget class="QLabel" name="label_deg_5">
+        <property name="text">
+         <string>deg</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0" colspan="6">
+       <widget class="QPushButton" name="PB_setUserDefinedCoSys">
+        <property name="text">
+         <string>Set KSF coordinate system at current pos </string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="4" column="0">
+     <layout class="QGridLayout" name="gridLayout_7">
+      <item row="5" column="0">
+       <widget class="QLabel" name="label_6">
+        <property name="text">
+         <string>Z: Q-E</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QLabel" name="label_7">
+        <property name="text">
+         <string>W: K-L</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>X: A-D</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <property name="indent">
+         <number>-1</number>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0" colspan="2" alignment="Qt::AlignHCenter">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Manual control keys (+-)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Y: W-S</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string>V: V-B</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>U: U-I</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0" colspan="2">
+       <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="0,0,0,0">
+        <item>
+         <widget class="QLabel" name="label_StepSize">
+          <property name="text">
+           <string>Step size</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSlider" name="HS_IncrementSize">
+          <property name="minimum">
+           <number>1</number>
+          </property>
+          <property name="maximum">
+           <number>10000</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="SB_StepSize">
+          <property name="minimum">
+           <number>1</number>
+          </property>
+          <property name="maximum">
+           <number>1000</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_12">
+          <property name="text">
+           <string>x min. inc.</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>2119</width>
+     <height>39</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuHexapod_GUI">
+    <property name="title">
+     <string>Hexapod GUI</string>
+    </property>
+   </widget>
+   <addaction name="menuHexapod_GUI"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
