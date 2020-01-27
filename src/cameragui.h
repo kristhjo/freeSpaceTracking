@@ -42,7 +42,7 @@ struct CamInfo
         FrameWidth=2044;
         OffsetX=0;
         OffsetY=0;
-        frameRate=10.0;
+        FrameRate=10.0;
     }
     std::string DeviceNr;
     double FrameRate;
@@ -61,7 +61,6 @@ struct CamInfo
     int FrameWidth;
     int OffsetX;
     int OffsetY;
-    double frameRate;
     std::string BaumerID;
 };
 
@@ -101,7 +100,7 @@ public:
     CamInfo m_CamInfo; ///< Struct containing all the relevant settings of the Baumer Cam.
     TrackingParameters m_TrackingParameters; ///< struct containing all the relevant settings for centroid tracking. This struct depends on the optical setup.
     cv::Point currentCentroid; ///< last calculated image centroid.
-
+    cv::Mat camImage;
     std::atomic<bool> newCamParameter; ///< Flags whenever the image acquisition loop needs to update the camera settings.
     std::atomic<bool> *isCameraConnected = nullptr;
     std::atomic<bool> *isCameraTracking = nullptr; ///< Flags that the image acquisition loop shall start calculating the centroid of each image.
@@ -142,6 +141,10 @@ private:
 
 
     void Run(); ///< Continuous loop handling the image acquisition and display, centroid calculations and uploads to m_imageContainer and centroidContainer. Terminates when stop() is called.
+private slots:
+    void updateCamImage();
+signals:
+    void newImage();
 };
 
 #endif // CAMERAGUI_H

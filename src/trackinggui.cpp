@@ -199,6 +199,7 @@ void TrackingGui::ConnectHexapod(){
     std::stringstream ss;
     if(this->isHexapodConnected){
         this->ui->TE_LogCam->append("Hexapod is already connected \n");
+        this->pm_hexapod->show();
         return;
     }
     this->pm_hexapod = std::make_unique<HexapodGui>(); //Initate the HexapodGui.

@@ -36,8 +36,6 @@ public:
     QGridLayout *gridLayout;
     QGridLayout *gridLayout_config;
     QHBoxLayout *horizontalLayout_7;
-    QSpinBox *SB_wavelength;
-    QLabel *Label_nanometer;
     QComboBox *ComboB_MeasurementType;
     QHBoxLayout *horizontalLayout_11;
     QLabel *Label_WindowingRadius;
@@ -59,7 +57,6 @@ public:
     QLabel *label_airymin;
     QLabel *label_3;
     QLabel *Label_SeeingMeasurementType;
-    QLabel *label_wavelength;
     QHBoxLayout *horizontalLayout;
     QLabel *Label_StoreImages;
     QCheckBox *CheckB_StoreImages;
@@ -83,7 +80,7 @@ public:
     {
         if (SeeingGui->objectName().isEmpty())
             SeeingGui->setObjectName(QString::fromUtf8("SeeingGui"));
-        SeeingGui->resize(859, 792);
+        SeeingGui->resize(859, 763);
         QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
         sizePolicy.setHorizontalStretch(0);
         sizePolicy.setVerticalStretch(0);
@@ -98,16 +95,6 @@ public:
         gridLayout_config->setSizeConstraint(QLayout::SetMinimumSize);
         horizontalLayout_7 = new QHBoxLayout();
         horizontalLayout_7->setObjectName(QString::fromUtf8("horizontalLayout_7"));
-        SB_wavelength = new QSpinBox(centralwidget);
-        SB_wavelength->setObjectName(QString::fromUtf8("SB_wavelength"));
-
-        horizontalLayout_7->addWidget(SB_wavelength);
-
-        Label_nanometer = new QLabel(centralwidget);
-        Label_nanometer->setObjectName(QString::fromUtf8("Label_nanometer"));
-
-        horizontalLayout_7->addWidget(Label_nanometer);
-
 
         gridLayout_config->addLayout(horizontalLayout_7, 6, 2, 1, 1);
 
@@ -218,11 +205,6 @@ public:
 
         gridLayout_config->addWidget(Label_SeeingMeasurementType, 0, 0, 1, 1);
 
-        label_wavelength = new QLabel(centralwidget);
-        label_wavelength->setObjectName(QString::fromUtf8("label_wavelength"));
-
-        gridLayout_config->addWidget(label_wavelength, 6, 0, 1, 1);
-
         horizontalLayout = new QHBoxLayout();
         horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
         Label_StoreImages = new QLabel(centralwidget);
@@ -324,7 +306,6 @@ public:
     void retranslateUi(QMainWindow *SeeingGui)
     {
         SeeingGui->setWindowTitle(QApplication::translate("SeeingGui", "MainWindow", nullptr));
-        Label_nanometer->setText(QApplication::translate("SeeingGui", "nm", nullptr));
         ComboB_MeasurementType->setItemText(0, QApplication::translate("SeeingGui", "Gaussian fit", nullptr));
         ComboB_MeasurementType->setItemText(1, QApplication::translate("SeeingGui", "DIMM", nullptr));
 
@@ -338,7 +319,6 @@ public:
         label_airymin->setText(QApplication::translate("SeeingGui", "# airy min.", nullptr));
         label_3->setText(QApplication::translate("SeeingGui", "Strehl ratio cut-off", nullptr));
         Label_SeeingMeasurementType->setText(QApplication::translate("SeeingGui", "Seeing measurement type", nullptr));
-        label_wavelength->setText(QApplication::translate("SeeingGui", "Wavelength", nullptr));
         Label_StoreImages->setText(QApplication::translate("SeeingGui", "Store images", nullptr));
         CheckB_StoreImages->setText(QApplication::translate("SeeingGui", "Yes", nullptr));
         label_2->setText(QApplication::translate("SeeingGui", "# Saturated pixels cut-off", nullptr));

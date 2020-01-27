@@ -32,6 +32,7 @@ CameraGui::CameraGui(QObject *parent) :
     this->pm_imgProcessor = nullptr;
     this->pm_pImage = nullptr;
     this->pm_pTransformImage = nullptr;
+    QObject::connect(this, SIGNAL(newImage()), this, SLOT(updateCamImage()), Qt::UniqueConnection);
 
 }
 
@@ -282,7 +283,11 @@ void CameraGui::Start(std::stringstream &ss)
     //---------------------   Start Stream --------------------------------------
     //---------------------        End     --------------------------------------
 }
-
+void CameraGui::updateCamImage(){
+    cv::imshow("BamCamTest", this->camImage);
+    cv::waitKey(1000);
+    //cv::destroyWindow("BamCamTest");
+}
 void CameraGui::Run()
 {
     //---------------------    Polling Picture Stream  --------------------------------------
@@ -307,6 +312,7 @@ void CameraGui::Run()
             }
             else{
                 cv::Mat cvimg = cv::Mat(pBufferFilled->GetHeight(), pBufferFilled->GetWidth(), CV_8U, pBufferFilled->GetMemPtr()); //creates an opencv image matrix with the image in the buffer
+                //cvimg.copyTo(this->camImage);
                 if (this->isCameraTracking->load(std::memory_order_acquire)){ // if tracking is activated, calculate centroids with either windowing or thresholding.
                     cv::Mat mask, croppedImg;
                     if (this->m_TrackingParameters.useWindowing.load(std::memory_order_acquire) == true){
@@ -323,12 +329,13 @@ void CameraGui::Run()
                         this->centroidContainer->currentCentroid = centroid;
                         this->centroidContainer->addCentroid(centroid);
                     }
-                    cv::circle(cvimg,centroid,5,cv::Scalar(128,0,0),-1); //creates circle on img following the centroid.
+                    cv::circle(cvimg,centroid,5,cv::Scalar(128),-1); //creates circle on img following the centroid.
                     cv::hconcat(cvimg, croppedImg, croppedImg);
                     cv::Point pText(20,20);
                     std::string centroidText = "x: " + std::to_string(centroid.x) + "   " + "y: " + std::to_string(centroid.y);
                     cv::putText(croppedImg, centroidText, pText,cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar(128,128,256));
-                    cv::imshow("BaumerCam", croppedImg);
+                    //cv::imshow("BaumerCam", croppedImg);
+                    croppedImg.copyTo(this->camImage);
 
                 }
                 else if (this->isMeasuringSeeing->load(std::memory_order_acquire) == true){ //if a seeing measurement is activated, share image with seeinggui.
@@ -340,9 +347,9 @@ void CameraGui::Run()
                     }
                     if (this->m_imageContainer->imgCounter < this->m_imageContainer->sampleSize ){
                         ///temporary for gaussfit testing
-                        // int size = rand() % 25;
-                        // int intensity = (rand() % 150) + 10;    //250/(10 % (this->m_imageContainer->imgCounter+1));
-                        // cv::circle(cvimg,cv::Point(cvimg.rows/2, cvimg.cols/2),size,cv::Scalar(intensity,0,0),-1);
+                        int size = rand() % 25;
+                        int intensity = (rand() % 150) + 10;    //250/(10 % (this->m_imageContainer->imgCounter+1));
+                        cv::circle(cvimg,cv::Point(cvimg.rows/2, cvimg.cols/2),size,cv::Scalar(intensity),-1);
                         ///
                         ///temporary for DIMM testing
                         /*int size = rand() % 10;
@@ -363,13 +370,15 @@ void CameraGui::Run()
                             std::this_thread::sleep_for(std::chrono::seconds(1));
                         }
                         this->m_imageContainer->imgCounter = 1;
-
                     }
-                    cv::imshow("BaumerCam", cvimg);
+                    //cv::imshow("BaumerCam", cvimg);
+                    cvimg.copyTo(this->camImage);
                 }
                 else{ //if no tracking, of seeing measurements are active, simply display the image.
-                    cv::imshow("BaumerCam", cvimg);
+                    cvimg.copyTo(this->camImage);
+                    //cv::imshow("BaumerCam", cvimg);
                 }
+                emit newImage();
                 cvimg.release();
                 pBufferFilled->QueueBuffer();
             }
