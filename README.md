@@ -33,6 +33,8 @@ Additionally, software libraries from Baumer and PI Systems must be included in 
 * Manual control is activated by pressing the button "Manually control hexapod". When the mouse is activated in the specified window, this activates keyboard control of the 6 axes. The step size of the motion can be set by dragging the corresponding slider
 * Position coordinates is set in under the header "move to pos", followed by a "move to position" button. These coordinates are defined relative to the active coordinate system, and are therefore not necessarily absolute coordinates. 
 
+![Main window](/docs/hexapodGui.png)
+
 ### Hexapod coordinate systems 
 The hexapod can be operated with two different coordinate systems. The ZERO system is always defined as the origin of the hexapod, i.e. absolute coordinates, while the USERDEFINED system can be set at any current coordinate. Activating a USERDEFINED coordinate system defines new axis directions along the current rotations. 
 
@@ -52,8 +54,10 @@ The hexapod can be operated with two different coordinate systems. The ZERO syst
 2. The measurement configuration is set by pressing "configure seeing measurement", and must be defined before the measurement can start.
 * To accurately perform a measurement, the parameters of the optical setup must be defined in the ini files. The optical setup is assumed to consist of a final focusing lens onto the baumer camera, with an optional magnification stage in front. The final focus length and the magnification must be defined, as well as the limiting aperture size of the setup. 
 
-### Gaussian fit <br>
+![Main window](/docs/seeingGui.png)
 
+### Gaussian fit <br>
+![Main window](/docs/gaussPlots.png)
 
 ### Differential Image Motion Monitoring <br>
 The DIMM measurement is calculated from the variance in the relative distance of two beam spots corresponding to the wavefront imaged over two spatially separated apertured.  
