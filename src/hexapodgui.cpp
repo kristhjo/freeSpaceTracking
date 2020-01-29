@@ -217,24 +217,29 @@ void HexapodGui::Stabilize(){
         double horizontalMotion = dHorizontal*this->m_configurationSettings.pixToHex*this->m_configurationSettings.proportionalGain*this->m_configurationSettings.horizontalSign;
         double verticalMotion = dVertical*this->m_configurationSettings.pixToHex*this->m_configurationSettings.proportionalGain*this->m_configurationSettings.verticalSign;
 
+        time_t current_time = time(nullptr);
         if(abs(horizontalMotion)< this->m_configurationSettings.maxMotion){
             newPos[this->m_configurationSettings.horizontalAxisIndex] += horizontalMotion;
+            this->m_stabilizationData.hexapod_horizontal->add(QCPGraphData(current_time, this->currentPos[this->m_configurationSettings.horizontalAxisIndex]*this->m_configurationSettings.degToRad*1e6)); //convert to micro radians
+            this->m_stabilizationData.centroid_horizontal->add(QCPGraphData(current_time, dHorizontal));
+
         }
         if(abs(verticalMotion)< this->m_configurationSettings.maxMotion){
             newPos[this->m_configurationSettings.verticalAxisIndex] += verticalMotion;
-        }
+            this->m_stabilizationData.hexapod_vertical->add(QCPGraphData(current_time, this->currentPos[this->m_configurationSettings.verticalAxisIndex]*this->m_configurationSettings.degToRad*1e6)); //convert to micro radians
+            this->m_stabilizationData.centroid_vertical->add(QCPGraphData(current_time, dVertical));
 
-        time_t current_time = time(nullptr);
-        this->m_stabilizationData.hexapod_vertical->add(QCPGraphData(current_time, verticalMotion*this->m_configurationSettings.degToRad*1e6)); //convert to micro radians
-        this->m_stabilizationData.hexapod_horizontal->add(QCPGraphData(current_time, horizontalMotion*this->m_configurationSettings.degToRad*1e6)); //convert to micro radians
-        this->m_stabilizationData.centroid_vertical->add(QCPGraphData(current_time, dVertical));
-        this->m_stabilizationData.centroid_horizontal->add(QCPGraphData(current_time, dHorizontal));
+        }
+        else{
+            std::cout << "too far deviation " << verticalMotion << std::endl;
+        }
         this->MoveToPosition( newPos, true ); //True marks that hexapod moves relative to current position in the Work Coordinate System.
         emit updateStabilizationPlot();
         std::this_thread::sleep_for(std::chrono::seconds(static_cast<int>(this->m_configurationSettings.deadTime))); //WAITS FOR NEW CENTROID MEASUREMENTS.
 
     }
     this->stabilizationInProcess.store(false, std::memory_order_release);
+
 }
 
 void HexapodGui::update_plotsWindow(){
