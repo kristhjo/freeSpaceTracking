@@ -12,7 +12,18 @@ sudo apt-get install libopencv-dev <br>
  
 Additionally, software libraries from Baumer and PI Systems must be included in the src directory. 
 ## Setting a  configuration
+The configuration files named config_BISAM.ini and config_IQOQI.ini contains the configuration settings for the setup at Bisamberg and IQOQI respectively. These can also be used as templates for new configuration files. The configuration file is read by the trackingGui, which passes along the settings to the seeingGui and hexapodGui. Following is a list of critical settings for smooth operation: 
 
+1. For camera operation:
+* BaumerID, i.e. mac-adress of the Baumer in the local ethernet.
+2. For seeing measurements: 
+* correct parameters of the seeing optics. 
+* imaging wavelength
+3. Hexapod operation: 
+* Hexapod ip adress in the local ethernet.
+4. Hexapod stabilization: 
+* correct parameters of the tracking optics. 
+* Axis and sign of the horizontal and vertical axis. 
 
 ## Connecting to a camera
 1. Initialize a configuration. This unfreezes the other gui buttons.  
