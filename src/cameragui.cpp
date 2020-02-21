@@ -285,8 +285,6 @@ void CameraGui::Start(std::stringstream &ss)
 }
 void CameraGui::updateCamImage(){
     cv::imshow("BamCamTest", this->camImage);
-    cv::waitKey(1000);
-    //cv::destroyWindow("BamCamTest");
 }
 void CameraGui::Run()
 {
@@ -336,6 +334,11 @@ void CameraGui::Run()
                     cv::putText(croppedImg, centroidText, pText,cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar(128,128,256));
                     //cv::imshow("BaumerCam", croppedImg);
                     croppedImg.copyTo(this->camImage);
+                    while(this->isHexapodMoving->load(std::memory_order_acquire)){
+                        std::cout << "waiting for hexapod" << std::endl;
+                        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                    }
+
 
                 }
                 else if (this->isMeasuringSeeing->load(std::memory_order_acquire) == true){ //if a seeing measurement is activated, share image with seeinggui.
@@ -378,6 +381,7 @@ void CameraGui::Run()
                     cvimg.copyTo(this->camImage);
                     //cv::imshow("BaumerCam", cvimg);
                 }
+                //cv::imshow("bamcam", this->camImage);
                 emit newImage();
                 cvimg.release();
                 pBufferFilled->QueueBuffer();

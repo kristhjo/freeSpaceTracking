@@ -15,7 +15,7 @@ TrackingGui::TrackingGui(QWidget *parent) :
     this->isHexapodConnected = false;
     this->isHexapodStabilizing = false;
     this->isMeasuringSeeing = false;
-
+    this->isHexapodMoving = false;
     this->m_imageContainer = std::make_shared<datacontainers::ImageContainer>();
     this->centroidContainer = std::make_shared<datacontainers::CentroidStabilization>();
 
@@ -206,6 +206,7 @@ void TrackingGui::ConnectHexapod(){
     this->pm_hexapod->loadConfiguration(this->m_configurationFilePath);
     this->pm_hexapod->isHexapodConnected = &this->isHexapodConnected;
     this->pm_hexapod->isHexapodStabilizing = &this->isHexapodStabilizing;
+    this->pm_hexapod->isHexapodMoving = &this->isHexapodMoving;
     this->pm_hexapod->connectToHexapod(ss);
     this->ui->TE_LogCam->append(QString::fromStdString(ss.str()));
     this->pm_hexapod->show();
@@ -448,6 +449,8 @@ void TrackingGui::ConnectToCamera(){
     this->pm_Camera->isCameraConnected = &this->isCameraConnected;
     this->pm_Camera->isMeasuringSeeing = &this->isMeasuringSeeing;
     this->pm_Camera->isHexapodStabilizing = &this->isHexapodStabilizing;
+    this->pm_Camera->isHexapodMoving = &this->isHexapodMoving;
+
     this->pm_Camera->m_TrackingParameters.WindowRadius = this->m_configurationSettings.windowRadius;
     this->pm_Camera->m_TrackingParameters.TrackingThresh = this->m_configurationSettings.trackingThresh;
     this->pm_Camera->m_TrackingParameters.useWindowing.store(this->m_configurationSettings.useWindowing,std::memory_order_release);

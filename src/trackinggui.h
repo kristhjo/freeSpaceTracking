@@ -91,6 +91,7 @@ private:
     std::atomic<bool> isCameraTracking; ///< Flags that centroid tracking is activated. Is shared with cameragui.
     std::atomic<bool> isMeasuringSeeing; ///< Flags that a seeing measurement is in progress. Is shared with cameragui.
     std::atomic<bool> isHexapodStabilizing; ///< Flags that the hexapod is actively stabilizing.
+    std::atomic<bool> isHexapodMoving; ///< Flags that the hexapod is moving.
 
     std::unique_ptr<HexapodGui> pm_hexapod = nullptr; ///< is assigned an instance of HexapodGui.
     std::unique_ptr<CameraGui> pm_Camera = nullptr; ///< is assigned an instance of CameraGui.

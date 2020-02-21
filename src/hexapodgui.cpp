@@ -233,7 +233,9 @@ void HexapodGui::Stabilize(){
         else{
             std::cout << "too far deviation " << verticalMotion << std::endl;
         }
+        this->isHexapodMoving->store(true, std::memory_order_release);
         this->MoveToPosition( newPos, true ); //True marks that hexapod moves relative to current position in the Work Coordinate System.
+        this->isHexapodMoving->store(false, std::memory_order_release);
         emit updateStabilizationPlot();
         std::this_thread::sleep_for(std::chrono::seconds(static_cast<int>(this->m_configurationSettings.deadTime))); //WAITS FOR NEW CENTROID MEASUREMENTS.
 

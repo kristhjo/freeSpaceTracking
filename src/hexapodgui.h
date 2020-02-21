@@ -140,6 +140,7 @@ public:
     std::atomic<bool> *isHexapodStabilizing; ///< Flags that the hexapod is stabilizing. Points to the same boolean value in TrackingGui, such that a local change in this gui is registered in both cameragui and trackingui.
     std::atomic<bool> *isHexapodConnected;
     std::atomic<bool> *isManualControlActivated;
+    std::atomic<bool> *isHexapodMoving = nullptr;
 
     void startStabilization(std::stringstream &ss); ///<
     void stopStabilization(std::stringstream &ss); ///<
